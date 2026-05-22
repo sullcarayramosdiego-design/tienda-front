@@ -7,14 +7,14 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-background via-background to-muted/20 py-16 lg:py-24">
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-secondary/5 py-16 lg:py-24">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
             {/* Left Column - Content */}
             <div className="flex flex-col justify-center space-y-8">
               {/* Badge */}
               <div>
-                <Badge variant="secondary" className="gap-2 text-sm">
+                <Badge className="gap-2 text-sm bg-secondary/10 text-secondary-foreground border-secondary/20 hover:bg-secondary/20">
                   <Sparkles className="size-4" />
                   Nueva Experiencia 3D
                 </Badge>
@@ -24,7 +24,7 @@ export default function HomePage() {
               <div className="space-y-4">
                 <h1 className="text-5xl lg:text-6xl xl:text-7xl font-heading font-extrabold tracking-tight leading-tight">
                   Descubre el futuro del{' '}
-                  <span className="bg-gradient-to-br from-primary to-primary/60 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
                     E-Commerce en 3D
                   </span>
                 </h1>
@@ -36,13 +36,13 @@ export default function HomePage() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" asChild className="gap-2 text-base">
+                <Button size="lg" asChild className="gap-2 text-base bg-primary hover:bg-primary/90">
                   <Link href="/catalog">
                     Explorar Catálogo
                     <ArrowRight className="size-5" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="text-base">
+                <Button size="lg" variant="outline" asChild className="text-base border-primary/30 hover:bg-primary/5">
                   <Link href="/catalog">Ver Productos 3D</Link>
                 </Button>
               </div>

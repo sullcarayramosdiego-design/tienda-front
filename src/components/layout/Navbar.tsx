@@ -2,9 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingCart, User, Heart, Search } from 'lucide-react';
+import { Heart, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -21,8 +20,8 @@ export function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-6 max-w-7xl">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-            <span className="text-white font-bold text-xl">3D</span>
+          <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
+            <span className="text-primary-foreground font-bold text-xl">3D</span>
           </div>
           <span className="text-xl font-bold hidden sm:inline">E-Commerce 3D</span>
         </Link>
@@ -73,29 +72,15 @@ export function Navbar() {
 
         {/* Acciones Derecha */}
         <div className="flex items-center gap-2">
-          <Link href="/cart">
-            <Button variant="ghost" size="icon" className="relative">
-              <ShoppingCart className="h-5 w-5" />
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-              >
-                3
-              </Badge>
-            </Button>
-          </Link>
-          
-          <div className="h-6 w-px bg-border mx-1 hidden sm:block" />
-          
-          <Link href="/account">
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
-          </Link>
-          
           <Link href="/login">
-            <Button size="sm" className="hidden sm:inline-flex">
+            <Button size="sm" variant="outline" className="border-primary/30 hover:bg-primary/5">
               Iniciar Sesión
+            </Button>
+          </Link>
+          
+          <Link href="/register">
+            <Button size="sm" className="bg-primary hover:bg-primary/90">
+              Crear Cuenta
             </Button>
           </Link>
         </div>

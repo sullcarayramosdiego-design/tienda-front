@@ -10,14 +10,13 @@ import { Upload, File, Check } from 'lucide-react';
 
 interface Asset3DUploadProps {
   productId: string;
-  onUploadSuccess?: (assetId: string) => void;
 }
 
 /**
  * Componente para subir modelos 3D (.glb, .usdz) al backend
  * Requiere autenticación y rol ADMIN
  */
-export function Asset3DUpload({ productId, onUploadSuccess }: Asset3DUploadProps) {
+export function Asset3DUpload({ productId }: Asset3DUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,11 +62,6 @@ export function Asset3DUpload({ productId, onUploadSuccess }: Asset3DUploadProps
       // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
-      }
-
-      // Callback de éxito
-      if (onUploadSuccess) {
-        onUploadSuccess(asset.id);
       }
 
       // Limpiar mensaje de éxito después de 3 segundos

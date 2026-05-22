@@ -58,8 +58,6 @@ export function ProductListIntegrated() {
             name={product.name}
             price={product.price}
             image={`/images/products/${product.sku}.jpg`} // Placeholder
-            stock={product.stock}
-            rating={4.5} // Placeholder hasta que tengamos ratings en el backend
           />
         ))}
       </div>

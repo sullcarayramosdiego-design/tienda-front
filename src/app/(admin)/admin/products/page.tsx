@@ -10,12 +10,7 @@ export default function AdminProductsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <h2 className="text-xl font-semibold mb-4">Subir Modelos 3D</h2>
-            <Asset3DUpload 
-              productId="example-product-id"
-              onUploadSuccess={(assetId) => {
-                console.log('Asset subido exitosamente:', assetId);
-              }}
-            />
+            <Asset3DUpload productId="example-product-id" />
           </div>
 
           <div className="space-y-4">

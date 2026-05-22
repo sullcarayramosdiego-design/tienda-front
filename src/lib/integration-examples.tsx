@@ -210,7 +210,7 @@ export function UploadAssetExample({ productId }: { productId: string }) {
         disabled={uploading}
       />
       {uploading && <p>Subiendo modelo 3D...</p>}
-      {error && <p className="text-red-500">{error}</p>}
+      {error && <p className="text-destructive">{error}</p>}
     </div>
   );
 }

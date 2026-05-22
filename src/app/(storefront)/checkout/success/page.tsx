@@ -9,7 +9,7 @@ export default function CheckoutSuccessPage() {
     <div className="container mx-auto py-16">
       <Card className="max-w-md mx-auto">
         <CardHeader>
-          <CardTitle className="text-green-600">Order Successful!</CardTitle>
+          <CardTitle className="text-secondary">Order Successful!</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p>Thank you for your purchase.</p>

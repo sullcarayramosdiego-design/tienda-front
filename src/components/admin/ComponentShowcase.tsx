@@ -151,7 +151,7 @@ export function ComponentShowcase() {
 
       {/* Success indicator */}
       <Alert>
-        <CheckCircle2 className="h-4 w-4 text-green-600" />
+        <CheckCircle2 className="h-4 w-4 text-secondary" />
         <div className="ml-3">
           <strong>MCP Test Successful!</strong> All Shadcn components are working
           correctly.

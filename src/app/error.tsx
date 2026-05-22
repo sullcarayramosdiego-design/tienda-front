@@ -20,15 +20,15 @@ export default function Error({
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-red-600">Something went wrong!</CardTitle>
+          <CardTitle className="text-destructive">Something went wrong!</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
             An error occurred while processing your request. Please try again.
           </p>
           {error.message && (
-            <div className="rounded-md bg-red-50 p-3">
-              <p className="text-xs font-mono text-red-800">{error.message}</p>
+            <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3">
+              <p className="text-xs font-mono text-destructive">{error.message}</p>
             </div>
           )}
           {error.digest && (

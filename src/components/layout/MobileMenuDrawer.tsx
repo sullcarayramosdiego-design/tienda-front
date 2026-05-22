@@ -107,7 +107,7 @@ export function MobileMenuDrawer({ isOpen, onClose }: MobileMenuDrawerProps) {
               </Link>
 
               <Link href="/register" onClick={onClose}>
-                <Button className="w-full justify-center bg-primary hover:bg-primary/90">
+                <Button className="w-full justify-center">
                   Registrarse
                 </Button>
               </Link>

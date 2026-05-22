@@ -101,7 +101,7 @@ export function Asset3DUpload({ productId, onUploadSuccess }: Asset3DUploadProps
             accept=".glb,.usdz"
             onChange={handleFileSelect}
             disabled={uploading}
-            className="block w-full text-sm text-slate-500
+            className="block w-full text-sm text-muted-foreground
               file:mr-4 file:py-2 file:px-4
               file:rounded-md file:border-0
               file:text-sm file:font-semibold

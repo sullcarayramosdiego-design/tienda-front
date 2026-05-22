@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,10 +23,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth.schema";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -34,8 +42,42 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    // TODO: Implement login logic with Server Action
-    console.log("Login data:", data);
+    try {
+      setError(null);
+      console.log("Intentando login con:", data.email);
+      
+      const response = await login({
+        email: data.email,
+        password: data.password,
+      });
+      
+      console.log("Login exitoso, usuario:", response.user);
+      
+      // Redirigir según el rol del usuario
+      if (response.user.role === 'SUPER_ADMIN' || response.user.role === 'ADMIN') {
+        console.log("Redirigiendo a /admin");
+        router.push("/admin");
+      } else {
+        console.log("Redirigiendo a /");
+        router.push("/");
+      }
+      router.refresh();
+    } catch (err: unknown) {
+      console.error("Error en login:", err);
+      
+      // Extraer mensaje de error del response de axios
+      let message = "Error al iniciar sesión. Verifica tus credenciales.";
+      if (err && typeof err === 'object' && 'response' in err) {
+        const errorResponse = (err as { response?: { data?: { message?: string | string[] } } }).response;
+        if (errorResponse?.data?.message) {
+          message = Array.isArray(errorResponse.data.message) 
+            ? errorResponse.data.message.join(", ") 
+            : errorResponse.data.message;
+        }
+      }
+      
+      setError(message);
+    }
   };
 
   return (
@@ -84,6 +126,13 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
+              
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              
               <Button
                 type="submit"
                 className="w-full bg-primary hover:bg-primary/90"
@@ -93,6 +142,15 @@ export default function LoginPage() {
               </Button>
             </form>
           </Form>
+
+          <div className="mt-4 p-3 bg-muted/50 rounded-md">
+            <p className="text-xs text-center text-muted-foreground mb-1">
+              Credenciales de prueba:
+            </p>
+            <p className="text-xs text-center font-mono">
+              admin@ecommerce3d.com / Admin123!
+            </p>
+          </div>
 
           <div className="relative my-6">
             <Separator />

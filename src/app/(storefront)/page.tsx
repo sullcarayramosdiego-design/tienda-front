@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { ProductViewer3D } from '@/components/viewer3d/ProductViewer3D';
 
 export default function HomePage() {
   return (
@@ -79,28 +80,14 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Right Column - 3D Viewer Placeholder - Responsive */}
-            <div className="flex items-center justify-center lg:justify-end lg:flex-1 mt-8 lg:mt-0">
+            {/* Right Column - 3D Viewer - Responsive */}
+            <div className="flex items-center justify-center lg:justify-end lg:flex-1 mt-8 lg:mt-0 w-full">
               <div className="relative w-full max-w-md lg:max-w-xl">
                 {/* Glow Effect Background */}
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-2xl opacity-50" />
                 
-                {/* 3D Canvas Container */}
-                <div className="relative aspect-square">
-                  <div className="absolute inset-0 bg-gradient-to-br from-muted to-muted/50 rounded-2xl lg:rounded-3xl border-2 border-dashed border-muted-foreground/20 shadow-xl flex items-center justify-center backdrop-blur-sm">
-                    <div className="text-center space-y-3 sm:space-y-4 p-6 sm:p-8">
-                      <div className="h-12 w-12 sm:h-16 sm:w-16 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center ring-4 ring-primary/10">
-                        <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
-                      </div>
-                      <p className="text-sm sm:text-base font-medium text-foreground">
-                        Visor 3D Interactivo
-                      </p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">
-                        Canvas de React Three Fiber se integrará aquí
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {/* 3D Canvas / model-viewer Container */}
+                <ProductViewer3D />
               </div>
             </div>
           </div>

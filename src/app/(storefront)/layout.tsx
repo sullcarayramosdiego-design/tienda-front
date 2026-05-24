@@ -1,5 +1,4 @@
-import { Navbar } from '@/components/layout/Navbar';
-import { StorefrontHeader } from '@/components/layout/StorefrontHeader';
+import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 
 export default function StorefrontLayout({
@@ -9,11 +8,8 @@ export default function StorefrontLayout({
 }) {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Desktop Navigation */}
-      <Navbar />
-      
-      {/* Mobile Header */}
-      <StorefrontHeader />
+      {/* Responsive Unified Header */}
+      <Header />
       
       <main className="flex-1">{children}</main>
       <Footer />

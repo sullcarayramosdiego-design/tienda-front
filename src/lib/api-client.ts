@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/${process.env.NEXT_PUBLIC_API_PREFIX}`;
+const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const prefix = process.env.NEXT_PUBLIC_API_PREFIX || '';
+const API_BASE_URL = prefix ? `${baseUrl}/${prefix}` : baseUrl;
 
 /**
  * Cliente HTTP configurado con interceptores para autenticación JWT

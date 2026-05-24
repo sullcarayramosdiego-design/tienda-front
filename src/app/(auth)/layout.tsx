@@ -1,5 +1,4 @@
-import { Navbar } from "@/components/layout/Navbar";
-import { StorefrontHeader } from "@/components/layout/StorefrontHeader";
+import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
 export default function AuthLayout({
@@ -9,11 +8,8 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-      {/* Desktop Navigation */}
-      <Navbar />
-      
-      {/* Mobile Header */}
-      <StorefrontHeader />
+      {/* Responsive Unified Header */}
+      <Header />
       
       {/* Contenido Centrado */}
       <main className="flex-1 flex items-center justify-center p-4">

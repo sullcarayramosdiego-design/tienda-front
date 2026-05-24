@@ -69,8 +69,8 @@ export default function LoginPage() {
         console.log("Redirigiendo a /admin");
         router.push("/admin");
       } else {
-        console.log("Redirigiendo a /");
-        router.push("/");
+        console.log("Redirigiendo a /account");
+        router.push("/account");
       }
       router.refresh();
     } catch (err: unknown) {

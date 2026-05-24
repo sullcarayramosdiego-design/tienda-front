@@ -43,36 +43,6 @@ export function Footer() {
   return (
     <footer className="border-t border-primary/5 bg-gradient-to-b from-background to-muted/30 pt-16 pb-8 transition-colors duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        {/* Features Row - Premium Badges */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 pb-12 mb-12 border-b border-primary/5">
-          <div className="flex items-start gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <Truck className="h-5 w-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-foreground">Envío Asegurado</h4>
-              <p className="text-xs text-muted-foreground mt-1">Garantizamos la entrega de modelos físicos y digitales a nivel nacional.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-foreground">Garantía de Satisfacción</h4>
-              <p className="text-xs text-muted-foreground mt-1">Explora en 3D interactivo y AR antes de comprar con total fidelidad.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <RotateCcw className="h-5 w-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-foreground">Soporte 24/7</h4>
-              <p className="text-xs text-muted-foreground mt-1">Estamos disponibles por WhatsApp y correo para resolver tus consultas 3D.</p>
-            </div>
-          </div>
-        </div>
 
         {/* Main Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12">

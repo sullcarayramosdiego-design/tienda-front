@@ -1,10 +1,149 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProductViewer3D } from '@/components/viewer3d/ProductViewer3D';
+import { ProductListIntegrated } from '@/components/storefront/ProductListIntegrated';
+import { 
+  ArrowRight, 
+  Sparkles, 
+  ShoppingBag, 
+  Award, 
+  Heart, 
+  LayoutDashboard, 
+  User,
+  Activity,
+  Box3d
+} from 'lucide-react';
 
 export default function HomePage() {
+  const { user, isAuthenticated } = useAuth();
+
+  // ==========================================
+  // 1. CUSTOMER DASHBOARD (Authenticated View)
+  // ==========================================
+  if (isAuthenticated && user) {
+    return (
+      <div className="space-y-10 animate-fade-in pb-10">
+        
+        {/* Welcome Header Hero Banner */}
+        <section className="relative overflow-hidden p-6 sm:p-8 md:p-10 border border-primary/10 bg-gradient-to-r from-primary/5 via-secondary/5 to-transparent rounded-3xl backdrop-blur-sm">
+          <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-2xl opacity-60" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="space-y-3">
+              <Badge className="gap-2 text-xs bg-primary/10 border-primary/20 text-primary hover:bg-primary/20">
+                <Sparkles className="h-3.5 w-3.5 animate-pulse text-secondary" />
+                <span>Sesión Activa</span>
+              </Badge>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold tracking-tight leading-tight">
+                ¡Hola de nuevo,{' '}
+                <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
+                  {user.firstName}
+                </span>!
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl">
+                Bienvenido a tu portal de compras 3D. Explora nuevos modelos en realidad aumentada, consulta tus pedidos y canjea tus puntos acumulados.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button asChild size="lg" className="rounded-2xl bg-primary hover:bg-primary/95 shadow-md shadow-primary/15 font-bold cursor-pointer h-12 px-6 active:scale-98">
+                <Link href="/catalog" className="flex items-center gap-2">
+                  <span>Ir al Catálogo 3D</span>
+                  <ArrowRight className="h-4.5 w-4.5" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* Client KPI Stats Cards Grid */}
+        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {/* Card: Puntos Club 3D */}
+          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300">
+            <CardHeader className="pb-2">
+              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Programa de Lealtad</span>
+              <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2 mt-1">
+                <Award className="h-4.5 w-4.5 text-primary" />
+                Puntos Club 3D
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
+                1,250 <span className="text-sm font-bold text-muted-foreground font-sans">Pts</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                ¡Tienes S/ 25.00 de descuento listos para canjear en modelos físicos!
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Card: Pedidos Activos */}
+          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300">
+            <CardHeader className="pb-2">
+              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Entregas en camino</span>
+              <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2 mt-1">
+                <ShoppingBag className="h-4.5 w-4.5 text-primary" />
+                Mis Pedidos
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
+                2 <span className="text-sm font-bold text-muted-foreground font-sans">Activos</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                Tus pedidos se encuentran en camino y llegarán hoy a tu domicilio.
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Card: Favoritos */}
+          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300">
+            <CardHeader className="pb-2">
+              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Lista de Deseos</span>
+              <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2 mt-1">
+                <Heart className="h-4.5 w-4.5 text-primary" />
+                Favoritos Guardados
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
+                4 <span className="text-sm font-bold text-muted-foreground font-sans">Productos</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                Explora y mantente al tanto si tus favoritos tienen descuentos.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        <hr className="border-primary/5" />
+
+        {/* Dashboard Catalog Explorer Section */}
+        <section className="space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+              <LayoutDashboard className="h-4 w-4" />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-foreground tracking-tight">
+              Explorar Catálogo de Productos
+            </h2>
+          </div>
+          <ProductListIntegrated />
+        </section>
+
+      </div>
+    );
+  }
+
+  // ==========================================
+  // 2. PUBLIC MARKETING HERO (Guest View)
+  // ==========================================
   return (
     <div className="min-h-screen">
       {/* Hero Section - Mobile First */}
@@ -29,7 +168,7 @@ export default function HomePage() {
                     E-Commerce en 3D
                   </span>
                 </h1>
-                <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+                <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
                   Explora productos con visualización 3D interactiva y realidad
                   aumentada. Toca, rota y examina cada detalle antes de comprar.
                 </p>
@@ -40,7 +179,7 @@ export default function HomePage() {
                 <Button 
                   size="lg" 
                   asChild 
-                  className="w-full sm:w-auto gap-2 text-base bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20"
+                  className="w-full sm:w-auto gap-2 text-base bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 cursor-pointer h-12"
                 >
                   <Link href="/catalog">
                     Explorar Catálogo
@@ -51,7 +190,7 @@ export default function HomePage() {
                   size="lg" 
                   variant="outline" 
                   asChild 
-                  className="w-full sm:w-auto text-base border-primary/30 hover:bg-primary/5"
+                  className="w-full sm:w-auto text-base border-primary/30 hover:bg-primary/5 h-12 cursor-pointer"
                 >
                   <Link href="/catalog">Ver Productos 3D</Link>
                 </Button>

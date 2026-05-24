@@ -1,113 +1,231 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Box, ShoppingCart, Menu } from 'lucide-react';
-import { useState } from 'react';
-
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import { 
+  Home, 
+  Box, 
+  ShoppingCart, 
+  Heart, 
+  User, 
+  LogOut, 
+  Sparkles,
+  ChevronRight,
+  ShieldCheck,
+  ShoppingBag,
+  ChevronsUpDown,
+  Settings
+} from 'lucide-react';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+  Sidebar as ShadcnSidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarSeparator,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import {
+  Avatar,
+  AvatarFallback,
+} from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { useAuth } from '@/hooks/useAuth';
+import type { User as UserType } from '@/types/api';
 import { cn } from '@/lib/utils';
 
-const navigationLinks = [
-  { href: '/', label: 'Inicio', icon: Home },
-  { href: '/catalog', label: 'Catálogo 3D', icon: Box },
-  { href: '/cart', label: 'Mi Carrito', icon: ShoppingCart },
-];
-
-function SidebarContent() {
-  const pathname = usePathname();
+function NavUser({ user, onLogout }: { user: UserType; onLogout: () => void }) {
+  const { isMobile } = useSidebar();
+  const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || 'U';
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Logo/Brand */}
-      <div className="p-6">
-        <h2 className="text-2xl font-heading font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
-          3D Store
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          E-Commerce del Futuro
-        </p>
-      </div>
-
-      <Separator />
-
-      {/* Navigation Links */}
-      <nav className="flex-1 space-y-1 p-4">
-        {navigationLinks.map((link) => {
-          const Icon = link.icon;
-          const isActive =
-            pathname === link.href ||
-            (link.href !== '/' && pathname.startsWith(link.href));
-
-          return (
-            <Button
-              key={link.href}
-              variant="ghost"
-              asChild
-              className={cn(
-                'w-full justify-start gap-3',
-                isActive && 'bg-muted text-foreground font-medium'
-              )}
+    <SidebarMenu>
+      <SidebarMenuItem>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              size="lg"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
             >
-              <Link href={link.href}>
-                <Icon className="size-5" />
-                {link.label}
+              <Avatar className="h-8 w-8 rounded-lg border border-primary/10">
+                <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary/15 to-secondary/15 text-primary font-bold text-xs uppercase">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold text-foreground">
+                  {user.firstName} {user.lastName}
+                </span>
+                <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+              </div>
+              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-xl p-1.5 bg-card/95 backdrop-blur-xl border-primary/5 shadow-xl"
+            side={isMobile ? 'bottom' : 'right'}
+            align={isMobile ? 'end' : 'start'}
+            sideOffset={4}
+          >
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary/15 to-secondary/15 text-primary font-bold text-xs animate-pulse">
+                    {initials}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-bold text-foreground">
+                    {user.firstName} {user.lastName}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                </div>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-primary/5" />
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+              <Link href="/account" className="flex w-full items-center gap-2">
+                <User className="size-4 text-muted-foreground" />
+                Mi Perfil
               </Link>
-            </Button>
-          );
-        })}
-      </nav>
-
-      <Separator />
-
-      {/* Auth Buttons */}
-      <div className="p-4 space-y-2">
-        <Button variant="outline" className="w-full" asChild>
-          <Link href="/login">Iniciar Sesión</Link>
-        </Button>
-        <Button className="w-full" asChild>
-          <Link href="/register">Registrarse</Link>
-        </Button>
-      </div>
-    </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+              <Link href="/account/orders" className="flex w-full items-center gap-2">
+                <ShoppingBag className="size-4 text-muted-foreground" />
+                Mis Pedidos
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-primary/5" />
+            <DropdownMenuItem 
+              onClick={onLogout}
+              className="rounded-lg cursor-pointer text-destructive focus:bg-destructive/10 dark:focus:bg-destructive/20 focus:text-destructive gap-2 text-sm"
+            >
+              <LogOut className="size-4" />
+              Cerrar Sesión
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SidebarMenuItem>
+    </SidebarMenu>
   );
 }
 
 export function Sidebar() {
-  const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const { user, isAuthenticated, logout } = useAuth();
+
+  // Dynamic Navigation Links depending on Authentication
+  const navigationLinks = [
+    { href: '/', label: 'Inicio', icon: Home },
+    { href: '/catalog', label: 'Catálogo 3D', icon: Box },
+    ...(isAuthenticated ? [
+      { href: '/cart', label: 'Mi Carrito', icon: ShoppingCart },
+      { href: '/wishlist', label: 'Favoritos', icon: Heart },
+      { href: '/account/orders', label: 'Mis Pedidos', icon: ShoppingBag },
+    ] : []),
+  ];
 
   return (
-    <>
-      {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon">
-              <Menu className="size-5" />
-              <span className="sr-only">Abrir menú</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
-            <SheetHeader className="sr-only">
-              <SheetTitle>Menú de navegación</SheetTitle>
-            </SheetHeader>
-            <SidebarContent />
-          </SheetContent>
-        </Sheet>
-      </div>
+    <ShadcnSidebar collapsible="icon" className="border-r border-primary/10">
+      
+      {/* Brand Header */}
+      <SidebarHeader className="p-2.5">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              tooltip="Tienda 3D"
+              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+              <Link href="/">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-secondary to-primary text-white shadow-md shadow-primary/25">
+                  <Sparkles className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    TIENDA 3D
+                  </span>
+                  <span className="truncate text-[8px] font-bold text-muted-foreground tracking-widest uppercase mt-0.5 leading-none">
+                    Experience
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex w-64 border-r bg-muted/10 flex-col">
-        <SidebarContent />
-      </aside>
-    </>
+      <SidebarSeparator className="mx-auto my-1 w-[calc(100%-2rem)] group-data-[collapsible=icon]:w-[calc(100%-1rem)]" />
+
+      {/* Main Navigation Content */}
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navegación</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive = link.href === '/'
+                  ? pathname === '/'
+                  : pathname.startsWith(link.href);
+
+                return (
+                  <SidebarMenuItem key={link.href}>
+                    <SidebarMenuButton 
+                      asChild 
+                      isActive={isActive} 
+                      tooltip={link.label}
+                      className={cn(
+                        "cursor-pointer font-semibold rounded-lg",
+                        isActive && "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/10 focus:text-primary-foreground focus:bg-gradient-to-r"
+                      )}
+                    >
+                      <Link href={link.href}>
+                        <Icon className={cn(isActive && "text-white")} />
+                        <span>{link.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarSeparator className="mx-auto my-1 w-[calc(100%-2rem)] group-data-[collapsible=icon]:w-[calc(100%-1rem)]" />
+
+      {/* Sidebar Footer (User details / dropdown menu) */}
+      <SidebarFooter className="p-2">
+        {isAuthenticated && user ? (
+          <NavUser user={user} onLogout={logout} />
+        ) : (
+          <SidebarMenu>
+            <SidebarMenuItem className="space-y-1 p-1">
+              <SidebarMenuButton asChild size="sm" tooltip="Iniciar Sesión" className="w-full justify-center border border-primary/10 rounded-lg h-9 font-semibold text-xs cursor-pointer">
+                <Link href="/login">Iniciar Sesión</Link>
+              </SidebarMenuButton>
+              <SidebarMenuButton asChild size="sm" tooltip="Registrarse" className="w-full justify-center bg-primary hover:bg-primary/95 text-primary-foreground rounded-lg h-9 font-bold text-xs cursor-pointer">
+                <Link href="/register">Registrarse</Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
+      </SidebarFooter>
+    </ShadcnSidebar>
   );
 }

@@ -84,17 +84,23 @@ export function ProductListIntegrated() {
   // 4. Client-side filtering & sorting overrides
   // We filter by Category and Only3D on the client side to keep responses ultra fast and ensure perfect compatibility
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = Array.isArray(products) ? [...products] : [];
 
     // Client-side category filtering if not handled directly by NestJS endpoint
     if (selectedCategory) {
-      // Assuming products may have a category property, otherwise match based on mock/seed structures
-      // If we don't have it, we fallback gracefully or assume category filter matching
-      // (Let's keep it safe: many seeded products contain categories or match names)
       result = result.filter(p => {
-        const pCat = (p as any).category || '';
-        return pCat.toLowerCase() === selectedCategory.toLowerCase() || 
-               p.name.toLowerCase().includes(selectedCategory.toLowerCase());
+        let pCat = (p as any).category || '';
+        
+        // If category is an object, extract its name, title, or id
+        if (typeof pCat === 'object' && pCat !== null) {
+          pCat = pCat.name || pCat.id || pCat.title || '';
+        }
+        
+        const pCatStr = String(pCat).toLowerCase();
+        const selectedCatStr = String(selectedCategory).toLowerCase();
+        
+        return pCatStr === selectedCatStr ||
+               p.name.toLowerCase().includes(selectedCatStr);
       });
     }
 

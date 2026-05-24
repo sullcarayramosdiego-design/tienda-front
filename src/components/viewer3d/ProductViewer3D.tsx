@@ -11,7 +11,15 @@ declare module 'react' {
   }
 }
 
-export function ProductViewer3D() {
+interface ProductViewer3DProps {
+  modelUrl?: string;
+  alt?: string;
+}
+
+export function ProductViewer3D({ 
+  modelUrl = "/3D/PCAS.glb", 
+  alt = "Modelo 3D interactivo del producto" 
+}: ProductViewer3DProps) {
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(0);
   const [showSkipButton, setShowSkipButton] = useState(false);
@@ -88,8 +96,8 @@ export function ProductViewer3D() {
       {/* 3D Model Viewer using Google's model-viewer for high optimization */}
       <model-viewer
         ref={modelViewerRef}
-        src="/3D/PCAS.glb"
-        alt="Modelo 3D PCAS del e-commerce"
+        src={modelUrl}
+        alt={alt}
         ar
         ar-modes="webxr scene-viewer quick-look"
         camera-controls

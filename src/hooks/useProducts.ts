@@ -22,8 +22,31 @@ export function useProducts(initialParams?: ProductQueryParams) {
       setError(null);
       
       const response = await productsService.list(params);
-      setProducts(response.items);
-      setMeta(response.meta);
+      if (Array.isArray(response)) {
+        setProducts(response);
+        setMeta({
+          total: response.length,
+          page: 1,
+          limit: response.length,
+          totalPages: 1,
+        });
+      } else if (response && Array.isArray((response as any).items)) {
+        setProducts((response as any).items);
+        setMeta((response as any).meta);
+      } else if (response && Array.isArray((response as any).data)) {
+        // In case the raw data is wrapped inside a secondary data field
+        const rawData = (response as any).data;
+        setProducts(rawData);
+        setMeta({
+          total: rawData.length,
+          page: 1,
+          limit: rawData.length,
+          totalPages: 1,
+        });
+      } else {
+        setProducts([]);
+        setMeta(null);
+      }
     } catch (err: any) {
       const message = err.response?.data?.message || 'Error al cargar productos';
       setError(Array.isArray(message) ? message.join(', ') : message);

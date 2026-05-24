@@ -17,20 +17,29 @@ export default function StorefrontLayout({
   const { isAuthenticated } = useAuth();
   const pathname = usePathname();
 
-  // Helper to parse route path segments and generate dynamic localized breadcrumbs
+  // Helper to parse route path segments and generate dynamic localized breadcrumbs.
+  // For /checkout we inject Mi Carrito as an intermediate step so the user can navigate back.
   const getBreadcrumbs = () => {
-    const items = [{ label: 'Inicio', href: '/' }];
-    
-    if (pathname === '/') return items;
-    
+    const base = [{ label: 'Inicio', href: '/' }];
+
+    if (pathname === '/') return base;
+
+    // Special case: checkout → show Inicio > Mi Carrito > Pasarela de Pago
+    if (pathname.startsWith('/checkout')) {
+      return [
+        ...base,
+        { label: 'Mi Carrito', href: '/cart' },
+        { label: 'Pasarela de Pago', href: '/checkout' },
+      ];
+    }
+
     const segments = pathname.split('/').filter(Boolean);
     let currentPath = '';
-    
+
     segments.forEach((segment) => {
       currentPath += `/${segment}`;
-      
+
       let label = segment;
-      // Localize segments into Spanish
       if (segment === 'catalog') label = 'Catálogo 3D';
       else if (segment === 'cart') label = 'Mi Carrito';
       else if (segment === 'wishlist') label = 'Favoritos';
@@ -38,16 +47,14 @@ export default function StorefrontLayout({
       else if (segment === 'orders') label = 'Mis Pedidos';
       else if (segment === 'loyalty') label = 'Puntos Club 3D';
       else if (segment === 'checkout') label = 'Pasarela de Pago';
-      
-      // Fallback for dynamic UUID routes
-      if (segment.match(/^[a-f0-9-]{36}$/i)) {
-        label = 'Detalle de Producto';
-      }
-      
-      items.push({ label, href: currentPath });
+
+      // Fallback for dynamic UUID/slug routes
+      if (segment.match(/^[a-f0-9-]{36}$/i)) label = 'Detalle de Producto';
+
+      base.push({ label, href: currentPath });
     });
-    
-    return items;
+
+    return base;
   };
 
   if (isAuthenticated) {

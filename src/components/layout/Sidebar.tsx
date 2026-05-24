@@ -129,12 +129,13 @@ export function Sidebar() {
 
   // Dynamic Navigation Links depending on Authentication
   const navigationLinks = [
-    { href: '/', label: 'Inicio', icon: Home },
-    { href: '/catalog', label: 'Catálogo 3D', icon: Box },
+    { href: '/', label: 'Inicio', icon: Home, matchExact: true },
+    { href: '/catalog', label: 'Catálogo 3D', icon: Box, matchExact: false },
     ...(isAuthenticated ? [
-      { href: '/cart', label: 'Mi Carrito', icon: ShoppingCart },
-      { href: '/wishlist', label: 'Favoritos', icon: Heart },
-      { href: '/account/orders', label: 'Mis Pedidos', icon: ShoppingBag },
+      // Cart is active on /cart AND /checkout (checkout is the cart flow)
+      { href: '/cart', label: 'Mi Carrito', icon: ShoppingCart, matchExact: false, alsoActiveOn: ['/checkout'] },
+      { href: '/wishlist', label: 'Favoritos', icon: Heart, matchExact: false },
+      { href: '/account/orders', label: 'Mis Pedidos', icon: ShoppingBag, matchExact: false },
     ] : []),
   ];
 
@@ -179,9 +180,12 @@ export function Sidebar() {
             <SidebarMenu>
               {navigationLinks.map((link) => {
                 const Icon = link.icon;
-                const isActive = link.href === '/'
-                  ? pathname === '/'
-                  : pathname.startsWith(link.href);
+                // isActive: exact match for home, prefix match for others,
+                // plus any extra paths defined in alsoActiveOn
+                const alsoActive = (link as any).alsoActiveOn ?? [];
+                const isActive = link.matchExact
+                  ? pathname === link.href
+                  : pathname.startsWith(link.href) || alsoActive.some((p: string) => pathname.startsWith(p));
 
                 return (
                   <SidebarMenuItem key={link.href}>

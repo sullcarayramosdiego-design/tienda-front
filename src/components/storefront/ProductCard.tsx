@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Sparkles, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/hooks/useCart';
 
 interface ProductCardProps {
   id: string;
@@ -15,6 +16,10 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ id, name, price, has3D = true }: ProductCardProps) {
+  const { items } = useCart();
+  const cartItem = items.find(item => item.product.id === id);
+  const cartQuantity = cartItem ? cartItem.quantity : 0;
+
   // Format price in local Peruvian Soles (S/)
   const formattedPrice = new Intl.NumberFormat('es-PE', {
     style: 'currency',
@@ -25,6 +30,15 @@ export function ProductCard({ id, name, price, has3D = true }: ProductCardProps)
     <Link href={`/catalog/${id}`} className="group block">
       <Card className="relative overflow-hidden border border-primary/10 bg-card/40 backdrop-blur-sm hover:bg-card/75 hover:border-primary/25 rounded-2xl shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 select-none">
         
+        {/* Badge: xQ in cart */}
+        {cartQuantity > 0 && (
+          <div className="absolute top-3 right-3 z-10 animate-fade-in scale-95">
+            <span className="flex items-center gap-1 px-2.5 py-1 text-[9px] font-black text-white bg-gradient-to-r from-primary to-secondary border border-white/10 rounded-md shadow-md uppercase tracking-wider">
+              {cartQuantity} en Carrito
+            </span>
+          </div>
+        )}
+
         {/* Badge: 3D/AR Available */}
         {has3D && (
           <div className="absolute top-3 left-3 z-10">

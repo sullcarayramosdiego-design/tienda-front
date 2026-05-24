@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
+import { CartDrawer } from '@/components/storefront/CartDrawer';
 
 interface HeaderProps {
   cartItemsCount?: number;
@@ -130,23 +131,7 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
         {/* ACCIONES DERECHA */}
         <div className="flex items-center gap-3">
           {/* Carrito Icono */}
-          {isAuthenticated && (
-            <Link href="/cart">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative h-11 w-11 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all transform active:scale-95 cursor-pointer"
-                aria-label="Ver carrito"
-              >
-                <ShoppingCart className="h-5 w-5" />
-                {cartItemsCount > 0 && (
-                  <Badge className="absolute -top-1.5 -right-1.5 h-5 min-w-[20px] px-1 bg-gradient-to-r from-primary to-secondary text-[10px] font-black border-2 border-background flex items-center justify-center rounded-full">
-                    {cartItemsCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
-          )}
+          {isAuthenticated && <CartDrawer />}
 
           {/* Menú de Usuario / Autenticación */}
           <div className="hidden sm:block">

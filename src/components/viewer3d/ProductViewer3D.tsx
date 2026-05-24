@@ -99,15 +99,15 @@ export function ProductViewer3D({
         src={modelUrl}
         alt={alt}
         ar
-        ar-modes="webxr scene-viewer quick-look"
-        camera-controls
-        auto-rotate
-        auto-rotate-delay="2000"
-        rotation-speed="1.2"
-        shadow-intensity="1.5"
-        shadow-softness="0.8"
-        exposure="1.0"
-        environment-image="neutral"
+        arModes="webxr scene-viewer quick-look"
+        cameraControls
+        autoRotate
+        autoRotateDelay={2000}
+        rotationSpeed={1.2}
+        shadowIntensity={1.5}
+        shadowSoftness={0.8}
+        exposure={1.0}
+        environmentImage="neutral"
         loading="eager"
         style={{ width: '100%', height: '100%', display: 'block', outline: 'none' }}
       >

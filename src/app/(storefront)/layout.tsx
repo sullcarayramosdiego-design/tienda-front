@@ -59,7 +59,7 @@ export default function StorefrontLayout({
         <Sidebar />
         
         {/* Right Content Panel */}
-        <SidebarInset className="overflow-x-hidden flex flex-col min-h-screen">
+        <SidebarInset className="overflow-x-clip flex flex-col min-h-screen">
           {/* Dynamic Top bar containing the Sidebar trigger & Breadcrumbs */}
           <div className="sticky top-0 z-20 flex h-14 shrink-0 items-center bg-background/95 px-4 backdrop-blur border-b border-primary/5 gap-2">
             <SidebarTrigger className="-ml-1 text-primary cursor-pointer active:scale-95 animate-fade-in" />
@@ -82,7 +82,11 @@ export default function StorefrontLayout({
           </div>
 
           {/* Main child viewport with premium spacing */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 pt-4 w-full max-w-7xl mx-auto">
+          <main className={`flex-1 w-full mx-auto ${
+            pathname.startsWith('/catalog') 
+              ? "max-w-none px-4 sm:px-6 lg:px-8 pt-0" 
+              : "max-w-7xl p-4 sm:p-6 lg:p-8 pt-4"
+          }`}>
             {children}
           </main>
           

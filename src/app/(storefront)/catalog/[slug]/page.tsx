@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useProduct } from '@/hooks/useProducts';
 import { useAuth } from '@/hooks/useAuth';
+import { useCart } from '@/hooks/useCart';
+import { useWishlist } from '@/hooks/useWishlist';
 import { ProductViewer3D } from '@/components/viewer3d/ProductViewer3D';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -40,6 +42,10 @@ export default function ProductPage({
   const [addedNotify, setAddedNotify] = useState(false);
   const [favNotify, setFavNotify] = useState(false);
 
+  const { addItem } = useCart();
+  const { toggleItem, hasItem } = useWishlist();
+  const isFavorite = hasItem(productId);
+
   // Format price in local Peruvian Soles (S/)
   const formatPrice = (value: number) => {
     return new Intl.NumberFormat('es-PE', {
@@ -49,11 +55,15 @@ export default function ProductPage({
   };
 
   const handleAddToCart = () => {
+    if (!product) return;
+    addItem(product, quantity);
     setAddedNotify(true);
     setTimeout(() => setAddedNotify(false), 3000);
   };
 
   const handleToggleFav = () => {
+    if (!product) return;
+    toggleItem(product);
     setFavNotify(true);
     setTimeout(() => setFavNotify(false), 3000);
   };
@@ -104,18 +114,6 @@ export default function ProductPage({
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/5 pb-20">
       
-      {/* Breadcrumbs Banner */}
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 max-w-7xl">
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground font-semibold">
-          <Link href="/catalog" className="hover:text-primary transition-colors flex items-center gap-1.5">
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Catálogo
-          </Link>
-          <span>/</span>
-          <span className="text-foreground max-w-[200px] truncate">{product.name}</span>
-        </div>
-      </nav>
-
       {/* Main Grid Content */}
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
@@ -123,7 +121,7 @@ export default function ProductPage({
           {/* ================================================= */}
           {/* LEFT SIDE - 3D Viewer                             */}
           {/* ================================================= */}
-          <div className="lg:col-span-7 flex flex-col gap-6">
+          <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="relative w-full aspect-square bg-card border border-primary/10 rounded-3xl overflow-hidden shadow-xl">
               <ProductViewer3D 
                 modelUrl={glbAssetUrl} 
@@ -157,7 +155,7 @@ export default function ProductPage({
           {/* ================================================= */}
           {/* RIGHT SIDE - Product Details                      */}
           {/* ================================================= */}
-          <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-24">
+          <div className="lg:col-span-4 space-y-8 lg:sticky lg:top-24">
             
             {/* Tag & Stock Header */}
             <div className="space-y-3">
@@ -243,12 +241,15 @@ export default function ProductPage({
                   </Button>
                   
                   <Button
-                    variant="outline"
+                    variant={isFavorite ? "default" : "outline"}
                     onClick={handleToggleFav}
-                    className="h-12 w-12 rounded-2xl border-primary/10 hover:bg-primary/5 hover:text-primary cursor-pointer active:scale-95 transition-all flex items-center justify-center"
+                    className={cn(
+                      "h-12 w-12 rounded-2xl border-primary/10 hover:bg-primary/5 hover:text-primary cursor-pointer active:scale-95 transition-all flex items-center justify-center shrink-0",
+                      isFavorite && "bg-gradient-to-r from-primary to-secondary text-primary-foreground border-transparent shadow-md shadow-primary/15"
+                    )}
                     aria-label="Añadir a favoritos"
                   >
-                    <Heart className="h-5 w-5" />
+                    <Heart className={cn("h-5 w-5", isFavorite && "fill-current")} />
                   </Button>
                 </div>
 

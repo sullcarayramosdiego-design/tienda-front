@@ -123,12 +123,12 @@ export function ProductListIntegrated() {
   }, [activeSearch, selectedCategory, priceRange.min, priceRange.max, only3D]);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 items-start">
+    <div className="flex flex-col lg:flex-row-reverse gap-8 items-start">
       
       {/* ========================================== */}
       {/* DESKTOP SIDEBAR - Filters                  */}
       {/* ========================================== */}
-      <aside className="hidden lg:flex flex-col gap-6 w-72 shrink-0 sticky top-24">
+      <aside className="hidden lg:flex flex-col gap-6 w-[292px] shrink-0 sticky top-20 max-h-[calc(100vh-110px)] overflow-y-auto px-3 pb-6 select-none scrollbar-thin">
         {/* Toggle 3D Products */}
         <div className="flex items-center justify-between p-4 rounded-2xl border border-primary/15 bg-primary/5 shadow-sm">
           <div className="space-y-0.5">

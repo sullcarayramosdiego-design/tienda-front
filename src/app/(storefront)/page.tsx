@@ -3,42 +3,54 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { useProducts } from '@/hooks/useProducts';
+import { ProductCard } from '@/components/storefront/ProductCard';
+import { ProductViewer3D } from '@/components/viewer3d/ProductViewer3D';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ProductViewer3D } from '@/components/viewer3d/ProductViewer3D';
-import { ProductListIntegrated } from '@/components/storefront/ProductListIntegrated';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   ArrowRight, 
   Sparkles, 
   ShoppingBag, 
   Award, 
   Heart, 
-  LayoutDashboard, 
-  User,
-  Activity,
-  Box3d
+  Truck,
+  RotateCcw,
+  Sparkle,
+  Clock,
+  ExternalLink,
+  Zap
 } from 'lucide-react';
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuth();
+  
+  // Fetch products for recommendations (unfiltered, page 1)
+  const { products, loading } = useProducts({ page: 1, limit: 3 });
+
+  // Slice to only show exactly 3 premium recommendations on the dashboard
+  const featuredProducts = React.useMemo(() => {
+    return Array.isArray(products) ? products.slice(0, 3) : [];
+  }, [products]);
 
   // ==========================================
-  // 1. CUSTOMER DASHBOARD (Authenticated View)
+  // 1. WELL-STRUCTURED CUSTOMER DASHBOARD (Logged-In)
   // ==========================================
   if (isAuthenticated && user) {
     return (
-      <div className="space-y-10 animate-fade-in pb-10">
+      <div className="space-y-8 animate-fade-in pb-10">
         
         {/* Welcome Header Hero Banner */}
         <section className="relative overflow-hidden p-6 sm:p-8 md:p-10 border border-primary/10 bg-gradient-to-r from-primary/5 via-secondary/5 to-transparent rounded-3xl backdrop-blur-sm">
           <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-2xl opacity-60" />
           
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <Badge className="gap-2 text-xs bg-primary/10 border-primary/20 text-primary hover:bg-primary/20">
                 <Sparkles className="h-3.5 w-3.5 animate-pulse text-secondary" />
-                <span>Sesión Activa</span>
+                <span>Panel de Cliente</span>
               </Badge>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold tracking-tight leading-tight">
                 ¡Hola de nuevo,{' '}
@@ -47,14 +59,14 @@ export default function HomePage() {
                 </span>!
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl">
-                Bienvenido a tu portal de compras 3D. Explora nuevos modelos en realidad aumentada, consulta tus pedidos y canjea tus puntos acumulados.
+                Esta es tu zona de control interactiva. Consulta tu historial, haz seguimiento a tus envíos o explora el catálogo completo en tres dimensiones.
               </p>
             </div>
 
             <div className="flex gap-3">
               <Button asChild size="lg" className="rounded-2xl bg-primary hover:bg-primary/95 shadow-md shadow-primary/15 font-bold cursor-pointer h-12 px-6 active:scale-98">
                 <Link href="/catalog" className="flex items-center gap-2">
-                  <span>Ir al Catálogo 3D</span>
+                  <span>Catálogo Completo</span>
                   <ArrowRight className="h-4.5 w-4.5" />
                 </Link>
               </Button>
@@ -65,76 +77,143 @@ export default function HomePage() {
         {/* Client KPI Stats Cards Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {/* Card: Puntos Club 3D */}
-          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300">
+          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md">
             <CardHeader className="pb-2">
-              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Programa de Lealtad</span>
+              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Lealtad</span>
               <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2 mt-1">
                 <Award className="h-4.5 w-4.5 text-primary" />
-                Puntos Club 3D
+                Mis Puntos Club 3D
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
               <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
                 1,250 <span className="text-sm font-bold text-muted-foreground font-sans">Pts</span>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                ¡Tienes S/ 25.00 de descuento listos para canjear en modelos físicos!
+              <p className="text-[11px] text-muted-foreground">
+                Canjeables por descuentos en tus compras 3D.
               </p>
             </CardContent>
           </Card>
 
           {/* Card: Pedidos Activos */}
-          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300">
+          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md">
             <CardHeader className="pb-2">
-              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Entregas en camino</span>
+              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Envío exprés</span>
               <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2 mt-1">
                 <ShoppingBag className="h-4.5 w-4.5 text-primary" />
-                Mis Pedidos
+                Mis Pedidos Activos
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
               <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
-                2 <span className="text-sm font-bold text-muted-foreground font-sans">Activos</span>
+                2 <span className="text-sm font-bold text-muted-foreground font-sans">En Camino</span>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                Tus pedidos se encuentran en camino y llegarán hoy a tu domicilio.
+              <p className="text-[11px] text-muted-foreground">
+                Haciendo seguimiento en tiempo real.
               </p>
             </CardContent>
           </Card>
 
           {/* Card: Favoritos */}
-          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md hover:shadow-lg transition-all duration-300">
+          <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md">
             <CardHeader className="pb-2">
-              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Lista de Deseos</span>
+              <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Favoritos</span>
               <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2 mt-1">
                 <Heart className="h-4.5 w-4.5 text-primary" />
-                Favoritos Guardados
+                Guardados
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1">
               <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
-                4 <span className="text-sm font-bold text-muted-foreground font-sans">Productos</span>
+                4 <span className="text-sm font-bold text-muted-foreground font-sans">Favoritos</span>
               </div>
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                Explora y mantente al tanto si tus favoritos tienen descuentos.
+              <p className="text-[11px] text-muted-foreground">
+                Sincronizados en tu lista de deseos.
               </p>
             </CardContent>
           </Card>
         </section>
 
-        <hr className="border-primary/5" />
-
-        {/* Dashboard Catalog Explorer Section */}
-        <section className="space-y-5">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <LayoutDashboard className="h-4 w-4" />
+        {/* Dashboard Sections Grid (Split into Orders Widget & Recommendations) */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Panel: Simulated Recent Orders Widget */}
+          <div className="lg:col-span-4 space-y-4">
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="h-4.5 w-4.5 text-primary" />
+              <h3 className="font-heading font-bold text-lg text-foreground">Pedidos Recientes</h3>
             </div>
-            <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-foreground tracking-tight">
-              Explorar Catálogo de Productos
-            </h2>
+            
+            <Card className="border-primary/10 bg-card/40 backdrop-blur-md shadow-md">
+              <CardContent className="p-4 space-y-4">
+                <div className="flex items-start justify-between border-b border-primary/5 pb-3">
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-black font-mono text-muted-foreground block uppercase">Cod: 3D-8827A</span>
+                    <span className="text-xs font-bold text-foreground">Impresión 3D PCAS (GLB)</span>
+                    <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-semibold">
+                      <Truck className="h-3.5 w-3.5" /> En Ruta - Llega Hoy
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-start justify-between pb-1">
+                  <div className="space-y-1">
+                    <span className="text-[9px] font-black font-mono text-muted-foreground block uppercase">Cod: 3D-1229F</span>
+                    <span className="text-xs font-bold text-foreground">Visor AR Pro</span>
+                    <span className="flex items-center gap-1 text-[10px] text-primary font-semibold">
+                      <Clock className="h-3.5 w-3.5 animate-spin" style={{ animationDuration: '4s' }} /> En Preparación
+                    </span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <ProductListIntegrated />
+
+          {/* Right Panel: Clean Curated Recommendations Grid (NO Redundant Filters) */}
+          <div className="lg:col-span-8 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Zap className="h-4.5 w-4.5 text-primary" />
+                <h3 className="font-heading font-bold text-lg text-foreground">Recomendaciones para Ti</h3>
+              </div>
+              <Link href="/catalog" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                Ver Catálogo completo
+                <ExternalLink className="h-3 w-3" />
+              </Link>
+            </div>
+
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="border border-primary/5 bg-card/25 rounded-2xl p-4 space-y-3">
+                    <Skeleton className="aspect-square w-full rounded-xl bg-primary/5" />
+                    <Skeleton className="h-4 w-1/3 bg-primary/5" />
+                    <Skeleton className="h-5 w-3/4 bg-primary/5" />
+                  </div>
+                ))}
+              </div>
+            ) : featuredProducts.length === 0 ? (
+              <Card className="border-primary/5 bg-card/20 py-10 text-center">
+                <CardContent className="text-xs text-muted-foreground">
+                  Visita el catálogo para explorar tus primeras piezas 3D.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                {featuredProducts.map((prod) => (
+                  <ProductCard
+                    key={prod.id}
+                    id={prod.id}
+                    name={prod.name}
+                    price={prod.price}
+                    image={`/images/products/${prod.sku}.jpg`}
+                    sku={prod.sku}
+                    has3D={prod.assets && prod.assets.length > 0}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </section>
 
       </div>
@@ -179,7 +258,7 @@ export default function HomePage() {
                 <Button 
                   size="lg" 
                   asChild 
-                  className="w-full sm:w-auto gap-2 text-base bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 cursor-pointer h-12"
+                  className="w-full sm:w-auto gap-2 text-base bg-primary hover:bg-primary/95 shadow-lg shadow-primary/20 cursor-pointer h-12"
                 >
                   <Link href="/catalog">
                     Explorar Catálogo

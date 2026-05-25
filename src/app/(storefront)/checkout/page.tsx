@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute, withAuth } from '@/components/auth/ProtectedRoute';
 import { useCartStore } from '@/stores/cart.store';
 import { ordersService } from '@/services/orders.service';
 import { PaymentTabs } from '@/components/payments/PaymentTabs';
@@ -392,7 +392,7 @@ function ShippingSection({
 // ─────────────────────────────────────────────────────────
 // Main page
 // ─────────────────────────────────────────────────────────
-export default function CheckoutPage() {
+function CheckoutPage() {
   const router = useRouter();
   const { items, getTotalPrice, clearCart } = useCartStore();
 
@@ -520,124 +520,124 @@ export default function CheckoutPage() {
   const stepIdx = STEPS.indexOf(step);
 
   return (
-    <ProtectedRoute>
-      <div className="space-y-5 pb-12">
-        {/* Page title */}
-        <div className="space-y-0.5">
-          <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-foreground">
-            Finalizar compra
-          </h1>
-          <p className="text-sm text-muted-foreground font-semibold">
-            Total:{' '}
-            <span className="text-primary font-black">
-              {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(grandTotal)}
-            </span>
-          </p>
-        </div>
+    <div className="space-y-5 pb-12">
+      {/* Page title */}
+      <div className="space-y-0.5">
+        <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-foreground">
+          Finalizar compra
+        </h1>
+        <p className="text-sm text-muted-foreground font-semibold">
+          Total:{' '}
+          <span className="text-primary font-black">
+            {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(grandTotal)}
+          </span>
+        </p>
+      </div>
 
-        {/* Step indicator */}
-        <div className="flex items-center gap-2">
-          {STEPS.map((s, i) => (
-            <div key={s} className="flex items-center gap-2">
-              <div
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
-                  i === stepIdx
-                    ? 'bg-primary text-primary-foreground shadow-md shadow-primary/15'
-                    : i < stepIdx
-                    ? 'bg-primary/10 text-primary'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {i < stepIdx ? (
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                ) : (
-                  <span className="w-4 h-4 rounded-full border-2 flex items-center justify-center text-[9px] font-black leading-none border-current">
-                    {i + 1}
-                  </span>
-                )}
-                {s}
-              </div>
-              {i < STEPS.length - 1 && (
-                <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
+      {/* Step indicator */}
+      <div className="flex items-center gap-2">
+        {STEPS.map((s, i) => (
+          <div key={s} className="flex items-center gap-2">
+            <div
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all ${
+                i === stepIdx
+                  ? 'bg-primary text-primary-foreground shadow-md shadow-primary/15'
+                  : i < stepIdx
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-muted text-muted-foreground'
+              }`}
+            >
+              {i < stepIdx ? (
+                <CheckCircle2 className="h-3.5 w-3.5" />
+              ) : (
+                <span className="w-4 h-4 rounded-full border-2 flex items-center justify-center text-[9px] font-black leading-none border-current">
+                  {i + 1}
+                </span>
               )}
+              {s}
             </div>
-          ))}
-        </div>
-
-        {/* Error */}
-        {orderError && (
-          <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/20 rounded-xl p-3.5">
-            <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-            <p className="text-xs text-destructive font-semibold flex-1">{orderError}</p>
-            <button onClick={() => setOrderError(null)} className="text-destructive/60 hover:text-destructive">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* LEFT — main content */}
-          <div className="lg:col-span-8 space-y-4">
-            {step === 'Envío' ? (
-              <>
-                <ShippingSection form={shippingForm} errors={shippingErrors} onChange={handleChange} />
-                <Button
-                  onClick={() => { if (validateShipping()) setStep('Pago'); }}
-                  className="w-full h-12 font-bold tracking-wide bg-primary hover:bg-primary/95 text-primary-foreground rounded-2xl shadow-lg shadow-primary/15 cursor-pointer active:scale-[0.98] transition-all flex items-center justify-center gap-2"
-                >
-                  Continuar al pago
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </>
-            ) : (
-              <>
-                {/* Back */}
-                <button
-                  onClick={() => setStep('Envío')}
-                  className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  Volver a datos de envío
-                </button>
-
-                {/* Payment card */}
-                <Card className="border-primary/10 bg-card/60 backdrop-blur-md shadow-lg overflow-hidden">
-                  <CardContent className="p-0">
-                    <div className="px-5 py-4 border-b border-primary/5 flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-primary" />
-                      <h2 className="font-heading font-bold text-sm text-foreground">
-                        Método de pago
-                      </h2>
-                    </div>
-
-                    <div className="p-5">
-                      {isPlacingOrder ? (
-                        <div className="flex flex-col items-center gap-4 py-10">
-                          <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                          <p className="text-xs font-semibold text-muted-foreground">
-                            Confirmando tu pedido...
-                          </p>
-                        </div>
-                      ) : (
-                        <PaymentTabs
-                          amount={grandTotal}
-                          onPaymentComplete={handlePaymentComplete}
-                        />
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </>
+            {i < STEPS.length - 1 && (
+              <ChevronRight className="h-4 w-4 text-muted-foreground/30" />
             )}
           </div>
+        ))}
+      </div>
 
-          {/* RIGHT — summary */}
-          <div className="lg:col-span-4">
-            <OrderSummary items={items} subtotal={subtotal} />
-          </div>
+      {/* Error */}
+      {orderError && (
+        <div className="flex items-start gap-3 bg-destructive/10 border border-destructive/20 rounded-xl p-3.5">
+          <AlertCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+          <p className="text-xs text-destructive font-semibold flex-1">{orderError}</p>
+          <button onClick={() => setOrderError(null)} className="text-destructive/60 hover:text-destructive">
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT — main content */}
+        <div className="lg:col-span-8 space-y-4">
+          {step === 'Envío' ? (
+            <>
+              <ShippingSection form={shippingForm} errors={shippingErrors} onChange={handleChange} />
+              <Button
+                onClick={() => { if (validateShipping()) setStep('Pago'); }}
+                className="w-full h-12 font-bold tracking-wide bg-primary hover:bg-primary/95 text-primary-foreground rounded-2xl shadow-lg shadow-primary/15 cursor-pointer active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                Continuar al pago
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <>
+              {/* Back */}
+              <button
+                onClick={() => setStep('Envío')}
+                className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                Volver a datos de envío
+              </button>
+
+              {/* Payment card */}
+              <Card className="border-primary/10 bg-card/60 backdrop-blur-md shadow-lg overflow-hidden">
+                <CardContent className="p-0">
+                  <div className="px-5 py-4 border-b border-primary/5 flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-primary" />
+                    <h2 className="font-heading font-bold text-sm text-foreground">
+                      Método de pago
+                    </h2>
+                  </div>
+
+                  <div className="p-5">
+                    {isPlacingOrder ? (
+                      <div className="flex flex-col items-center gap-4 py-10">
+                        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                        <p className="text-xs font-semibold text-muted-foreground">
+                          Confirmando tu pedido...
+                        </p>
+                      </div>
+                    ) : (
+                      <PaymentTabs
+                        amount={grandTotal}
+                        onPaymentComplete={handlePaymentComplete}
+                      />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
+        </div>
+
+        {/* RIGHT — summary */}
+        <div className="lg:col-span-4">
+          <OrderSummary items={items} subtotal={subtotal} />
         </div>
       </div>
-    </ProtectedRoute>
+    </div>
   );
 }
+
+export default withAuth(CheckoutPage);

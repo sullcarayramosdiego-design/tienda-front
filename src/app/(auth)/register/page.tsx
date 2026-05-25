@@ -29,6 +29,7 @@ import { registerSchema, type RegisterFormData } from "@/lib/validators/auth.sch
 import { cn } from "@/lib/utils";
 import { Mail, Lock, Eye, EyeOff, Loader2, Sparkles, User, ShieldAlert, X } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { register } = useAuth();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -52,8 +54,16 @@ export default function RegisterPage() {
       setError(null);
       console.log("Register data:", data);
       
-      // Simulación de delay/espera para demostrar la animación premium de carga
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const nameParts = data.name.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || 'Pérez';
+      
+      await register({
+        email: data.email,
+        password: data.password,
+        firstName,
+        lastName,
+      });
       
       toast({
         title: "¡Cuenta Creada Exitosamente!",
@@ -65,13 +75,14 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push("/login");
       }, 1000);
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error("Error en registro:", err);
-      const message = "Error al crear la cuenta. Inténtalo de nuevo.";
-      setError(message);
+      const message = err.response?.data?.message || "Error al crear la cuenta. Inténtalo de nuevo.";
+      const errorMessage = Array.isArray(message) ? message.join(', ') : message;
+      setError(errorMessage);
       toast({
         title: "Error al Registrarse",
-        description: message,
+        description: errorMessage,
         type: "error"
       });
     }

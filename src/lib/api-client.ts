@@ -63,14 +63,16 @@ apiClient.interceptors.response.use(
           refreshToken,
         });
 
+        const newAccessToken = data.data.accessToken;
+
         // Guardar nuevo access token
         if (typeof window !== 'undefined') {
-          localStorage.setItem('access_token', data.accessToken);
+          localStorage.setItem('access_token', newAccessToken);
         }
 
         // Reintentar la petición original con el nuevo token
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         }
         
         return apiClient(originalRequest);

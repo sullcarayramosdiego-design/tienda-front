@@ -201,7 +201,7 @@ export function ProductListIntegrated() {
             {searchVal && (
               <button
                 type="button"
-                onClick={() => { setSearchVal(''); setActiveSearch(''); }}
+                onClick={() => { setSearchVal(''); updateQueryParams({ search: null }); }}
                 className="absolute right-16 top-3 text-muted-foreground hover:text-foreground cursor-pointer"
               >
                 <X className="h-5 w-5" />

@@ -16,7 +16,7 @@ interface ProductCardProps {
   slug?: string;
 }
 
-export function ProductCard({ id, name, price, has3D = false, sku, slug }: ProductCardProps) {
+export function ProductCard({ id, name, price, has3D = true, sku, slug }: ProductCardProps) {
   const { items } = useCart();
   const cartItem = items.find(item => item.product.id === id);
   const cartQuantity = cartItem ? cartItem.quantity : 0;

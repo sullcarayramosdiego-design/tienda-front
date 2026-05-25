@@ -2,30 +2,45 @@
 
 import { OrbitControls, PerspectiveCamera, Environment, ContactShadows } from '@react-three/drei';
 import { ModelLoader } from './ModelLoader';
+import { useThree } from '@react-three/fiber';
+import { useEffect } from 'react';
+import * as THREE from 'three';
 
 interface SceneProps {
   modelUrl?: string;
 }
 
 export function Scene({ modelUrl }: SceneProps) {
+  const { gl } = useThree();
+
+  useEffect(() => {
+    // Configure renderer for proper color management and tone mapping
+    gl.outputColorSpace = THREE.SRGBColorSpace;
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = 1.0;
+    gl.shadowMap.enabled = true;
+    gl.shadowMap.type = THREE.PCFSoftShadowMap;
+  }, [gl]);
+
   return (
     <>
-      {/* Camera Setup - 85mm portrait lens simulation for cinematic product view */}
+      {/* Camera Setup - Optimized for full model visibility */}
       <PerspectiveCamera 
         makeDefault 
-        fov={28} 
-        position={[0, 0, 5]} 
+        fov={50} 
+        position={[0, 0, 4]} 
       />
 
-      {/* Orbit Controls - Smooth interaction with constraints */}
+      {/* Orbit Controls - Smooth interaction optimized for character viewing */}
       <OrbitControls
         enableDamping
         dampingFactor={0.05}
-        minDistance={3}
-        maxDistance={8}
-        minPolarAngle={Math.PI / 4}
-        maxPolarAngle={Math.PI / 1.5}
+        minDistance={2.5}
+        maxDistance={7}
+        minPolarAngle={Math.PI / 6}
+        maxPolarAngle={Math.PI / 1.6}
         enablePan={false}
+        target={[0, 0.2, 0]}
       />
 
       {/* Cinematic Lighting Setup */}

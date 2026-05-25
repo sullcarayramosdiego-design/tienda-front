@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { Scene } from './Scene';
@@ -32,6 +32,43 @@ export function ProductViewer3D({
   modelUrl = "/3D/PCAS.glb",
   className = "w-full h-full min-h-[400px] lg:min-h-[500px]"
 }: ProductViewer3DProps) {
+  // Global error suppression for GLTF texture warnings
+  useEffect(() => {
+    const originalError = console.error;
+    const originalWarn = console.warn;
+    
+    // Override console.error to filter out GLTF texture warnings
+    console.error = (...args: any[]) => {
+      const message = args[0]?.toString?.() || '';
+      if (
+        message.includes('THREE.GLTFLoader') ||
+        message.includes("Couldn't load texture") ||
+        message.includes('blob:http')
+      ) {
+        // Suppress - these are non-critical warnings for embedded textures
+        return;
+      }
+      originalError(...args);
+    };
+    
+    console.warn = (...args: any[]) => {
+      const message = args[0]?.toString?.() || '';
+      if (
+        message.includes('THREE.GLTFLoader') ||
+        message.includes("Couldn't load texture") ||
+        message.includes('blob:http')
+      ) {
+        return;
+      }
+      originalWarn(...args);
+    };
+
+    return () => {
+      console.error = originalError;
+      console.warn = originalWarn;
+    };
+  }, []);
+
   return (
     <div className={className}>
       <Canvas

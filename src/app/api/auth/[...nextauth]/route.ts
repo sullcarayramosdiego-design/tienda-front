@@ -50,29 +50,49 @@ const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log('SignIn callback:', { user, account, profile });
-      
-      // Si es login con Google, registrar/actualizar usuario en tu backend
-      if (account?.provider === 'google' && profile?.email) {
-        try {
-          // TODO: Enviar datos a tu backend para crear/actualizar usuario
-          // await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google`, {
-          //   method: 'POST',
-          //   body: JSON.stringify({ email: profile.email, name: profile.name })
-          // });
-          console.log('Usuario Google autenticado:', profile.email);
-        } catch (error) {
-          console.error('Error al registrar usuario Google:', error);
-          return false;
-        }
+      // Solo validamos que el perfil exista para Google
+      if (account?.provider === 'google' && !profile?.email) {
+        return false;
       }
-      
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, profile }) {
+      // El objeto account solo está definido la primera vez que se inicia sesión
       if (account && user) {
-        token.accessToken = account.access_token;
         token.provider = account.provider;
+        
+        if (account.provider === 'google' && profile) {
+          try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+            const apiPrefix = process.env.NEXT_PUBLIC_API_PREFIX || 'api/v1';
+            
+            const response = await fetch(`${apiUrl}/${apiPrefix}/auth/google`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                email: profile.email, 
+                name: profile.name,
+                googleId: account.providerAccountId,
+                image: profile.image || user.image
+              })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              // Guardamos los tokens del backend en el token de NextAuth
+              token.backendTokens = {
+                accessToken: data.data.accessToken,
+                refreshToken: data.data.refreshToken,
+                user: data.data.user
+              };
+              console.log('Tokens del backend obtenidos exitosamente para Google auth');
+            }
+          } catch (error) {
+            console.error('Error al obtener tokens del backend para Google:', error);
+          }
+        }
       }
       return token;
     },
@@ -80,13 +100,15 @@ const authOptions: NextAuthOptions = {
       if (session.user) {
         (session.user as any).provider = token.provider;
       }
+      // Pasamos los tokens del backend a la sesión del cliente
+      if (token.backendTokens) {
+        (session as any).backendTokens = token.backendTokens;
+      }
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Redirigir a /catalog después del login exitoso
-      if (url.startsWith(baseUrl)) return url;
-      if (url.startsWith('/')) return `${baseUrl}${url}`;
-      return baseUrl + '/catalog';
+      // Redirigir siempre a /catalog después del login exitoso (layout del cliente)
+      return `${baseUrl}/catalog`;
     }
   },
   session: {

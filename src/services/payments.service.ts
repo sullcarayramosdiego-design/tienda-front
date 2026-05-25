@@ -8,11 +8,11 @@ import type { Payment, CreatePaymentIntentDto, PaymentIntentResponse } from '@/t
 export const paymentsService = {
   /**
    * Crear intención de pago
-   * POST /api/v1/payments/intents
+   * POST /payments/intents
    */
   async createIntent(paymentData: CreatePaymentIntentDto): Promise<PaymentIntentResponse> {
     const response = await apiClient.post<{ success: boolean; data: PaymentIntentResponse }>(
-      '/v1/payments/intents',
+      '/payments/intents',
       paymentData
     );
     return response.data.data;
@@ -20,10 +20,10 @@ export const paymentsService = {
 
   /**
    * Obtener estado de un pago
-   * GET /api/v1/payments/:id
+   * GET /payments/:id
    */
   async getById(id: string): Promise<Payment> {
-    const response = await apiClient.get<{ success: boolean; data: Payment }>(`/v1/payments/${id}`);
+    const response = await apiClient.get<{ success: boolean; data: Payment }>(`/payments/${id}`);
     return response.data.data;
   },
 

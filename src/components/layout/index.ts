@@ -10,3 +10,4 @@ export { MobileMenuDrawer } from './MobileMenuDrawer';
 export { Navbar } from './Navbar';
 export { Sidebar } from './Sidebar';
 export { StorefrontHeader } from './StorefrontHeader';
+export { NotificationBell } from './NotificationBell';

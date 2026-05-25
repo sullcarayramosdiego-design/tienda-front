@@ -8,38 +8,73 @@ import type { Order, CreateOrderDto, UpdateOrderStatusDto } from '@/types/order'
 export const ordersService = {
   /**
    * Obtener todos los pedidos del usuario autenticado
-   * GET /api/v1/orders
+   * GET /orders
    */
   async getMyOrders(): Promise<Order[]> {
-    const response = await apiClient.get<{ success: boolean; data: Order[] }>('/v1/orders');
+    const response = await apiClient.get<{ success: boolean; data: Order[] }>('/orders');
+    return response.data.data;
+  },
+
+  /**
+   * Obtener todos los pedidos (solo admins)
+   * GET /orders/all
+   */
+  async getAllAdmin(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    status?: string;
+  }): Promise<{
+    orders: Order[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.status) queryParams.append('status', params.status);
+
+    const response = await apiClient.get<{
+      success: boolean;
+      data: {
+        orders: Order[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+    }>(`/orders/all?${queryParams.toString()}`);
     return response.data.data;
   },
 
   /**
    * Obtener un pedido específico por ID
-   * GET /api/v1/orders/:id
+   * GET /orders/:id
    */
   async getById(id: string): Promise<Order> {
-    const response = await apiClient.get<{ success: boolean; data: Order }>(`/v1/orders/${id}`);
+    const response = await apiClient.get<{ success: boolean; data: Order }>(`/orders/${id}`);
     return response.data.data;
   },
 
   /**
    * Crear un nuevo pedido desde el carrito
-   * POST /api/v1/orders
+   * POST /orders
    */
   async create(orderData: CreateOrderDto): Promise<Order> {
-    const response = await apiClient.post<{ success: boolean; data: Order }>('/v1/orders', orderData);
+    const response = await apiClient.post<{ success: boolean; data: Order }>('/orders', orderData);
     return response.data.data;
   },
 
   /**
    * Actualizar estado de un pedido (solo admin)
-   * PATCH /api/v1/orders/:id/status
+   * PATCH /orders/:id/status
    */
   async updateStatus(id: string, status: UpdateOrderStatusDto['status']): Promise<Order> {
     const response = await apiClient.patch<{ success: boolean; data: Order }>(
-      `/v1/orders/${id}/status`,
+      `/orders/${id}/status`,
       { status }
     );
     return response.data.data;
@@ -47,10 +82,10 @@ export const ordersService = {
 
   /**
    * Cancelar un pedido
-   * DELETE /api/v1/orders/:id
+   * DELETE /orders/:id
    */
   async cancel(id: string): Promise<Order> {
-    const response = await apiClient.delete<{ success: boolean; data: Order }>(`/v1/orders/${id}`);
+    const response = await apiClient.delete<{ success: boolean; data: Order }>(`/orders/${id}`);
     return response.data.data;
   },
 };

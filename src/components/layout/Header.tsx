@@ -30,6 +30,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { CartDrawer } from '@/components/storefront';
+import { NotificationBell } from './NotificationBell';
 
 interface HeaderProps {
   cartItemsCount?: number;
@@ -130,6 +131,8 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
  
         {/* ACCIONES DERECHA */}
         <div className="flex items-center gap-3">
+          {/* Notificaciones Bell */}
+          {isAuthenticated && <NotificationBell />}
           {/* Carrito Icono */}
           {isAuthenticated && <CartDrawer />}
 

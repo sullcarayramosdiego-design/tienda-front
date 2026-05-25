@@ -77,9 +77,9 @@ export function CheckoutFlow() {
     try {
       const orderData: CreateOrderDto = {
         items: items.map((item) => ({
-          productId: item.productId,
+          productId: item.product.id,
           quantity: item.quantity,
-          price: item.price,
+          price: item.product.price,
         })),
         shippingAddress,
         billingAddress: sameAsShipping ? shippingAddress : billingAddress,
@@ -170,14 +170,14 @@ export function CheckoutFlow() {
             <>
               <div className="space-y-2">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex justify-between p-4 border rounded">
+                  <div key={item.product.id} className="flex justify-between p-4 border rounded">
                     <div>
-                      <p className="font-medium">{item.name}</p>
+                      <p className="font-medium">{item.product.name}</p>
                       <p className="text-sm text-gray-500">
-                        Cantidad: {item.quantity} × S/ {item.price.toFixed(2)}
+                        Cantidad: {item.quantity} × S/ {item.product.price.toFixed(2)}
                       </p>
                     </div>
-                    <p className="font-bold">S/ {(item.quantity * item.price).toFixed(2)}</p>
+                    <p className="font-bold">S/ {(item.quantity * item.product.price).toFixed(2)}</p>
                   </div>
                 ))}
               </div>

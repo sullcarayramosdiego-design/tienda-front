@@ -22,8 +22,9 @@ export interface OrderItemDto {
 
 export interface CreateOrderDto {
   items: OrderItemDto[];
-  shippingAddress: Address;
-  billingAddress: Address;
+  shippingAddress: any;
+  billingAddress?: any;
+  [key: string]: any;
 }
 
 export interface OrderItem {
@@ -51,8 +52,8 @@ export interface Order {
   shipping: number;
   discount: number;
   items: OrderItem[];
-  shippingAddress: Address;
-  billingAddress: Address;
+  shippingAddress: any;
+  billingAddress?: any;
   createdAt: string;
   updatedAt: string;
   completedAt?: string;

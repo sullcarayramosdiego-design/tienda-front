@@ -124,8 +124,7 @@ export default function ProductPage({
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="relative w-full aspect-square bg-card border border-primary/10 rounded-3xl overflow-hidden shadow-xl">
               <ProductViewer3D 
-                modelUrl={glbAssetUrl} 
-                alt={`Visualización interactiva de ${product.name}`} 
+                modelUrl={glbAssetUrl}
               />
             </div>
 

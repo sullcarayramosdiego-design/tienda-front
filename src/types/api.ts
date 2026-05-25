@@ -83,9 +83,11 @@ export interface Product {
   price: number;
   sku: string;
   stock: number;
+  slug: string;
   createdAt: string;
   updatedAt: string;
   assets?: Asset3D[];
+  category?: any;
 }
 
 export interface CreateProductData {

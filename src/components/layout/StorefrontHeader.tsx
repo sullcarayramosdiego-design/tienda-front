@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MobileMenuDrawer } from "@/components/layout/MobileMenuDrawer";
+import { MobileMenuDrawer } from '@/components/layout';
 import { useState } from "react";
 
 export function StorefrontHeader() {

@@ -1,6 +1,6 @@
 'use client';
 
-import { AdminSidebar } from '@/components/layout/AdminSidebar';
+import { AdminSidebar } from '@/components/layout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 

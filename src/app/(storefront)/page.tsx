@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useProducts } from '@/hooks/useProducts';
-import { ProductCard } from '@/components/storefront/ProductCard';
+import { ProductCard } from '@/components/storefront';
 import { ProductViewer3D } from '@/components/viewer3d/ProductViewer3D';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

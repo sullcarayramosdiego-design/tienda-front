@@ -3,9 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useProducts } from '@/hooks/useProducts';
-import { ProductCard } from '@/components/storefront/ProductCard';
-import { CategoryFilter } from '@/components/storefront/CategoryFilter';
-import { PriceRangeSlider } from '@/components/storefront/PriceRangeSlider';
+import { ProductCard, CategoryFilter, PriceRangeSlider } from '@/components/storefront';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';

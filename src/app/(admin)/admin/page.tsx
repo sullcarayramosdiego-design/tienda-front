@@ -1,4 +1,4 @@
-import { MetricCard } from '@/components/admin/MetricCard';
+import { MetricCard } from '@/components/admin';
 
 export default function AdminDashboard() {
   return (

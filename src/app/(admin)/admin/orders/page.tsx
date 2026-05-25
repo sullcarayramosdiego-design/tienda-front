@@ -1,4 +1,4 @@
-import { OrderKanban } from '@/components/admin/OrderKanban';
+import { OrderKanban } from '@/components/admin';
 
 export default function OrdersPage() {
   return (

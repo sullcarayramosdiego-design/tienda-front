@@ -1,4 +1,4 @@
-import { InventoryTable } from '@/components/admin/InventoryTable';
+import { InventoryTable } from '@/components/admin';
 
 export default function InventoryPage() {
   return (

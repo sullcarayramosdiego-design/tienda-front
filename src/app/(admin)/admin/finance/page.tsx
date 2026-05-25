@@ -1,4 +1,4 @@
-import { FinanceLedger } from '@/components/admin/FinanceLedger';
+import { FinanceLedger } from '@/components/admin';
 
 export default function FinancePage() {
   return (

@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { LoyaltyPointsBadge } from '@/components/storefront/LoyaltyPointsBadge';
+import { LoyaltyPointsBadge } from '@/components/storefront';
 
 export default function LoyaltyPage() {
   return (

@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
-import { CartDrawer } from '@/components/storefront/CartDrawer';
+import { CartDrawer } from '@/components/storefront';
 
 interface HeaderProps {
   cartItemsCount?: number;

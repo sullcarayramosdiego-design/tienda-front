@@ -1,7 +1,7 @@
 'use client';
 
 import { Card } from '@/components/ui/card';
-import { AssetUploadZone } from '@/components/admin/AssetUploadZone';
+import { AssetUploadZone } from '@/components/admin';
 import { use } from 'react';
 
 export default function InventoryDetailPage({

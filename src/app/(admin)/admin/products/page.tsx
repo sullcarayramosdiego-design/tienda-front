@@ -1,5 +1,5 @@
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Asset3DUpload } from '@/components/admin/Asset3DUpload';
+import { Asset3DUpload } from '@/components/admin';
 
 export default function AdminProductsPage() {
   return (

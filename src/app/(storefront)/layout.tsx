@@ -3,9 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { Sidebar } from '@/components/layout/Sidebar';
+import { Header, Footer, Sidebar } from '@/components/layout';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 

@@ -1,4 +1,4 @@
-import { ProductListIntegrated } from '@/components/storefront/ProductListIntegrated';
+import { ProductListIntegrated } from '@/components/storefront';
 import { Suspense } from 'react';
 
 export default function CatalogPage() {

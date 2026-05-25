@@ -120,6 +120,8 @@ export interface ProductQueryParams {
   search?: string;
   minPrice?: number;
   maxPrice?: number;
+  category?: string;
+  only3D?: boolean;
 }
 
 // ============================================================================

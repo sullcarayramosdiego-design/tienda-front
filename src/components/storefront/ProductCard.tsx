@@ -13,9 +13,10 @@ interface ProductCardProps {
   image?: string;
   sku?: string;
   has3D?: boolean;
+  slug?: string;
 }
 
-export function ProductCard({ id, name, price, has3D = true }: ProductCardProps) {
+export function ProductCard({ id, name, price, has3D = false, sku, slug }: ProductCardProps) {
   const { items } = useCart();
   const cartItem = items.find(item => item.product.id === id);
   const cartQuantity = cartItem ? cartItem.quantity : 0;
@@ -27,7 +28,7 @@ export function ProductCard({ id, name, price, has3D = true }: ProductCardProps)
   }).format(price);
 
   return (
-    <Link href={`/catalog/${id}`} className="group block">
+    <Link href={`/catalog/${slug || id}`} className="group block">
       <Card className="relative overflow-hidden border border-primary/10 bg-card/40 backdrop-blur-sm hover:bg-card/75 hover:border-primary/25 rounded-2xl shadow-md hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 select-none">
         
         {/* Badge: xQ in cart */}
@@ -78,7 +79,7 @@ export function ProductCard({ id, name, price, has3D = true }: ProductCardProps)
         <CardContent className="p-5">
           {/* Product SKU */}
           <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest block mb-1">
-            MOCK-SKU
+            {sku || 'N/A'}
           </span>
           
           {/* Product Name */}

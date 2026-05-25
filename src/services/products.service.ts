@@ -31,6 +31,8 @@ export const productsService = {
         search: params?.search,
         minPrice: params?.minPrice,
         maxPrice: params?.maxPrice,
+        category: params?.category,
+        only3D: params?.only3D,
       },
     });
     return response.data.data;
@@ -41,6 +43,14 @@ export const productsService = {
    */
   async getById(id: string): Promise<Product> {
     const response = await apiClient.get<ApiResponse<Product>>(`/products/${id}`);
+    return response.data.data;
+  },
+
+  /**
+   * Obtener un producto por Slug (endpoint público)
+   */
+  async getBySlug(slug: string): Promise<Product> {
+    const response = await apiClient.get<ApiResponse<Product>>(`/products/by-slug/${slug}`);
     return response.data.data;
   },
 

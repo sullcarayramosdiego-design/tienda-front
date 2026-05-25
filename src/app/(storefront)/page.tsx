@@ -209,6 +209,7 @@ export default function HomePage() {
                     image={`/images/products/${prod.sku}.jpg`}
                     sku={prod.sku}
                     has3D={prod.assets && prod.assets.length > 0}
+                    slug={prod.slug}
                   />
                 ))}
               </div>

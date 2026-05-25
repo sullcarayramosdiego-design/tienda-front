@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { productsService } from '@/services/products.service';
 import type { Product, ProductListResponse, ProductQueryParams } from '@/types/api';
 
@@ -14,13 +14,14 @@ export function useProducts(initialParams?: ProductQueryParams) {
   const [meta, setMeta] = useState<ProductListResponse['meta'] | null>(null);
 
   /**
-   * Cargar productos con parámetros específicos
+   * Cargar productos con parámetros específicos.
+   * No tiene dependencias externas: los params se pasan en cada llamada.
    */
   const fetchProducts = useCallback(async (params?: ProductQueryParams) => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await productsService.list(params);
       if (Array.isArray(response)) {
         setProducts(response);
@@ -37,12 +38,16 @@ export function useProducts(initialParams?: ProductQueryParams) {
         // In case the raw data is wrapped inside a secondary data field
         const rawData = (response as any).data;
         setProducts(rawData);
-        setMeta({
-          total: rawData.length,
-          page: 1,
-          limit: rawData.length,
-          totalPages: 1,
-        });
+        if ((response as any).meta) {
+          setMeta((response as any).meta);
+        } else {
+          setMeta({
+            total: rawData.length,
+            page: 1,
+            limit: rawData.length,
+            totalPages: 1,
+          });
+        }
       } else {
         setProducts([]);
         setMeta(null);
@@ -53,35 +58,56 @@ export function useProducts(initialParams?: ProductQueryParams) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, []); // ← sin dependencias: params se pasan al invocar
 
   /**
-   * Cargar productos al montar el componente
+   * FIX "Maximum update depth exceeded":
+   *
+   * El problema raíz es que `initialParams` es un OBJETO LITERAL creado en el
+   * componente padre. Cada render padre produce una nueva referencia de objeto,
+   * aunque los valores sean idénticos. Si ponemos el objeto directamente en el
+   * array de deps del useEffect, React lo compara por referencia (===), detecta
+   * un objeto "nuevo" en cada render y dispara el efecto infinitamente.
+   *
+   * Solución: serializar los params con JSON.stringify → string estable que sólo
+   * cambia cuando los VALORES realmente son distintos.
+   */
+  const paramsKey = JSON.stringify(initialParams ?? null);
+
+  // Ref para acceder a los últimos params dentro del efecto sin añadirlos como dep.
+  const paramsRef = useRef(initialParams);
+  useEffect(() => {
+    paramsRef.current = initialParams;
+  });
+
+  /**
+   * Disparar fetch al montar y cuando los valores de initialParams cambien.
    */
   useEffect(() => {
-    fetchProducts(initialParams);
-  }, [fetchProducts, initialParams]);
+    fetchProducts(paramsRef.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchProducts, paramsKey]); // paramsKey es string → comparación por valor, no por referencia
 
   /**
    * Refrescar lista de productos
    */
   const refresh = useCallback(() => {
-    fetchProducts(initialParams);
-  }, [fetchProducts, initialParams]);
+    fetchProducts(paramsRef.current);
+  }, [fetchProducts]);
 
   /**
    * Buscar productos por término
    */
   const search = useCallback(async (query: string) => {
-    await fetchProducts({ ...initialParams, search: query });
-  }, [fetchProducts, initialParams]);
+    await fetchProducts({ ...paramsRef.current, search: query });
+  }, [fetchProducts]);
 
   /**
    * Cambiar de página
    */
   const goToPage = useCallback(async (page: number) => {
-    await fetchProducts({ ...initialParams, page });
-  }, [fetchProducts, initialParams]);
+    await fetchProducts({ ...paramsRef.current, page });
+  }, [fetchProducts]);
 
   return {
     products,
@@ -95,9 +121,9 @@ export function useProducts(initialParams?: ProductQueryParams) {
 }
 
 /**
- * Hook para obtener un producto individual por ID
+ * Hook para obtener un producto individual por ID o Slug
  */
-export function useProduct(id: string) {
+export function useProduct(idOrSlug: string) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -107,8 +133,12 @@ export function useProduct(id: string) {
       try {
         setLoading(true);
         setError(null);
-        
-        const data = await productsService.getById(id);
+
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(idOrSlug);
+        const data = isUuid 
+          ? await productsService.getById(idOrSlug)
+          : await productsService.getBySlug(idOrSlug);
+
         setProduct(data);
       } catch (err: any) {
         const message = err.response?.data?.message || 'Error al cargar producto';
@@ -118,10 +148,10 @@ export function useProduct(id: string) {
       }
     };
 
-    if (id) {
+    if (idOrSlug) {
       fetchProduct();
     }
-  }, [id]);
+  }, [idOrSlug]);
 
   return {
     product,

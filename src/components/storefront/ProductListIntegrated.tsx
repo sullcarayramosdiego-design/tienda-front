@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useProducts } from '@/hooks/useProducts';
 import { ProductCard } from '@/components/storefront/ProductCard';
 import { CategoryFilter } from '@/components/storefront/CategoryFilter';
@@ -22,19 +23,58 @@ import {
 import { cn } from '@/lib/utils';
 
 export function ProductListIntegrated() {
-  // 1. Unified filter states
-  const [searchVal, setSearchVal] = useState('');
-  const [activeSearch, setActiveSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [priceRange, setPriceRange] = useState<{ min: number | undefined; max: number | undefined }>({
-    min: undefined,
-    max: undefined,
-  });
-  const [only3D, setOnly3D] = useState(false);
-  const [page, setPage] = useState(1);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  // 1. Read filter values from URL parameters as Source of Truth
+  const pageParam = searchParams.get('page');
+  const categoryParam = searchParams.get('category');
+  const minPriceParam = searchParams.get('minPrice');
+  const maxPriceParam = searchParams.get('maxPrice');
+  const only3DParam = searchParams.get('only3D');
+  const searchParam = searchParams.get('search');
+
+  // Convert URL parameters to correct JavaScript types
+  const page = pageParam ? parseInt(pageParam, 10) : 1;
+  const selectedCategory = categoryParam || null;
+  const priceRange = useMemo(() => ({
+    min: minPriceParam ? parseFloat(minPriceParam) : undefined,
+    max: maxPriceParam ? parseFloat(maxPriceParam) : undefined,
+  }), [minPriceParam, maxPriceParam]);
+  const only3D = only3DParam === 'true';
+  const activeSearch = searchParam || '';
+
+  // Local state only for the raw search input text box (so user can type before submitting)
+  const [searchVal, setSearchVal] = useState(activeSearch);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  // 2. Memoized parameters for backend hook to prevent redundant rendering loops
+  // Sync raw input searchVal if activeSearch changes externally (e.g. clear filters)
+  useEffect(() => {
+    setSearchVal(activeSearch);
+  }, [activeSearch]);
+
+  // Helper to push updated search parameters to the URL
+  const updateQueryParams = (newParams: Record<string, string | number | boolean | null | undefined>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === '' || value === false) {
+        params.delete(key);
+      } else {
+        params.set(key, String(value));
+      }
+    });
+    
+    // Reset page to 1 when changing any filter (unless we are explicitly paginating)
+    if (!('page' in newParams)) {
+      params.delete('page');
+    }
+    
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  // 2. Memoized parameters for backend hook
   const queryParams = useMemo(() => {
     return {
       page,
@@ -42,75 +82,40 @@ export function ProductListIntegrated() {
       search: activeSearch || undefined,
       minPrice: priceRange.min,
       maxPrice: priceRange.max,
+      category: selectedCategory || undefined,
+      only3D: only3D || undefined,
     };
-  }, [page, activeSearch, priceRange.min, priceRange.max]);
+  }, [page, activeSearch, priceRange.min, priceRange.max, selectedCategory, only3D]);
 
   // 3. Fetch products from the backend hook
-  const { products, loading, error, meta, goToPage } = useProducts(queryParams);
+  const { products, loading, error, meta } = useProducts(queryParams);
 
-  // Sync internal page state with hook meta if changed
-  useEffect(() => {
-    if (meta?.page) {
-      setPage(meta.page);
-    }
-  }, [meta?.page]);
-
-  // Reset page to 1 when filters change
   const handleCategoryChange = (cat: string | null) => {
-    setSelectedCategory(cat);
-    setPage(1);
+    updateQueryParams({ category: cat });
   };
 
   const handlePriceChange = (min: number | undefined, max: number | undefined) => {
-    setPriceRange({ min, max });
-    setPage(1);
+    updateQueryParams({ minPrice: min, maxPrice: max });
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setActiveSearch(searchVal);
-    setPage(1);
+    updateQueryParams({ search: searchVal });
+  };
+
+  const handlePageChange = (newPage: number) => {
+    updateQueryParams({ page: newPage });
   };
 
   const clearAllFilters = () => {
     setSearchVal('');
-    setActiveSearch('');
-    setSelectedCategory(null);
-    setPriceRange({ min: undefined, max: undefined });
-    setOnly3D(false);
-    setPage(1);
+    router.push(pathname, { scroll: false });
   };
 
-  // 4. Client-side filtering & sorting overrides
-  // We filter by Category and Only3D on the client side to keep responses ultra fast and ensure perfect compatibility
+  // 4. Rely entirely on clean backend filtered & paginated data
   const filteredProducts = useMemo(() => {
-    let result = Array.isArray(products) ? [...products] : [];
-
-    // Client-side category filtering if not handled directly by NestJS endpoint
-    if (selectedCategory) {
-      result = result.filter(p => {
-        let pCat = (p as any).category || '';
-        
-        // If category is an object, extract its name, title, or id
-        if (typeof pCat === 'object' && pCat !== null) {
-          pCat = pCat.name || pCat.id || pCat.title || '';
-        }
-        
-        const pCatStr = String(pCat).toLowerCase();
-        const selectedCatStr = String(selectedCategory).toLowerCase();
-        
-        return pCatStr === selectedCatStr ||
-               p.name.toLowerCase().includes(selectedCatStr);
-      });
-    }
-
-    // Client-side 3D filter: only show products with 3D assets
-    if (only3D) {
-      result = result.filter(p => p.assets && p.assets.length > 0);
-    }
-
-    return result;
-  }, [products, selectedCategory, only3D]);
+    return Array.isArray(products) ? products : [];
+  }, [products]);
 
   // Active filter count
   const activeFiltersCount = useMemo(() => {
@@ -139,7 +144,7 @@ export function ProductListIntegrated() {
             <p className="text-[11px] text-muted-foreground">Sólo modelos interactivos</p>
           </div>
           <button
-            onClick={() => setOnly3D(!only3D)}
+            onClick={() => updateQueryParams({ only3D: !only3D })}
             className={cn(
               "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none",
               only3D ? "bg-primary" : "bg-muted"
@@ -237,25 +242,25 @@ export function ProductListIntegrated() {
             {activeSearch && (
               <span className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-full">
                 Búsqueda: "{activeSearch}"
-                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => { setSearchVal(''); setActiveSearch(''); }} />
+                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => updateQueryParams({ search: null })} />
               </span>
             )}
             {selectedCategory && (
               <span className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-full">
                 Categoría: {selectedCategory}
-                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => setSelectedCategory(null)} />
+                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => updateQueryParams({ category: null })} />
               </span>
             )}
             {(priceRange.min !== undefined || priceRange.max !== undefined) && (
               <span className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-full">
                 Precio: S/ {priceRange.min ?? 0} - S/ {priceRange.max ?? 'Max'}
-                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => setPriceRange({ min: undefined, max: undefined })} />
+                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => updateQueryParams({ minPrice: null, maxPrice: null })} />
               </span>
             )}
             {only3D && (
               <span className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-full">
                 Sólo 3D / AR
-                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => setOnly3D(false)} />
+                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => updateQueryParams({ only3D: null })} />
               </span>
             )}
             <button
@@ -320,6 +325,7 @@ export function ProductListIntegrated() {
                   image={`/images/products/${product.sku}.jpg`}
                   sku={product.sku}
                   has3D={product.assets && product.assets.length > 0}
+                  slug={product.slug}
                 />
               ))}
             </div>
@@ -334,7 +340,7 @@ export function ProductListIntegrated() {
                 <div className="flex items-center gap-1.5">
                   <Button
                     variant="outline"
-                    onClick={() => { setPage(page - 1); goToPage(page - 1); }}
+                    onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1}
                     className="h-9 w-9 p-0 border-primary/10 rounded-xl cursor-pointer"
                   >
@@ -346,7 +352,7 @@ export function ProductListIntegrated() {
                       <Button
                         key={i}
                         variant={page === i + 1 ? 'default' : 'outline'}
-                        onClick={() => { setPage(i + 1); goToPage(i + 1); }}
+                        onClick={() => handlePageChange(i + 1)}
                         className={cn(
                           "h-9 min-w-9 px-3 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300",
                           page === i + 1 
@@ -361,7 +367,7 @@ export function ProductListIntegrated() {
 
                   <Button
                     variant="outline"
-                    onClick={() => { setPage(page + 1); goToPage(page + 1); }}
+                    onClick={() => handlePageChange(page + 1)}
                     disabled={page === meta.totalPages}
                     className="h-9 w-9 p-0 border-primary/10 rounded-xl cursor-pointer"
                   >
@@ -409,7 +415,7 @@ export function ProductListIntegrated() {
                   <p className="text-[10px] text-muted-foreground">Sólo modelos interactivos</p>
                 </div>
                 <button
-                  onClick={() => setOnly3D(!only3D)}
+                  onClick={() => updateQueryParams({ only3D: !only3D })}
                   className={cn(
                     "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none",
                     only3D ? "bg-primary" : "bg-muted"

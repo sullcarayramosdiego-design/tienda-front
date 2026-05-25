@@ -44,7 +44,7 @@ export default function ProductPage({
 
   const { addItem } = useCart();
   const { toggleItem, hasItem } = useWishlist();
-  const isFavorite = hasItem(productId);
+  const isFavorite = product ? hasItem(product.id) : false;
 
   // Format price in local Peruvian Soles (S/)
   const formatPrice = (value: number) => {

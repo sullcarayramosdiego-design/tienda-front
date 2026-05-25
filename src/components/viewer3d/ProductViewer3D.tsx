@@ -9,6 +9,7 @@ import { Sparkles } from 'lucide-react';
 interface ProductViewer3DProps {
   modelUrl?: string;
   className?: string;
+  scale?: number;
 }
 
 // Custom Loader Component
@@ -30,7 +31,8 @@ function LoadingFallback() {
 
 export function ProductViewer3D({ 
   modelUrl = "/3D/PCAS.glb",
-  className = "w-full h-full min-h-[400px] lg:min-h-[500px]"
+  className = "w-full h-full min-h-[400px] lg:min-h-[500px]",
+  scale = 2.0
 }: ProductViewer3DProps) {
   // Global error suppression for GLTF texture warnings
   useEffect(() => {
@@ -82,7 +84,7 @@ export function ProductViewer3D({
         className="rounded-2xl"
       >
         <Suspense fallback={<LoadingFallback />}>
-          <Scene modelUrl={modelUrl} />
+          <Scene modelUrl={modelUrl} scale={scale} />
         </Suspense>
       </Canvas>
     </div>

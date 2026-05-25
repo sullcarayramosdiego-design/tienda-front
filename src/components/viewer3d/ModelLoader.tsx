@@ -6,9 +6,10 @@ import * as THREE from 'three';
 
 interface ModelLoaderProps {
   modelUrl?: string;
+  scale?: number;
 }
 
-export function ModelLoader({ modelUrl = '/3D/PCAS.glb' }: ModelLoaderProps) {
+export function ModelLoader({ modelUrl = '/3D/PCAS.glb', scale = 2.0 }: ModelLoaderProps) {
   // Suppress non-critical GLTF texture warnings
   useEffect(() => {
     const originalError = console.error;
@@ -86,12 +87,13 @@ export function ModelLoader({ modelUrl = '/3D/PCAS.glb' }: ModelLoaderProps) {
     });
     
     // Center the model and position it optimally
-    clone.position.set(0, -1.8, 0);
+    // Adjust position depending on scale if needed
+    clone.position.set(0, -0.8, 0);
     
     return clone;
   }, [gltf.scene]);
 
-  return <primitive object={clonedScene} scale={4.5} />;
+  return <primitive object={clonedScene} scale={scale} />;
 }
 
 // Preload the model for optimal performance

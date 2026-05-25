@@ -8,9 +8,10 @@ import * as THREE from 'three';
 
 interface SceneProps {
   modelUrl?: string;
+  scale?: number;
 }
 
-export function Scene({ modelUrl }: SceneProps) {
+export function Scene({ modelUrl, scale }: SceneProps) {
   const { gl } = useThree();
 
   useEffect(() => {
@@ -76,7 +77,7 @@ export function Scene({ modelUrl }: SceneProps) {
 
       {/* Contact Shadows - Ground plane shadows for realism */}
       <ContactShadows
-        position={[0, -1.5, 0]}
+        position={[0, -0.8, 0]}
         opacity={0.4}
         scale={10}
         blur={2}
@@ -84,7 +85,7 @@ export function Scene({ modelUrl }: SceneProps) {
       />
 
       {/* 3D Model */}
-      <ModelLoader modelUrl={modelUrl} />
+      <ModelLoader modelUrl={modelUrl} scale={scale} />
     </>
   );
 }

@@ -1,15 +1,19 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 import { authService } from '@/services/auth.service';
 import { usersService } from '@/services/users.service';
 import type { RegisterData, LoginData, User } from '@/types/api';
+import { useToast } from '@/components/ui/toast';
 
 /**
  * Hook de autenticación para gestionar el estado del usuario
  * y las operaciones de login/logout/register
  */
 export function useAuth() {
+  const { data: session, status } = useSession();
+  const { toast } = useToast();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +22,27 @@ export function useAuth() {
    * Verificar autenticación al cargar el componente
    */
   useEffect(() => {
+    // Si NextAuth todavía está cargando, esperamos
+    if (status === 'loading') return;
+
     const checkAuth = async () => {
+      // Forzamos la sincronización aquí también por si el AuthSync de GlobalProvider tardó
+      if (session && (session as any).backendTokens) {
+        const tokens = (session as any).backendTokens;
+        if (tokens.accessToken && localStorage.getItem('access_token') !== tokens.accessToken) {
+          localStorage.setItem('access_token', tokens.accessToken);
+          localStorage.setItem('refresh_token', tokens.refreshToken);
+          if (tokens.user) {
+            localStorage.setItem('user', JSON.stringify(tokens.user));
+            // Mostrar Toast de bienvenida al iniciar sesión con Google
+            toast({
+              title: "¡Bienvenido de vuelta!",
+              description: `Has iniciado sesión correctamente como ${tokens.user.firstName || tokens.user.name}.`,
+            });
+          }
+        }
+      }
+
       if (authService.isAuthenticated()) {
         try {
           // Obtener datos actualizados del usuario
@@ -27,13 +51,16 @@ export function useAuth() {
         } catch (err) {
           console.error('Error al verificar autenticación:', err);
           authService.logout();
+          signOut({ redirect: false });
         }
+      } else {
+        setUser(null);
       }
       setLoading(false);
     };
 
     checkAuth();
-  }, []);
+  }, [session, status]);
 
   /**
    * Registrar un nuevo usuario
@@ -86,9 +113,11 @@ export function useAuth() {
   /**
    * Cerrar sesión
    */
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    setLoading(true);
     authService.logout();
     setUser(null);
+    await signOut({ callbackUrl: '/login' });
   }, []);
 
   /**

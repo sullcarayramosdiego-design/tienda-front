@@ -6,13 +6,14 @@ import { usePathname } from 'next/navigation';
 import { Header, Footer, Sidebar } from '@/components/layout';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { FullScreenLoader } from '@/components/ui/full-screen-loader';
 
 export default function StorefrontLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const pathname = usePathname();
 
   // Helper to parse route path segments and generate dynamic localized breadcrumbs.
@@ -54,6 +55,11 @@ export default function StorefrontLayout({
 
     return base;
   };
+
+  // Mostrar el spinner de carga
+  if (loading) {
+    return <FullScreenLoader message="Cargando permisos y verificando sesión..." />;
+  }
 
   if (isAuthenticated) {
     const breadcrumbs = getBreadcrumbs();

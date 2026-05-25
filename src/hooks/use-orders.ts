@@ -1,12 +1,9 @@
-'use client';
-
 import { useState, useCallback } from 'react';
 import { ordersService } from '@/services/orders.service';
 import type { Order, CreateOrderDto } from '@/types/order';
 
 /**
  * Hook para gestionar órdenes
- * Conecta con el backend implementado en Fase 1
  */
 export function useOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -53,7 +50,7 @@ export function useOrders() {
   }, []);
 
   /**
-   * Crear nueva orden desde el carrito
+   * Crear nueva orden
    */
   const createOrder = useCallback(async (orderData: CreateOrderDto) => {
     setLoading(true);
@@ -80,6 +77,7 @@ export function useOrders() {
     try {
       const data = await ordersService.cancel(id);
       setCurrentOrder(data);
+      // Actualizar lista de órdenes
       setOrders((prev) => prev.map((order) => (order.id === id ? data : order)));
       return data;
     } catch (err: any) {

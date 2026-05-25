@@ -301,12 +301,12 @@ export default function HomePage() {
 
             {/* Right Column - 3D Viewer - Responsive */}
             <div className="flex items-center justify-center lg:justify-end lg:flex-1 mt-8 lg:mt-0 w-full">
-              <div className="relative w-full max-w-md lg:max-w-xl">
+              <div className="relative w-full max-w-md lg:max-w-xl h-[450px] sm:h-[500px] lg:h-[600px]">
                 {/* Glow Effect Background */}
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-2xl opacity-50" />
                 
                 {/* 3D Canvas / model-viewer Container */}
-                <ProductViewer3D />
+                <ProductViewer3D className="w-full h-full" />
               </div>
             </div>
           </div>

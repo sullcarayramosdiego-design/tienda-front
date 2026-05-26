@@ -1,13 +1,11 @@
 'use client';
 
 import React from 'react';
-import { ShoppingBag, TableProperties } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { ShoppingBag } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { OrderKanban } from '@/components/admin';
+import { OrderTable } from '@/components/admin';
 
-export default function OrdersPage() {
+export default function OrdersListPage() {
   return (
     <ProtectedRoute requireAdmin>
       <div className="space-y-6 w-full p-4">
@@ -16,23 +14,17 @@ export default function OrdersPage() {
           <div>
             <h1 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
               <ShoppingBag className="h-8 w-8 text-primary" />
-              Tablero de Pedidos (Kanban)
+              Directorio de Pedidos
             </h1>
             <p className="text-xs text-muted-foreground font-semibold mt-1">
-              Arrastra y suelta pedidos para actualizar su estado de despacho en tiempo real.
+              Listado tabular completo de todas las órdenes de compra emitidas en la plataforma.
             </p>
           </div>
-          <Link href="/admin/orders/list">
-            <Button variant="secondary" size="sm" className="h-10 px-4 rounded-xl text-xs font-bold gap-1.5 cursor-pointer">
-              <TableProperties className="h-4 w-4" />
-              Ver como Tabla
-            </Button>
-          </Link>
         </div>
 
-        {/* Tablero Kanban */}
+        {/* Tabla de Pedidos */}
         <div className="border-t border-primary/5 pt-4">
-          <OrderKanban />
+          <OrderTable />
         </div>
       </div>
     </ProtectedRoute>

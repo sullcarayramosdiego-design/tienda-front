@@ -10,4 +10,5 @@ export { FinanceLedger } from './FinanceLedger';
 export { InventoryTable } from './InventoryTable';
 export { MetricCard } from './MetricCard';
 export { OrderKanban } from './OrderKanban';
+export { OrderTable } from './OrderTable';
 export { UserTable } from './UserTable';

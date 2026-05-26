@@ -7,8 +7,7 @@ import {
   TrendingUp, 
   UserPlus, 
   Calendar, 
-  RefreshCw,
-  Search
+  RefreshCw
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,7 +15,6 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { UserTable } from '@/components/admin';
 import reportsService, { UserAnalytics } from '@/services/reports.service';
 import {
   ResponsiveContainer,
@@ -81,11 +79,11 @@ export default function UsersAnalyticsPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
-              <UsersIcon className="h-8 w-8 text-primary" />
-              Métricas de Usuarios
+              <TrendingUp className="h-8 w-8 text-primary" />
+              Métricas y Reportes de Usuarios
             </h1>
             <p className="text-xs text-muted-foreground font-semibold mt-1">
-              Monitoreo en tiempo real de registros, conversión y actividad del cliente.
+              Monitoreo en tiempo real de registros, conversión y actividad de clientes.
             </p>
           </div>
         </div>
@@ -301,20 +299,6 @@ export default function UsersAnalyticsPage() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Tabla de Gestión Administrativa */}
-        <div className="border-t border-primary/5 pt-8">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-              <UsersIcon className="h-6 w-6 text-primary" />
-              Gestión de Cuentas
-            </h2>
-            <p className="text-xs text-muted-foreground font-semibold mt-0.5">
-              Administra los roles de usuario, activa o suspende perfiles de forma segura.
-            </p>
-          </div>
-          <UserTable />
-        </div>
       </div>
     </ProtectedRoute>
   );

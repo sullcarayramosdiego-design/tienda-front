@@ -14,6 +14,7 @@ const accountLinks = [
   { href: '/account', label: 'Mi Resumen', icon: User },
   { href: '/account/orders', label: 'Mis Pedidos', icon: ShoppingBag },
   { href: '/account/loyalty', label: 'Club Puntos 3D', icon: Award },
+  { href: '/account/subscription', label: 'Suscripción Premium', icon: Sparkles },
 ];
 
 export default function AccountLayout({

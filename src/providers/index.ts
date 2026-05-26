@@ -4,3 +4,5 @@
  */
 
 export { Providers } from './GlobalProvider';
+export { ThemeProvider, useTheme } from './ThemeProvider';
+

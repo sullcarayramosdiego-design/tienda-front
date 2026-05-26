@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { Alert, AlertTitle, AlertDescription, AlertAction } from '@/components/ui/alert';
 import reportsService from '@/services/reports.service';
 import productsService from '@/services/products.service';
 import inventoryService from '@/services/inventory.service';
@@ -106,19 +107,24 @@ export default function AdminDashboard() {
 
         {/* Notificaciones y Alertas Críticas */}
         {stats.lowStockAlerts > 0 && (
-          <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-2xl p-4 flex items-center justify-between gap-4 animate-pulse">
-            <div className="flex items-center gap-3">
-              <AlertTriangle className="h-5 w-5 shrink-0" />
-              <div className="text-xs font-semibold">
-                Alerta de Inventario: Hay <span className="font-extrabold">{stats.lowStockAlerts} productos</span> con stock crítico (bajo 10 unidades).
-              </div>
-            </div>
-            <Link href="/admin/inventory">
-              <Button size="sm" variant="outline" className="border-amber-500/20 text-amber-500 hover:bg-amber-500/10 h-8 px-3 rounded-lg font-bold text-[10px] cursor-pointer">
-                Gestionar Stock
-              </Button>
-            </Link>
-          </div>
+          <Alert variant="destructive" className="border-destructive/20 rounded-2xl animate-pulse">
+            <AlertTriangle className="h-5 w-5 shrink-0 text-destructive" />
+            <AlertTitle className="text-xs font-bold">Alerta de Inventario</AlertTitle>
+            <AlertDescription className="text-xs font-semibold mt-0.5">
+              Hay <span className="font-extrabold">{stats.lowStockAlerts} productos</span> con stock crítico (bajo 10 unidades).
+            </AlertDescription>
+            <AlertAction className="top-1/2 -translate-y-1/2 right-4">
+              <Link href="/admin/inventory">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="border-destructive/20 text-destructive hover:bg-destructive/10 h-8 px-3 rounded-lg font-bold text-[10px] cursor-pointer"
+                >
+                  Gestionar Stock
+                </Button>
+              </Link>
+            </AlertAction>
+          </Alert>
         )}
 
         {/* Cuadrícula de Métricas Clave */}

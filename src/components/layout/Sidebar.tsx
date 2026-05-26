@@ -46,6 +46,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import type { User as UserType } from '@/types/api';
 import { cn } from '@/lib/utils';
+import { NotificationBell } from './NotificationBell';
 
 function NavUser({ user, onLogout }: { user: UserType; onLogout: () => void }) {
   const { isMobile } = useSidebar();
@@ -126,6 +127,7 @@ function NavUser({ user, onLogout }: { user: UserType; onLogout: () => void }) {
 export function Sidebar() {
   const pathname = usePathname();
   const { user, isAuthenticated, logout } = useAuth();
+  const { state } = useSidebar();
 
   // Dynamic Navigation Links depending on Authentication
   const navigationLinks = [
@@ -144,30 +146,37 @@ export function Sidebar() {
       
       {/* Brand Header */}
       <SidebarHeader className="p-2.5">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              asChild
-              tooltip="Tienda 3D"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-            >
-              <Link href="/">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-secondary to-primary text-white shadow-md shadow-primary/25">
-                  <Sparkles className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                    TIENDA 3D
-                  </span>
-                  <span className="truncate text-[8px] font-bold text-muted-foreground tracking-widest uppercase mt-0.5 leading-none">
-                    Experience
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex items-center justify-between gap-2">
+          <SidebarMenu className="flex-1 min-w-0">
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size="lg"
+                asChild
+                tooltip="Tienda 3D"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              >
+                <Link href="/">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-secondary to-primary text-white shadow-md shadow-primary/25">
+                    <Sparkles className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      TIENDA 3D
+                    </span>
+                    <span className="truncate text-[8px] font-bold text-muted-foreground tracking-widest uppercase mt-0.5 leading-none">
+                      Experience
+                    </span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+          {state !== 'collapsed' && (
+            <div className="shrink-0 animate-fade-in">
+              <NotificationBell variant="sidebar" />
+            </div>
+          )}
+        </div>
       </SidebarHeader>
 
       <SidebarSeparator className="mx-auto my-1 w-[calc(100%-2rem)] group-data-[collapsible=icon]:w-[calc(100%-1rem)]" />

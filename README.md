@@ -114,3 +114,4 @@ Sigue estos pasos para levantar la aplicación en tu entorno local:
 * **Diseño Mobile-First:** Interfaz totalmente adaptativa y optimizada para pantallas táctiles de dispositivos móviles.
 * **Esqueletos de Carga Estéticos:** Transiciones suaves usando animaciones avanzadas de cargadores estructurados para evitar saltos bruscos de contenido.
 * **Integración de Pagos Localizada:** Soporte interactivo y visual para métodos de pago peruanos populares como **Yape**, **Plin**, **PagoEfectivo** y tarjetas mediante **Culqi**.
+

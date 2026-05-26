@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight, Home } from 'lucide-react';
-import { AdminSidebar, NotificationBell } from '@/components/layout';
+import { AdminSidebar } from '@/components/layout';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
@@ -83,9 +83,6 @@ export default function AdminLayout({
             <div className="flex items-center gap-4 min-w-0 pr-4">
               <SidebarTrigger className="-ml-1" />
               <AdminBreadcrumb />
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <NotificationBell />
             </div>
           </div>
           <main id="admin-main-content" className="flex-1 w-full overflow-auto p-6 pt-4">

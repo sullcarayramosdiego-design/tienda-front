@@ -27,7 +27,11 @@ import { cn } from '@/lib/utils';
 import { notificationsService, Notification } from '@/services/notifications.service';
 import { useAuth } from '@/hooks/useAuth';
 
-export function NotificationBell() {
+interface NotificationBellProps {
+  variant?: 'ghost' | 'sidebar';
+}
+
+export function NotificationBell({ variant = 'ghost' }: NotificationBellProps) {
   const { isAuthenticated } = useAuth();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -125,17 +129,29 @@ export function NotificationBell() {
 
   if (!isAuthenticated) return null;
 
+  const isSidebar = variant === 'sidebar';
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button 
-          variant="ghost" 
+          variant={isSidebar ? 'default' : 'ghost'}
           size="icon" 
-          className="relative h-10 w-10 rounded-xl hover:bg-muted/50 cursor-pointer"
+          className={cn(
+            "relative h-10 w-10 rounded-xl cursor-pointer transition-all duration-300 active:scale-95 shrink-0",
+            isSidebar 
+              ? "bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/25 border-none"
+              : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+          )}
         >
-          <Bell className="h-5 w-5 text-muted-foreground hover:text-foreground transition-colors" />
+          <Bell className={cn("h-5 w-5 transition-transform duration-300 hover:rotate-12", isSidebar ? "text-white" : "text-muted-foreground hover:text-foreground")} />
           {unreadCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-extrabold text-destructive-foreground animate-pulse shadow-sm">
+            <span className={cn(
+              "absolute flex items-center justify-center rounded-full font-extrabold animate-pulse shadow-md border-2",
+              isSidebar
+                ? "-top-1 -right-1 h-5 w-5 bg-destructive text-[9px] text-destructive-foreground border-sidebar"
+                : "top-1.5 right-1.5 h-4 w-4 bg-destructive text-[9px] text-destructive-foreground border-background"
+            )}>
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -143,8 +159,10 @@ export function NotificationBell() {
       </DropdownMenuTrigger>
       
       <DropdownMenuContent 
-        align="end" 
-        className="w-80 sm:w-96 rounded-xl p-1.5 border-primary/5 shadow-xl bg-card/95 backdrop-blur-xl mt-2 z-[60]"
+        align={isSidebar ? "start" : "end"} 
+        side={isSidebar ? "right" : "bottom"}
+        sideOffset={isSidebar ? 12 : 8}
+        className="w-80 sm:w-96 rounded-xl p-1.5 border-primary/5 shadow-xl bg-card/95 backdrop-blur-xl z-[60]"
       >
         <DropdownMenuLabel className="px-3 py-2 flex items-center justify-between">
           <div className="flex items-center gap-2">

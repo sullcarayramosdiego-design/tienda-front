@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.github
+.vercel
+vercel.json
+.vercelignore
+README.md
+LICENSE
+.vscode
+Dockerfile
+.dockerignore

@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Gift, Copy, Check, Users, Award, HelpCircle, ArrowRight, Share2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Gift, Copy, Check, Users, Award, HelpCircle, ArrowRight, Share2, Loader2, AlertCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
+import { referralsService, ReferralRecord, ReferralStats } from '@/services/referrals.service';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Table, 
   TableBody, 
@@ -18,15 +20,38 @@ import {
 export default function ReferralsPage() {
   const { user } = useAuth();
   const [copied, setCopied] = useState(false);
-  
-  // Custom referral code based on user's name or fallback
-  const referralCode = user 
-    ? `${user.firstName.toUpperCase()}${Math.floor(100 + Math.random() * 900)}3D`
-    : 'TIENDA3D500';
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<ReferralStats | null>(null);
+  const [myCode, setMyCode] = useState<{ referralCode: string; referralLink: string } | null>(null);
+  const [referralsList, setReferralsList] = useState<ReferralRecord[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const referralLink = typeof window !== 'undefined' 
-    ? `${window.location.origin}/register?ref=${referralCode}`
-    : `https://tienda3d.pe/register?ref=${referralCode}`;
+  // Cargar datos reales desde la API
+  useEffect(() => {
+    async function loadReferralData() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [statsData, codeData, listData] = await Promise.all([
+          referralsService.getStats(),
+          referralsService.getMyCode(),
+          referralsService.getMyReferrals(),
+        ]);
+
+        setStats(statsData);
+        setMyCode(codeData);
+        setReferralsList(listData);
+      } catch (err: any) {
+        console.error('Error al cargar datos de referidos:', err);
+        setError('No se pudieron sincronizar las estadísticas de referidos en tiempo real.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadReferralData();
+  }, []);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -38,40 +63,23 @@ export default function ReferralsPage() {
     }
   };
 
-  const referralHistory = [
-    {
-      id: '1',
-      friendName: 'Carlos Pérez',
-      email: 'c***z@gmail.com',
-      date: '15/05/2026',
-      status: 'Completado',
-      points: 500,
-    },
-    {
-      id: '2',
-      friendName: 'Sofía Ramos',
-      email: 's***s@hotmail.com',
-      date: '02/05/2026',
-      status: 'Completado',
-      points: 500,
-    },
-    {
-      id: '3',
-      friendName: 'Luis Gómez',
-      email: 'l***z@gmail.com',
-      date: '28/04/2026',
-      status: 'Registrado',
-      points: 100,
-    },
-    {
-      id: '4',
-      friendName: 'Ana Mendoza',
-      email: 'a***a@gmail.com',
-      date: '10/04/2026',
-      status: 'Pendiente',
-      points: 0,
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="space-y-6 animate-pulse">
+        <Skeleton className="h-28 w-full rounded-3xl" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+          <Skeleton className="h-24 rounded-2xl" />
+        </div>
+        <Skeleton className="h-48 w-full rounded-3xl" />
+      </div>
+    );
+  }
+
+  // Fallbacks seguros si no se han cargado datos
+  const referralCode = myCode?.referralCode || 'Cargando...';
+  const referralLink = myCode?.referralLink || 'Cargando...';
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -82,9 +90,17 @@ export default function ReferralsPage() {
           <Gift className="h-7 w-7 text-primary" /> Programa de Referidos
         </h1>
         <p className="text-sm font-semibold text-muted-foreground mt-1">
-          Invita a tus amigos y gana Puntos 3D canjeables por descuentos y productos físicos.
+          Invita a tus amigos y gana Puntos Club 3D canjeables por descuentos y privilegios premium.
         </p>
       </div>
+
+      {/* Error alert */}
+      {error && (
+        <div className="p-4 border border-destructive/20 bg-destructive/5 rounded-2xl text-destructive text-sm font-semibold flex items-center gap-3">
+          <AlertCircle className="h-5 w-5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Overview Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -95,7 +111,9 @@ export default function ReferralsPage() {
             </div>
             <div>
               <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Amigos Invitados</span>
-              <span className="text-xl font-heading font-black text-foreground">4 amigos</span>
+              <span className="text-xl font-heading font-black text-foreground">
+                {stats?.totalReferrals || 0} { (stats?.totalReferrals || 0) === 1 ? 'amigo' : 'amigos' }
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -107,7 +125,9 @@ export default function ReferralsPage() {
             </div>
             <div>
               <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Puntos Acumulados</span>
-              <span className="text-xl font-heading font-black text-primary">1,100 pts</span>
+              <span className="text-xl font-heading font-black text-primary">
+                {(stats?.totalPointsEarned || 0).toLocaleString('es-PE')} pts
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -118,8 +138,10 @@ export default function ReferralsPage() {
               <Gift className="h-5 w-5" />
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Próxima Recompensa</span>
-              <span className="text-xl font-heading font-black text-foreground">A los 1,500 pts</span>
+              <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">Pendientes de Compra</span>
+              <span className="text-xl font-heading font-black text-foreground">
+                {stats?.pendingReferrals || 0} invitaciones
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -130,7 +152,7 @@ export default function ReferralsPage() {
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-heading font-black">Comparte tu Experiencia 3D</CardTitle>
           <CardDescription className="text-xs font-semibold text-muted-foreground mt-0.5">
-            Tus amigos obtienen un **10% de descuento** en su primer pedido, y tú obtienes **500 Puntos 3D** cuando realicen su compra.
+            Tus amigos obtienen un **10% de descuento** en su primer pedido, y tú obtienes **500 Puntos Club 3D** cuando realicen su compra confirmada.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -141,7 +163,7 @@ export default function ReferralsPage() {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-muted-foreground block">Tu Código de Referido</label>
               <div className="flex gap-2">
-                <div className="flex-1 bg-card border border-primary/10 rounded-xl px-4 flex items-center justify-between font-mono font-black text-lg text-primary tracking-wider select-all shadow-inner h-11">
+                <div className="flex-1 bg-card border border-primary/10 rounded-xl px-4 flex items-center justify-between font-mono font-black text-sm text-primary tracking-wider select-all shadow-inner h-11">
                   {referralCode}
                 </div>
                 <Button 
@@ -202,7 +224,7 @@ export default function ReferralsPage() {
                 <span className="text-xs font-bold text-foreground">Comparte tu código</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed pl-10">
-                Envía tu código o enlace a tus amigos interesados en impresión y modelos 3D.
+                Envía tu código o enlace a tus amigos interesados en impresión y modelos 3D interactivos.
               </p>
             </div>
 
@@ -212,7 +234,7 @@ export default function ReferralsPage() {
                 <span className="text-xs font-bold text-foreground">Ellos obtienen 10% dto.</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed pl-10">
-                Tus amigos obtienen un descuento automático de bienvenida del 10% en su primera orden.
+                Tus amigos obtienen un descuento automático de bienvenida del 10% en su primera orden de compra.
               </p>
             </div>
 
@@ -222,7 +244,7 @@ export default function ReferralsPage() {
                 <span className="text-xs font-bold text-foreground">¡Tú ganas Puntos!</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed pl-10">
-                Al completarse el envío del primer pedido de tu amigo, se sumarán 500 Puntos 3D a tu cuenta.
+                Al procesarse y completarse la primera compra pagada de tu amigo, se sumarán 500 Puntos Club 3D a tu cuenta.
               </p>
             </div>
 
@@ -235,51 +257,74 @@ export default function ReferralsPage() {
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-heading font-extrabold">Historial de Invitados</CardTitle>
           <CardDescription className="text-xs font-semibold text-muted-foreground">
-            Monitorea el estado de tus recomendaciones y los puntos obtenidos.
+            Monitorea en tiempo real el estado de tus recomendaciones y los puntos reales obtenidos.
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0 sm:p-5">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="border-primary/5 hover:bg-transparent">
-                  <TableHead className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Amigo</TableHead>
-                  <TableHead className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Fecha</TableHead>
-                  <TableHead className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Estado</TableHead>
-                  <TableHead className="font-bold text-xs uppercase tracking-wider text-muted-foreground text-right">Puntos Ganados</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {referralHistory.map((item) => (
-                  <TableRow key={item.id} className="border-primary/5 hover:bg-primary/5/30 transition-colors">
-                    <TableCell className="py-3.5">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-foreground">{item.friendName}</span>
-                        <span className="text-[10px] text-muted-foreground font-mono">{item.email}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-xs font-semibold text-muted-foreground py-3.5">{item.date}</TableCell>
-                    <TableCell className="py-3.5">
-                      <span className={`px-2 py-0.5 text-[9px] font-black uppercase rounded-md border tracking-wider select-none ${
-                        item.status === 'Completado' 
-                          ? 'bg-[#00D47C]/10 border-[#00D47C]/15 text-[#00AF66]' 
-                          : item.status === 'Registrado'
-                          ? 'bg-[#00D2D3]/10 border-[#00D2D3]/15 text-[#00A8A9]'
-                          : 'bg-muted border-primary/10 text-muted-foreground'
-                      }`}>
-                        {item.status}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right py-3.5">
-                      <span className={`text-xs font-black font-mono ${item.points > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
-                        {item.points > 0 ? `+${item.points} pts` : '0 pts'}
-                      </span>
-                    </TableCell>
+          {referralsList.length === 0 ? (
+            <div className="text-center py-10 space-y-2.5">
+              <Users className="h-10 w-10 text-muted-foreground/30 mx-auto" />
+              <p className="text-sm font-semibold text-muted-foreground">Aún no tienes amigos registrados</p>
+              <p className="text-xs text-muted-foreground/60 max-w-xs mx-auto">
+                Comparte tu enlace de registro único con tus amigos para empezar a acumular Puntos Club 3D.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-primary/5 hover:bg-transparent">
+                    <TableHead className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Amigo</TableHead>
+                    <TableHead className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Fecha de Unión</TableHead>
+                    <TableHead className="font-bold text-xs uppercase tracking-wider text-muted-foreground">Estado</TableHead>
+                    <TableHead className="font-bold text-xs uppercase tracking-wider text-muted-foreground text-right">Puntos Ganados</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {referralsList.map((item) => {
+                    const friend = item.referred;
+                    const dateStr = new Date(item.createdAt).toLocaleDateString('es-PE', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric'
+                    });
+
+                    return (
+                      <TableRow key={item.id} className="border-primary/5 hover:bg-primary/5/30 transition-colors">
+                        <TableCell className="py-3.5">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-foreground">
+                              {friend.firstName} {friend.lastName}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground font-mono">
+                              {friend.email.replace(/(?<=.)[^@\n](?=[^@\n]*?[^@\n].@)/g, '*')}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs font-semibold text-muted-foreground py-3.5">
+                          {dateStr}
+                        </TableCell>
+                        <TableCell className="py-3.5">
+                          <span className={`px-2 py-0.5 text-[9px] font-black uppercase rounded-md border tracking-wider select-none ${
+                            item.status === 'COMPLETED' 
+                              ? 'bg-[#00D47C]/10 border-[#00D47C]/15 text-[#00AF66]' 
+                              : 'bg-amber-500/10 border-amber-500/15 text-amber-500'
+                          }`}>
+                            {item.status === 'COMPLETED' ? 'Completado' : 'Registrado / Pendiente'}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right py-3.5">
+                          <span className={`text-xs font-black font-mono ${item.pointsAwarded > 0 ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {item.pointsAwarded > 0 ? `+${item.pointsAwarded} pts` : '0 pts'}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

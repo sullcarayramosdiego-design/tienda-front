@@ -14,7 +14,10 @@ import {
   ChevronsUpDown,
   TrendingUp,
   Sun,
-  Moon
+  Moon,
+  Sparkles,
+  Award,
+  Gift
 } from 'lucide-react';
 import { useTheme } from '@/providers';
 
@@ -61,6 +64,14 @@ const adminNavigationGroups = [
     links: [
       { href: '/admin/orders', label: 'Pedidos y Despachos', icon: ShoppingCart },
       { href: '/admin/inventory', label: 'Inventario 3D', icon: Box },
+    ],
+  },
+  {
+    label: '📈 MARKETING & FIDELIZACIÓN',
+    links: [
+      { href: '/admin/subscriptions', label: 'Suscripciones VIP', icon: Sparkles },
+      { href: '/admin/loyalty', label: 'Club de Puntos', icon: Award },
+      { href: '/admin/referrals', label: 'Programa de Referidos', icon: Gift },
     ],
   },
   {

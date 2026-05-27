@@ -87,6 +87,14 @@ export const productsService = {
   ): Promise<ProductListResponse> {
     return this.list({ minPrice, maxPrice, page, limit });
   },
+
+  /**
+   * Obtener todas las categorías registradas
+   */
+  async getCategories(): Promise<{ id: string; name: string; slug: string; description?: string }[]> {
+    const response = await apiClient.get<ApiResponse<{ id: string; name: string; slug: string; description?: string }[]>>('/products/categories');
+    return response.data.data;
+  },
 };
 
 export default productsService;

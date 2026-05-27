@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
@@ -31,9 +31,11 @@ import { cn } from "@/lib/utils";
 import { Mail, Lock, Eye, EyeOff, Loader2, Sparkles, User, ShieldAlert, X } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
 import { useAuth } from "@/hooks/useAuth";
+import { referralsService } from "@/services/referrals.service";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -66,6 +68,17 @@ export default function RegisterPage() {
         firstName,
         lastName,
       });
+
+      // Capture referrer code from query parameter and apply
+      const referrerId = searchParams?.get("ref");
+      if (referrerId) {
+        try {
+          await referralsService.applyReferral(referrerId);
+          console.log("Referido asociado exitosamente:", referrerId);
+        } catch (refErr) {
+          console.error("Error aplicando patrocinador de referido:", refErr);
+        }
+      }
       
       toast({
         title: "¡Cuenta Creada Exitosamente!",

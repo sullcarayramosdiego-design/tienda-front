@@ -56,6 +56,17 @@ export function InventoryTable() {
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
+  // Estados de Crear Producto
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [categoriesList, setCategoriesList] = useState<{ id: string; name: string; slug: string }[]>([]);
+  const [newProductName, setNewProductName] = useState('');
+  const [newProductDescription, setNewProductDescription] = useState('');
+  const [newProductSku, setNewProductSku] = useState('');
+  const [newProductPrice, setNewProductPrice] = useState('');
+  const [newProductStock, setNewProductStock] = useState('0');
+  const [newProductCategoryId, setNewProductCategoryId] = useState('');
+  const [submittingCreate, setSubmittingCreate] = useState(false);
+
   // Estados de Modales
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -102,6 +113,95 @@ export function InventoryTable() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Cargar categorías al montar
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const cats = await productsService.getCategories();
+        setCategoriesList(cats);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  // Generar SKU de manera inteligente
+  const generateSku = () => {
+    if (newProductName) {
+      const prefix = newProductName.substring(0, 3).toUpperCase().replace(/[^A-Z0-9]/g, 'PRD');
+      const randomPart = Math.floor(1000 + Math.random() * 9000);
+      setNewProductSku(`${prefix}-${randomPart}`);
+    } else {
+      const randomPart = Math.floor(100000 + Math.random() * 900000);
+      setNewProductSku(`PRD-${randomPart}`);
+    }
+  };
+
+  // Enviar creación del nuevo producto
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const priceNum = parseFloat(newProductPrice);
+    const stockNum = parseInt(newProductStock, 10);
+    
+    if (!newProductName.trim()) {
+      toast({ type: 'error', title: 'Error', description: 'El nombre es obligatorio.' });
+      return;
+    }
+    if (!newProductSku.trim()) {
+      toast({ type: 'error', title: 'Error', description: 'El SKU es obligatorio.' });
+      return;
+    }
+    if (isNaN(priceNum) || priceNum < 0) {
+      toast({ type: 'error', title: 'Error', description: 'El precio debe ser un número mayor o igual a 0.' });
+      return;
+    }
+    if (isNaN(stockNum) || stockNum < 0) {
+      toast({ type: 'error', title: 'Error', description: 'El stock inicial debe ser mayor o igual a 0.' });
+      return;
+    }
+    
+    try {
+      setSubmittingCreate(true);
+      await productsService.create({
+        name: newProductName.trim(),
+        description: newProductDescription.trim(),
+        sku: newProductSku.trim().toUpperCase(),
+        price: priceNum,
+        stock: stockNum,
+        categoryId: newProductCategoryId || undefined,
+      });
+      
+      toast({
+        type: 'success',
+        title: 'Producto Creado 🎁',
+        description: `El producto ${newProductName} se ha registrado y agregado al inventario con éxito.`,
+      });
+      
+      // Limpiar y Cerrar
+      setNewProductName('');
+      setNewProductDescription('');
+      setNewProductSku('');
+      setNewProductPrice('');
+      setNewProductStock('0');
+      setNewProductCategoryId('');
+      setIsCreateOpen(false);
+      
+      // Recargar datos de la tabla
+      fetchData();
+    } catch (error: any) {
+      console.error('Error creating product:', error);
+      toast({
+        type: 'error',
+        title: 'Error al registrar producto',
+        description: error.response?.data?.message || 'Verifique que el SKU no esté duplicado.',
+      });
+    } finally {
+      setSubmittingCreate(false);
+    }
+  };
 
   // Manejar apertura de modal de ajuste
   const openAdjustModal = (product: Product) => {
@@ -297,10 +397,16 @@ export function InventoryTable() {
             className="pl-10 h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 transition-all"
           />
         </div>
-        <Button onClick={fetchData} variant="outline" size="sm" className="h-10 px-3.5 rounded-xl text-xs font-bold gap-1 cursor-pointer">
-          <RefreshCw className="h-3.5 w-3.5" />
-          Sincronizar
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button onClick={() => setIsCreateOpen(true)} className="flex-1 sm:flex-initial h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer shadow-sm shadow-primary/10">
+            <Plus className="h-4 w-4" />
+            Nuevo Producto
+          </Button>
+          <Button onClick={fetchData} variant="outline" size="sm" className="h-10 px-3.5 rounded-xl text-xs font-bold gap-1 cursor-pointer">
+            <RefreshCw className="h-3.5 w-3.5" />
+            Sincronizar
+          </Button>
+        </div>
       </div>
 
       {/* Tabla Principal */}
@@ -584,6 +690,142 @@ export function InventoryTable() {
               Cerrar Auditoría
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL 3: CREAR NUEVO PRODUCTO */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="sm:max-w-lg rounded-xl p-6 shadow-xl bg-card border-primary/5">
+          <form onSubmit={handleCreateProduct}>
+            <DialogHeader>
+              <DialogTitle className="text-sm font-bold text-foreground">Registrar Nuevo Producto en Catálogo</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Agrega un nuevo artículo físico o modelo 3D al catálogo e inicializa su inventario.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              {/* Fila 1: Nombre */}
+              <div className="grid gap-1">
+                <Label htmlFor="prodName" className="text-xs font-bold text-muted-foreground">Nombre del Producto</Label>
+                <Input
+                  id="prodName"
+                  type="text"
+                  placeholder="Ej: Silla de Oficina Ergonómica 3D"
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                  className="h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                  required
+                />
+              </div>
+
+              {/* Fila 2: SKU con Auto-Generador */}
+              <div className="grid gap-1">
+                <Label htmlFor="prodSku" className="text-xs font-bold text-muted-foreground">SKU (Código Único)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="prodSku"
+                    type="text"
+                    placeholder="Ej: FURN-CHAIR-99"
+                    value={newProductSku}
+                    onChange={(e) => setNewProductSku(e.target.value)}
+                    className="h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs font-mono uppercase"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={generateSku}
+                    className="h-10 rounded-xl text-xs font-bold border-primary/5 hover:bg-primary/5 cursor-pointer shrink-0"
+                  >
+                    Generar SKU
+                  </Button>
+                </div>
+              </div>
+
+              {/* Fila 3: Precio y Stock Inicial en 2 columnas */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-1">
+                  <Label htmlFor="prodPrice" className="text-xs font-bold text-muted-foreground">Precio (S/.)</Label>
+                  <Input
+                    id="prodPrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="Ej: 299.90"
+                    value={newProductPrice}
+                    onChange={(e) => setNewProductPrice(e.target.value)}
+                    className="h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                    required
+                  />
+                </div>
+                <div className="grid gap-1">
+                  <Label htmlFor="prodStock" className="text-xs font-bold text-muted-foreground">Stock Inicial</Label>
+                  <Input
+                    id="prodStock"
+                    type="number"
+                    min="0"
+                    placeholder="Ej: 25"
+                    value={newProductStock}
+                    onChange={(e) => setNewProductStock(e.target.value)}
+                    className="h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Fila 4: Categoría */}
+              <div className="grid gap-1">
+                <Label htmlFor="prodCategory" className="text-xs font-bold text-muted-foreground">Categoría</Label>
+                <Select
+                  value={newProductCategoryId}
+                  onValueChange={(val: any) => setNewProductCategoryId(val)}
+                >
+                  <SelectTrigger id="prodCategory" className="h-10 rounded-xl bg-muted/40 border-primary/5 text-xs cursor-pointer">
+                    <SelectValue placeholder="Seleccione una categoría (Opcional)" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card">
+                    {categoriesList.map((cat) => (
+                      <SelectItem key={cat.id} className="text-xs cursor-pointer" value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Fila 5: Descripción */}
+              <div className="grid gap-1">
+                <Label htmlFor="prodDesc" className="text-xs font-bold text-muted-foreground">Descripción Detallada</Label>
+                <textarea
+                  id="prodDesc"
+                  placeholder="Detalla las especificaciones del producto, dimensiones y compatibilidad 3D..."
+                  value={newProductDescription}
+                  onChange={(e) => setNewProductDescription(e.target.value)}
+                  className="w-full min-w-0 rounded-xl border border-primary/10 bg-muted/40 px-3.5 py-2 text-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 h-20"
+                  required
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsCreateOpen(false)}
+                className="rounded-xl text-xs cursor-pointer"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={submittingCreate}
+                className="rounded-xl bg-primary text-primary-foreground font-bold text-xs cursor-pointer shadow-md shadow-primary/10"
+              >
+                {submittingCreate ? 'Creando...' : 'Crear Producto'}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

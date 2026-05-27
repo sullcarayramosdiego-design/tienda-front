@@ -49,6 +49,45 @@ export const loyaltyService = {
     const response = await apiClient.post<{ success: boolean; data: RedeemResult }>('/loyalty/redeem', { points });
     return response.data.data;
   },
+
+  // ========================================================
+  // ENDPOINTS ADMINISTRATIVOS (Solo ADMIN / SUPER_ADMIN)
+  // ========================================================
+
+  /**
+   * GET /loyalty/admin/balances - Listar cuentas globales de fidelización
+   */
+  async getAccountsAdmin(page: number = 1, limit: number = 10): Promise<{
+    accounts: LoyaltyAccount[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const response = await apiClient.get<{
+      success: boolean;
+      data: {
+        accounts: LoyaltyAccount[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+      };
+    }>(`/loyalty/admin/balances?page=${page}&limit=${limit}`);
+    return response.data.data;
+  },
+
+  /**
+   * POST /loyalty/admin/adjust - Ajuste manual de puntos para un usuario
+   */
+  async adjustPointsAdmin(userId: string, points: number, reason: string): Promise<LoyaltyAccount> {
+    const response = await apiClient.post<{ success: boolean; data: LoyaltyAccount }>('/loyalty/admin/adjust', {
+      userId,
+      points,
+      reason,
+    });
+    return response.data.data;
+  },
 };
 
 export default loyaltyService;

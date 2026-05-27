@@ -26,6 +26,9 @@ function AdminBreadcrumb() {
     products: 'Catálogo de Productos',
     account: 'Mi Cuenta',
     settings: 'Configuración',
+    subscriptions: 'Suscripciones VIP',
+    loyalty: 'Club de Puntos',
+    referrals: 'Programa de Referidos',
   };
 
   return (

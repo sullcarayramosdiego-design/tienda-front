@@ -1,13 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProtectedRoute, withAuth } from '@/components/auth/ProtectedRoute';
 import { useCartStore } from '@/stores/cart.store';
 import { ordersService } from '@/services/orders.service';
+import { subscriptionService } from '@/services/subscription.service';
+import { loyaltyService } from '@/services/loyalty.service';
 import { PaymentTabs } from '@/components/payments/PaymentTabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Package,
   MapPin,
@@ -23,6 +26,8 @@ import {
   ArrowLeft,
   Award,
   Wallet,
+  Minus,
+  Plus,
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────────────
@@ -89,11 +94,23 @@ const inputCls = (hasError?: boolean) =>
 // ─────────────────────────────────────────────────────────
 // Order Summary (right sticky panel)
 // ─────────────────────────────────────────────────────────
-function OrderSummary({ items, subtotal }: { items: any[]; subtotal: number }) {
-  const shipping = subtotal >= 150 ? 0 : 12;
-  const grand = subtotal + shipping;
-  const points = Math.floor(subtotal / 2);
-
+function OrderSummary({
+  items,
+  subtotal,
+  premiumDiscount,
+  loyaltyDiscount,
+  shipping,
+  grandTotal,
+  pointsToEarn,
+}: {
+  items: any[];
+  subtotal: number;
+  premiumDiscount: number;
+  loyaltyDiscount: number;
+  shipping: number;
+  grandTotal: number;
+  pointsToEarn: number;
+}) {
   const fmt = (v: number) =>
     new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(v);
 
@@ -137,6 +154,24 @@ function OrderSummary({ items, subtotal }: { items: any[]; subtotal: number }) {
             <span>Subtotal</span>
             <span className="text-foreground font-bold">{fmt(subtotal)}</span>
           </div>
+
+          {/* Premium VIP Discount */}
+          {premiumDiscount > 0 && (
+            <div className="flex justify-between text-xs font-semibold text-primary animate-fade-in">
+              <span className="flex items-center gap-1">🏆 Descuento Premium VIP (10%)</span>
+              <span className="font-bold">-{fmt(premiumDiscount)}</span>
+            </div>
+          )}
+
+          {/* Loyalty Discount */}
+          {loyaltyDiscount > 0 && (
+            <div className="flex justify-between text-xs font-semibold text-emerald-600 animate-fade-in">
+              <span className="flex items-center gap-1">🎁 Descuento Club Puntos</span>
+              <span className="font-bold">-{fmt(loyaltyDiscount)}</span>
+            </div>
+          )}
+
+          {/* Shipping */}
           <div className="flex justify-between text-xs font-semibold">
             <span className="text-muted-foreground flex items-center gap-1.5">
               <Truck className="h-3 w-3" /> Envío
@@ -150,6 +185,7 @@ function OrderSummary({ items, subtotal }: { items: any[]; subtotal: number }) {
               {shipping === 0 ? 'Gratis' : fmt(shipping)}
             </span>
           </div>
+
           {shipping > 0 && (
             <p className="text-[10px] text-muted-foreground leading-snug">
               * Agrega{' '}
@@ -160,7 +196,7 @@ function OrderSummary({ items, subtotal }: { items: any[]; subtotal: number }) {
           <div className="h-px bg-primary/5 my-1" />
           <div className="flex items-end justify-between">
             <span className="text-sm font-heading font-bold text-foreground">Total</span>
-            <span className="text-xl font-heading font-black text-primary">{fmt(grand)}</span>
+            <span className="text-xl font-heading font-black text-primary">{fmt(grandTotal)}</span>
           </div>
         </div>
 
@@ -171,10 +207,10 @@ function OrderSummary({ items, subtotal }: { items: any[]; subtotal: number }) {
           </div>
           <div>
             <span className="text-[9px] font-black uppercase text-primary tracking-wider block">
-              Club 3D Experiencia
+              Club Puntos Acumulables
             </span>
             <span className="text-[10px] font-semibold text-muted-foreground">
-              Ganarás <strong className="text-foreground font-extrabold">+{points} Pts</strong> con este pedido
+              Ganarás <strong className="text-foreground font-extrabold">+{pointsToEarn.toLocaleString('es-PE')} Pts</strong> con este pedido
             </span>
           </div>
         </div>
@@ -247,7 +283,7 @@ function ShippingSection({
                   key={value}
                   type="button"
                   onClick={() => onChange('deliveryMethod', value)}
-                  className={`flex items-start gap-2.5 p-3 rounded-xl border-2 transition-all text-left ${
+                  className={`flex items-start gap-2.5 p-3 rounded-xl border-2 transition-all text-left cursor-pointer ${
                     form.deliveryMethod === value
                       ? 'border-primary bg-primary/5 text-primary'
                       : 'border-primary/10 hover:border-primary/20 text-muted-foreground'
@@ -401,9 +437,11 @@ function CheckoutPage() {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [orderError, setOrderError] = useState<string | null>(null);
 
-  const subtotal = getTotalPrice();
-  const shipping = subtotal >= 150 ? 0 : 12;
-  const grandTotal = subtotal + shipping;
+  // States de Fidelización
+  const [subscription, setSubscription] = useState<any | null>(null);
+  const [loyaltyAccount, setLoyaltyAccount] = useState<any | null>(null);
+  const [redeemedPoints, setRedeemedPoints] = useState<number>(0);
+  const [pointsInput, setPointsInput] = useState<string>('');
 
   const [shippingForm, setShippingForm] = useState<ShippingForm>({
     firstName: '', lastName: '', email: '', phone: '',
@@ -411,6 +449,59 @@ function CheckoutPage() {
     reference: '', deliveryMethod: 'delivery',
   });
   const [shippingErrors, setShippingErrors] = useState<Partial<Record<keyof ShippingForm, string>>>({});
+
+  // Cargar datos de lealtad y suscripciones del backend
+  useEffect(() => {
+    async function loadFidelizacionData() {
+      try {
+        const [subData, loyaltyData] = await Promise.all([
+          subscriptionService.getCurrentSubscription().catch(() => null),
+          loyaltyService.getMyAccount().catch(() => null),
+        ]);
+        setSubscription(subData);
+        setLoyaltyAccount(loyaltyData);
+      } catch (err) {
+        console.error('Error al cargar datos de fidelización:', err);
+      }
+    }
+    loadFidelizacionData();
+  }, []);
+
+  const subtotal = getTotalPrice();
+
+  // --- CÁLCULO DE TOTALES DE FIDELIZACIÓN ---
+  let isVipActive = false;
+  let premiumDiscountPercentage = 0;
+  let freeShippingApplied = false;
+
+  if (subscription) {
+    const status = subscription.status;
+    const now = new Date();
+    const isValid = status === 'ACTIVE' || (status === 'CANCELLED' && new Date(subscription.endDate) >= now);
+    
+    if (isValid && subscription.plan) {
+      isVipActive = true;
+      const features = subscription.plan.features as any;
+      if (features?.premiumDiscounts === true) {
+        premiumDiscountPercentage = 0.10; // 10% descuento catálogo
+      }
+      if (features?.freeShipping === true || features?.arEnabled === true) {
+        freeShippingApplied = true; // Silver y Gold tienen envío gratis
+      }
+    }
+  }
+
+  const premiumDiscount = subtotal * premiumDiscountPercentage;
+  let shipping = freeShippingApplied ? 0 : (subtotal >= 150 ? 0 : 12);
+  
+  const loyaltyDiscount = redeemedPoints / 100;
+  const totalDiscount = premiumDiscount + loyaltyDiscount;
+  
+  const taxableSubtotal = Math.max(0, subtotal - totalDiscount);
+  const tax = taxableSubtotal * 0.18;
+  const grandTotal = taxableSubtotal + tax + shipping;
+
+  const pointsToEarn = Math.floor(grandTotal * 10);
 
   const handleChange = (key: keyof ShippingForm, value: string) => {
     setShippingForm((p) => ({ ...p, [key]: value }));
@@ -452,6 +543,7 @@ function CheckoutPage() {
         customerName: `${shippingForm.firstName} ${shippingForm.lastName}`,
         customerEmail: shippingForm.email,
         customerPhone: shippingForm.phone,
+        redeemedPoints: redeemedPoints > 0 ? redeemedPoints : undefined,
       });
       clearCart();
       setOrderSuccess(true);
@@ -581,9 +673,98 @@ function CheckoutPage() {
           {step === 'Envío' ? (
             <>
               <ShippingSection form={shippingForm} errors={shippingErrors} onChange={handleChange} />
+              
+              {/* Canjear Puntos Card */}
+              {loyaltyAccount && loyaltyAccount.points >= 100 && (
+                <Card className="border-primary/10 bg-card/60 backdrop-blur-md shadow-lg overflow-hidden mt-4">
+                  <CardContent className="p-5 space-y-4">
+                    <div className="flex items-center gap-2 text-primary">
+                      <Award className="h-5 w-5 animate-pulse" />
+                      <h3 className="font-heading font-bold text-sm text-foreground">Canjear Puntos Club 3D</h3>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Tienes <strong className="text-foreground">{loyaltyAccount.points.toLocaleString('es-PE')} pts</strong>. 
+                      Puedes canjearlos en múltiplos de 100 por un descuento directo de <strong className="text-emerald-600">S/. 1.00 por cada 100 pts</strong>.
+                    </p>
+                    
+                    <div className="flex items-center gap-2 max-w-xs">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-9 w-9 shrink-0 cursor-pointer"
+                        onClick={() => {
+                          const newPts = Math.max(0, redeemedPoints - 100);
+                          setRedeemedPoints(newPts);
+                          setPointsInput(newPts > 0 ? String(newPts) : '');
+                        }}
+                        disabled={redeemedPoints <= 0}
+                      >
+                        <Minus className="h-3 w-3" />
+                      </Button>
+                      <Input
+                        type="number"
+                        min={100}
+                        step={100}
+                        max={Math.floor(loyaltyAccount.points / 100) * 100}
+                        placeholder="Cantidad de puntos"
+                        value={pointsInput}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value) || 0;
+                          setPointsInput(e.target.value);
+                          if (val >= 0 && val <= loyaltyAccount.points) {
+                            setRedeemedPoints(Math.floor(val / 100) * 100);
+                          }
+                        }}
+                        className="text-center font-bold h-9"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="h-9 w-9 shrink-0 cursor-pointer"
+                        onClick={() => {
+                          const maxVal = Math.floor(loyaltyAccount.points / 100) * 100;
+                          const newPts = Math.min(maxVal, redeemedPoints + 100);
+                          setRedeemedPoints(newPts);
+                          setPointsInput(String(newPts));
+                        }}
+                        disabled={redeemedPoints >= Math.floor(loyaltyAccount.points / 100) * 100}
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    {redeemedPoints > 0 && (
+                      <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 animate-fade-in">
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        ¡Descuento de S/. {loyaltyDiscount.toFixed(2)} aplicado exitosamente!
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* VIP Benefits Info Card */}
+              {isVipActive && (
+                <Card className="border-primary/15 bg-gradient-to-r from-primary/5 via-secondary/5 to-transparent shadow-lg overflow-hidden mt-4">
+                  <CardContent className="p-5 flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                      <ShieldCheck className="h-4.5 w-4.5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black uppercase text-primary tracking-wider">Beneficios VIP Premium Activos</p>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
+                        {premiumDiscountPercentage > 0 && '✓ Descuento premium del 10% en catálogo. '}
+                        {freeShippingApplied && '✓ Envío prioritario totalmente gratuito.'}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               <Button
                 onClick={() => { if (validateShipping()) setStep('Pago'); }}
-                className="w-full h-12 font-bold tracking-wide bg-primary hover:bg-primary/95 text-primary-foreground rounded-2xl shadow-lg shadow-primary/15 cursor-pointer active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="w-full h-12 font-bold tracking-wide bg-primary hover:bg-primary/95 text-primary-foreground rounded-2xl shadow-lg shadow-primary/15 cursor-pointer active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4"
               >
                 Continuar al pago
                 <ChevronRight className="h-4 w-4" />
@@ -594,7 +775,7 @@ function CheckoutPage() {
               {/* Back */}
               <button
                 onClick={() => setStep('Envío')}
-                className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
+                className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 Volver a datos de envío
@@ -633,7 +814,15 @@ function CheckoutPage() {
 
         {/* RIGHT — summary */}
         <div className="lg:col-span-4">
-          <OrderSummary items={items} subtotal={subtotal} />
+          <OrderSummary
+            items={items}
+            subtotal={subtotal}
+            premiumDiscount={premiumDiscount}
+            loyaltyDiscount={loyaltyDiscount}
+            shipping={shipping}
+            grandTotal={grandTotal}
+            pointsToEarn={pointsToEarn}
+          />
         </div>
       </div>
     </div>

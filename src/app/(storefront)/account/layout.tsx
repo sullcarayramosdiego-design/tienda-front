@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { User, ShoppingBag, Award, Sparkles, ChevronRight, ShieldCheck } from 'lucide-react';
+import { User, ShoppingBag, Award, Sparkles, ChevronRight, ShieldCheck, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,8 +14,10 @@ const accountLinks = [
   { href: '/account', label: 'Mi Resumen', icon: User },
   { href: '/account/orders', label: 'Mis Pedidos', icon: ShoppingBag },
   { href: '/account/loyalty', label: 'Club Puntos 3D', icon: Award },
+  { href: '/account/referrals', label: 'Programa de Referidos', icon: Gift },
   { href: '/account/subscription', label: 'Suscripción Premium', icon: Sparkles },
 ];
+
 
 export default function AccountLayout({
   children,

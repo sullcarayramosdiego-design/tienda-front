@@ -14,3 +14,7 @@ export { ProductGrid } from './ProductGrid';
 export { ProductListIntegrated } from './ProductListIntegrated';
 export { WishlistButton } from './WishlistButton';
 export { CheckoutFlow } from './checkout/CheckoutFlow';
+export { ProductReviews } from './ProductReviews';
+export { AIChatbotWidget } from './AIChatbotWidget';
+
+

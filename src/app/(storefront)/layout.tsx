@@ -7,6 +7,8 @@ import { Header, Footer, Sidebar } from '@/components/layout';
 import { useAuth } from '@/hooks/useAuth';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { FullScreenLoader } from '@/components/ui/full-screen-loader';
+import { AIChatbotWidget } from '@/components/storefront/AIChatbotWidget';
+
 
 export default function StorefrontLayout({
   children,
@@ -107,8 +109,10 @@ export default function StorefrontLayout({
               &copy; {new Date().getFullYear()} TIENDA 3D EXPERIENCE. Todos los derechos reservados.
             </p>
           </footer>
+          <AIChatbotWidget />
         </SidebarInset>
       </SidebarProvider>
+
     );
   }
 
@@ -118,6 +122,8 @@ export default function StorefrontLayout({
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      <AIChatbotWidget />
     </div>
   );
+
 }

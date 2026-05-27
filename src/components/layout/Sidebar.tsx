@@ -15,8 +15,11 @@ import {
   ShieldCheck,
   ShoppingBag,
   ChevronsUpDown,
-  Settings
+  Settings,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { useTheme } from '@/providers';
 import {
   Sidebar as ShadcnSidebar,
   SidebarContent,
@@ -47,10 +50,19 @@ import { useAuth } from '@/hooks/useAuth';
 import type { User as UserType } from '@/types/api';
 import { cn } from '@/lib/utils';
 import { NotificationBell } from './NotificationBell';
+import { ThemeToggle } from './ThemeToggle';
+
 
 function NavUser({ user, onLogout }: { user: UserType; onLogout: () => void }) {
   const { isMobile } = useSidebar();
   const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`.toUpperCase() || 'U';
+  const { theme, setTheme } = useTheme();
+
+  const toggleTheme = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
   return (
     <SidebarMenu>
@@ -82,18 +94,31 @@ function NavUser({ user, onLogout }: { user: UserType; onLogout: () => void }) {
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
-              <div className="flex items-center gap-2 px-2 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary/15 to-secondary/15 text-primary font-bold text-xs animate-pulse">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-bold text-foreground">
-                    {user.firstName} {user.lastName}
-                  </span>
-                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+              <div className="flex items-center justify-between gap-2 px-2 py-1.5 text-left text-sm">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarFallback className="rounded-lg bg-gradient-to-br from-primary/15 to-secondary/15 text-primary font-bold text-xs animate-pulse">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight min-w-0">
+                    <span className="truncate font-bold text-foreground">
+                      {user.firstName} {user.lastName}
+                    </span>
+                    <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                  </div>
                 </div>
+                {/* Theme Toggle Button next to Account Name */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="h-8 w-8 rounded-lg border border-primary/10 hover:bg-muted/80 flex items-center justify-center shrink-0 cursor-pointer text-foreground relative focus-visible:outline-none focus:outline-none"
+                  title="Alternar Tema"
+                >
+                  <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-amber-500" />
+                  <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-indigo-400" />
+                  <span className="sr-only">Alternar Tema</span>
+                </button>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-primary/5" />

@@ -19,7 +19,7 @@ import {
   LightbulbOff,
   Lightbulb
 } from 'lucide-react';
-import { ModelViewer } from './ModelViewer';
+import { ModelViewer } from '@/components/shared/ModelViewer';
 
 export interface Asset3DPreviewModalProps {
   isOpen: boolean;

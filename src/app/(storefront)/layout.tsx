@@ -4,10 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Header, Footer, Sidebar } from '@/components/layout';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { FullScreenLoader } from '@/components/ui/full-screen-loader';
-import { AIChatbotWidget } from '@/features/chat/components/AIChatbotWidget';
+import { AIChatbotWidget } from '@/features/chat';
 
 
 export default function StorefrontLayout({

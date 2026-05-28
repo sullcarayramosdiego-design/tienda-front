@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api-client';
-import type { Order, CreateOrderDto, UpdateOrderStatusDto } from '@/types/order';
+import type { Order, CreateOrderDto, UpdateOrderStatusDto } from '@/features/checkout/types/order';
 
 /**
  * Servicio para gestión de pedidos

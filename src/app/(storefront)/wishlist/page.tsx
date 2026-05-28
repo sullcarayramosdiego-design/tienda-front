@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useWishlist } from '@/features/engagement/hooks/useWishlist';
-import { ProductCard } from '@/features/catalog/components';
+import { useWishlist } from '@/features/engagement';
+import { ProductCard } from '@/features/catalog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

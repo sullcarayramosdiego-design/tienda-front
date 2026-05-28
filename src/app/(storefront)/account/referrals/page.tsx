@@ -5,8 +5,8 @@ import { Gift, Copy, Check, Users, Award, HelpCircle, ArrowRight, Share2, Loader
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { referralsService, ReferralRecord, ReferralStats } from '@/features/engagement/services/referrals.service';
+import { useAuth } from '@/features/auth';
+import { referralsService, ReferralRecord, ReferralStats } from '@/features/engagement';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Table, 

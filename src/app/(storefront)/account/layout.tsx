@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation';
 import { User, ShoppingBag, Award, Sparkles, ChevronRight, ShieldCheck, Gift } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
+import { ProtectedRoute } from '@/features/auth';
 
 const accountLinks = [
   { href: '/account', label: 'Mi Resumen', icon: User },

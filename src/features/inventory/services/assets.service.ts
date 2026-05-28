@@ -1,5 +1,6 @@
 import apiClient from '@/lib/api-client';
-import type { Asset3D, ApiResponse } from '@/types/api';
+import type  { ApiResponse } from '@/types/api';
+import type  { Asset3D } from '@/features/inventory';
 
 /**
  * Servicio para gestión de activos 3D (.glb, .usdz)

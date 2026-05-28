@@ -1,10 +1,6 @@
 import apiClient from '@/lib/api-client';
-import type {
-  ProductVariant,
-  CreateVariantData,
-  UpdateVariantData,
-  ApiResponse,
-} from '@/types/api';
+import type  { ApiResponse } from '@/types/api';
+import type  { ProductVariant, CreateVariantData, UpdateVariantData } from '@/features/inventory';
 
 /**
  * Servicio para gestión de variantes de producto (SKUs complejos).

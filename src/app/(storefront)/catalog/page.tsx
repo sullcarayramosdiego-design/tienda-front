@@ -1,4 +1,4 @@
-import { ProductListIntegrated } from '@/features/catalog/components';
+import { ProductListIntegrated } from '@/features/catalog';
 import { Suspense } from 'react';
 
 export default function CatalogPage() {

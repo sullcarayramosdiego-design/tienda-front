@@ -1,4 +1,4 @@
-import { InventoryTable } from '@/features/inventory/components/InventoryTable';
+import { InventoryTable } from '@/features/inventory';
 
 export default function InventoryPage() {
   return (

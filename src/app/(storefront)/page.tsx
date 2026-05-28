@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useProducts } from '@/features/inventory/hooks/useProducts';
-import { ProductCard } from '@/features/catalog/components';
-import { ProductViewer3D } from '@/features/catalog/components/viewer3d/ProductViewer3D';
+import { useAuth } from '@/features/auth';
+import { useProducts } from '@/features/inventory';
+import { ProductCard } from '@/features/catalog';
+import { ProductViewer3D } from '@/features/catalog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

@@ -19,11 +19,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useCart } from '@/features/checkout/hooks/useCart';
-import { useOrders } from '@/hooks/useOrders';
-import { usePayments } from '@/features/checkout/hooks/usePayments';
-import type { Address, CreateOrderDto } from '@/types/order';
-import type { PaymentMethod } from '@/types/payment';
+import { useCart } from '@/features/checkout';
+import { useOrders } from '@/features/checkout';
+import { usePayments } from '@/features/checkout';
+import type { Address, CreateOrderDto } from '@/features/checkout';
+import type { PaymentMethod } from '@/features/checkout';
 
 interface CheckoutStep {
   id: number;

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { paymentsService } from '@/features/checkout/services/payments.service';
-import type { Payment, CreatePaymentIntentDto, PaymentIntentResponse } from '@/types/payment';
+import type { Payment, CreatePaymentIntentDto, PaymentIntentResponse } from '@/features/checkout/types/payment';
 
 /**
  * Hook para gestionar pagos

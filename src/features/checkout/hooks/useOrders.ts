@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { ordersService } from '@/features/checkout/services/orders.service';
-import type { Order, CreateOrderDto } from '@/types/order';
+import { ordersService } from '../services/orders.service';
+import type { Order, CreateOrderDto } from '../types/order';
 
 /**
  * Hook para gestionar órdenes

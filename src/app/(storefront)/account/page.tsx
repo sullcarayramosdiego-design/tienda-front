@@ -4,10 +4,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useLoyalty } from '@/features/engagement/hooks/useLoyalty';
-import { subscriptionService } from '@/services/subscription.service';
-import { referralsService } from '@/features/engagement/services/referrals.service';
+import { useAuth } from '@/features/auth';
+import { useLoyalty } from '@/features/engagement';
+import { subscriptionService } from '@/features/subscriptions';
+import { referralsService } from '@/features/engagement';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   Award, 

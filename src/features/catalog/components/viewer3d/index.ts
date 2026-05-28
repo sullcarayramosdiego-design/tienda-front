@@ -4,5 +4,3 @@
  */
 
 export { ProductViewer3D } from './ProductViewer3D';
-export { Scene } from './Scene';
-export { ModelLoader } from './ModelLoader';

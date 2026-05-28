@@ -7,10 +7,10 @@
 
 'use client';
 
-import { CheckoutFlow } from '@/features/checkout/components/checkout/CheckoutFlow';
+import { CheckoutFlow } from '@/features/checkout';
 import { useRouter } from 'next/navigation';
-import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
-import type { Address } from '@/types/order';
+import { ProtectedRoute } from '@/features/auth';
+import type { Address } from '@/features/checkout';
 
 export default function SimpleCheckoutExample() {
   const router = useRouter();

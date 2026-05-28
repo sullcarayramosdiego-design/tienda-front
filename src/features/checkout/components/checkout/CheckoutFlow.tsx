@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useCart } from '@/features/checkout/hooks/useCart';
-import { useOrders } from '@/hooks/useOrders';
+import { useOrders } from '@/features/checkout';
 import { usePayments } from '@/features/checkout/hooks/usePayments';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle2, XCircle, CreditCard, Smartphone, Wallet, Truck } from 'lucide-react';
-import type { CreateOrderDto, Address } from '@/types/order';
-import type { PaymentMethod } from '@/types/payment';
+import type { CreateOrderDto, Address } from '@/features/checkout/types/order';
+import type { PaymentMethod } from '@/features/checkout/types/payment';
 
 type CheckoutStep = 'review' | 'payment' | 'processing' | 'success' | 'error';
 

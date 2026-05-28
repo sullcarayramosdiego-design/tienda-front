@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 import { authService } from '@/features/auth/services/auth.service';
 import { usersService } from '@/features/auth/services/users.service';
-import type { RegisterData, LoginData, User } from '@/types/api';
+import type  { RegisterData, LoginData, User } from '@/features/auth';
 import { useToast } from '@/components/ui/toast';
 
 /**

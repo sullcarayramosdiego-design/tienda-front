@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { useProducts } from '@/features/inventory/hooks/useProducts';
+import { useProducts } from '@/features/inventory';
 import { ProductCard, CategoryFilter, PriceRangeSlider } from '@/features/catalog/components';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';

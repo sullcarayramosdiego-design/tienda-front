@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api-client';
-import type { Payment, CreatePaymentIntentDto, PaymentIntentResponse } from '@/types/payment';
+import type { Payment, CreatePaymentIntentDto, PaymentIntentResponse } from '@/features/checkout/types/payment';
 
 /**
  * Servicio para gestión de pagos

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useOrders } from '@/hooks/useOrders';
-import type { Order, OrderStatus } from '@/types/order';
+import { useOrders } from '@/features/checkout';
+import type { Order, OrderStatus } from '@/features/checkout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

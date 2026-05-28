@@ -1,12 +1,6 @@
 import apiClient from '@/lib/api-client';
-import type { 
-  Product, 
-  CreateProductData, 
-  UpdateProductData, 
-  ProductListResponse,
-  ProductQueryParams,
-  ApiResponse
-} from '@/types/api';
+import type  { ApiResponse } from '@/types/api';
+import type  { Product, CreateProductData, UpdateProductData, ProductListResponse, ProductQueryParams } from '@/features/inventory';
 
 /**
  * Servicio para gestión de productos

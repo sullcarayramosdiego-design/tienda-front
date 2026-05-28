@@ -46,8 +46,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import type { User as UserType } from '@/types/api';
+import { useAuth } from '@/features/auth';
+import type  { User as UserType } from '@/features/auth';
 import { cn } from '@/lib/utils';
 import { NotificationBell } from './NotificationBell';
 import { ThemeToggle } from './ThemeToggle';

@@ -1,10 +1,6 @@
 import apiClient from '@/lib/api-client';
-import type { 
-  RegisterData, 
-  LoginData, 
-  AuthResponse,
-  ApiResponse
-} from '@/types/api';
+import type  { ApiResponse } from '@/types/api';
+import type  { RegisterData, LoginData, AuthResponse } from '@/features/auth';
 
 /**
  * Servicio de autenticación para gestión de usuarios y tokens JWT

@@ -26,12 +26,12 @@ import {
 } from "@/components/ui/form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { registerSchema, type RegisterFormData } from "@/lib/validators/auth.schema";
+import { registerSchema, type RegisterFormData } from "@/features/auth";
 import { cn } from "@/lib/utils";
 import { Mail, Lock, Eye, EyeOff, Loader2, Sparkles, User, ShieldAlert, X } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
-import { useAuth } from "@/features/auth/hooks/useAuth";
-import { referralsService } from "@/features/engagement/services/referrals.service";
+import { useAuth } from "@/features/auth";
+import { referralsService } from "@/features/engagement";
 
 export default function RegisterPage() {
   const router = useRouter();

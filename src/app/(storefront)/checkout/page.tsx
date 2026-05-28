@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ProtectedRoute, withAuth } from '@/features/auth/components/ProtectedRoute';
-import { useCartStore } from '@/features/checkout/stores/cart.store';
-import { ordersService } from '@/features/checkout/services/orders.service';
-import { subscriptionService } from '@/services/subscription.service';
-import { loyaltyService } from '@/features/engagement/services/loyalty.service';
-import { PaymentTabs } from '@/features/checkout/components/payments/PaymentTabs';
+import { ProtectedRoute, withAuth } from '@/features/auth';
+import { useCartStore } from '@/features/checkout';
+import { ordersService } from '@/features/checkout';
+import { subscriptionService } from '@/features/subscriptions';
+import { loyaltyService } from '@/features/engagement';
+import { PaymentTabs } from '@/features/checkout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

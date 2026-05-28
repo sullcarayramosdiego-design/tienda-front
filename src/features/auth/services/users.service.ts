@@ -1,5 +1,6 @@
 import apiClient from '@/lib/api-client';
-import type { User, UpdateUserData, ApiResponse } from '@/types/api';
+import type  { ApiResponse } from '@/types/api';
+import type  { User, UpdateUserData } from '@/features/auth';
 
 /**
  * Servicio para gestión de usuarios

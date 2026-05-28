@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Sparkles, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useCart } from '@/features/checkout/hooks/useCart';
+import { useCart } from '@/features/checkout';
 
 interface ProductCardProps {
   id: string;

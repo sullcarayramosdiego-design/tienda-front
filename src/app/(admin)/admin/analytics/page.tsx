@@ -14,8 +14,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
-import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
-import reportsService, { UserAnalytics } from '@/features/admin/services/reports.service';
+import { ProtectedRoute } from '@/features/auth';
+import { reportsService, UserAnalytics } from '@/features/admin';
 import {
   ResponsiveContainer,
   AreaChart,

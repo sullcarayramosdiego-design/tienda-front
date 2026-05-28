@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { productsService } from '@/features/catalog/services/products.service';
-import type { Product, ProductListResponse, ProductQueryParams } from '@/types/api';
+import { productsService } from '@/features/catalog';
+import type  { Product, ProductListResponse, ProductQueryParams } from '@/features/inventory';
 
 /**
  * Hook para gestionar productos con estados de carga y errores

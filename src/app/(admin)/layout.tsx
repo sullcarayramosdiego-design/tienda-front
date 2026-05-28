@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight, Home } from 'lucide-react';
 import { AdminSidebar } from '@/components/layout';
-import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
+import { ProtectedRoute } from '@/features/auth';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 // Componente dinámico de Breadcrumb para el panel de administración

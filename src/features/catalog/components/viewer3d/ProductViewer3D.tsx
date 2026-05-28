@@ -3,7 +3,7 @@
 import React, { Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { Scene } from './Scene';
+import { Scene } from '@/components/canvas/Scene';
 import { Sparkles } from 'lucide-react';
 
 interface ProductViewer3DProps {

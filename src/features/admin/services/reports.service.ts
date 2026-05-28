@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api-client';
-import type { ApiResponse } from '@/types/api';
+import type  { ApiResponse } from '@/types/api';
 
 export interface FinanceSummary {
   totalRevenue: number;

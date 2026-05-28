@@ -28,8 +28,8 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
-import { ordersService } from '@/features/checkout/services/orders.service';
-import type { Order, OrderStatus } from '@/types/order';
+import { ordersService } from '@/features/checkout';
+import type { Order, OrderStatus } from '@/features/checkout';
 
 interface OrderWithUser extends Order {
   user?: {

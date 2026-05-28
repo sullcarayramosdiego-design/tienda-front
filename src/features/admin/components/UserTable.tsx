@@ -46,8 +46,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
-import { usersService } from '@/features/auth/services/users.service';
-import type { User } from '@/types/api';
+import { usersService } from '@/features/auth';
+import type  { User } from '@/features/auth';
 
 export function UserTable() {
   const [users, setUsers] = useState<User[]>([]);

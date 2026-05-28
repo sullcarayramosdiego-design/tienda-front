@@ -24,8 +24,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { notificationsService, Notification } from '@/services/notifications.service';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { notificationsService, Notification } from '@/features/notifications';
+import { useAuth } from '@/features/auth';
 
 interface NotificationBellProps {
   variant?: 'ghost' | 'sidebar';

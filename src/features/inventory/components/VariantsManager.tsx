@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { variantsService } from '@/features/inventory/services/variants.service';
-import type { ProductVariant } from '@/types/api';
+import type  { ProductVariant } from '@/features/inventory';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 

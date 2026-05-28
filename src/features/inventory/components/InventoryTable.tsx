@@ -70,12 +70,12 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
-import { productsService } from '@/features/catalog/services/products.service';
+import { productsService } from '@/features/catalog';
 import { variantsService } from '@/features/inventory/services/variants.service';
 import { VariantBuilder, VariantDraft } from './VariantBuilder';
 import { VariantsManager } from './VariantsManager';
 import { inventoryService, LowStockAlert, InventoryMovement } from '@/features/inventory/services/inventory.service';
-import type { Product } from '@/types/api';
+import type  { Product } from '@/features/inventory';
 import { Asset3DUpload } from './Asset3DUpload';
 
 export function InventoryTable() {

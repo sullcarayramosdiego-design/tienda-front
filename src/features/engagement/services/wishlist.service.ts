@@ -1,5 +1,5 @@
 import apiClient from '@/lib/api-client';
-import type { Product } from '@/types/api';
+import type  { Product } from '@/features/inventory';
 
 /**
    * Servicio para conectar con la API de favoritos del backend (Fase 3)

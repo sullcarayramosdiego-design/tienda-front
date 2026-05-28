@@ -7,9 +7,9 @@
 
 'use client';
 
-import { CheckoutFlow } from '@/components/storefront';
+import { CheckoutFlow } from '@/features/checkout/components/checkout/CheckoutFlow';
 import { useRouter } from 'next/navigation';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
 import type { Address } from '@/types/order';
 
 export default function SimpleCheckoutExample() {
@@ -46,11 +46,11 @@ export default function SimpleCheckoutExample() {
           <CheckoutFlow
             shippingAddress={shippingAddress}
             billingAddress={billingAddress}
-            onSuccess={(orderId) => {
+            onSuccess={(orderId: any) => {
               console.log('✅ Pedido creado exitosamente:', orderId);
               // Aquí puedes agregar analytics, notificaciones, etc.
             }}
-            onError={(error) => {
+            onError={(error: any) => {
               console.error('❌ Error en checkout:', error);
               // Aquí puedes agregar logging de errores, etc.
             }}

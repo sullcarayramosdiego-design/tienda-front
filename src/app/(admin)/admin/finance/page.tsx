@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { FinanceLedger, MetricCard } from '@/components/admin';
-import { RevenueChart } from '@/components/admin/charts/RevenueChart';
-import { reportsService, FinanceSummary, LedgerTransaction } from '@/services/reports.service';
+import { FinanceLedger, MetricCard } from '@/features/admin/components';
+import { RevenueChart } from '@/features/admin/components/charts/RevenueChart';
+import { reportsService, FinanceSummary, LedgerTransaction } from '@/features/admin/services/reports.service';
 import { useToast } from '@/components/ui/toast';
 
 export default function FinancePage() {

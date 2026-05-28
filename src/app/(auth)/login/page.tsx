@@ -27,7 +27,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { loginSchema, type LoginFormData } from "@/lib/validators/auth.schema";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Mail, Lock, Eye, EyeOff, Loader2, Sparkles, ShieldAlert, X } from "lucide-react";
 import { useToast } from "@/components/ui/toast";

@@ -18,9 +18,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/components/ui/toast';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { useAuth } from '@/hooks/useAuth';
-import { usersService } from '@/services/users.service';
+import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { usersService } from '@/features/auth/services/users.service';
 
 export default function AdminAccountPage() {
   const { user, login } = useAuth();

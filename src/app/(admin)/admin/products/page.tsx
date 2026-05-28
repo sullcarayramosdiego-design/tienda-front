@@ -15,10 +15,11 @@ import {
   ArrowLeftRight,
   Eye
 } from 'lucide-react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Asset3DUpload, Asset3DPreviewModal } from '@/components/admin';
-import { productsService } from '@/services/products.service';
-import { assetsService } from '@/services/assets.service';
+import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
+import { Asset3DUpload } from '@/features/inventory/components/Asset3DUpload';
+import { Asset3DPreviewModal } from '@/features/inventory/components/Asset3DPreviewModal';
+import { productsService } from '@/features/catalog/services/products.service';
+import { assetsService } from '@/features/inventory/services/assets.service';
 import type { Product, Asset3D } from '@/types/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

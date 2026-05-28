@@ -19,9 +19,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useCart } from '@/hooks/useCart';
+import { useCart } from '@/features/checkout/hooks/useCart';
 import { useOrders } from '@/hooks/useOrders';
-import { usePayments } from '@/hooks/usePayments';
+import { usePayments } from '@/features/checkout/hooks/usePayments';
 import type { Address, CreateOrderDto } from '@/types/order';
 import type { PaymentMethod } from '@/types/payment';
 

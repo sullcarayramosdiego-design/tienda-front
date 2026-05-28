@@ -16,8 +16,8 @@ import {
   ChartTooltipContent
 } from '@/components/ui/chart';
 import { DollarSign, Filter, ShoppingBag, Users as UsersIcon, CreditCard, Tag } from 'lucide-react';
-import { reportsService } from '@/services/reports.service';
-import { productsService } from '@/services/products.service';
+import { reportsService } from '@/features/admin/services/reports.service';
+import { productsService } from '@/features/catalog/services/products.service';
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);

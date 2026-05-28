@@ -28,8 +28,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/hooks/useAuth';
-import { CartDrawer } from '@/components/storefront';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { CartDrawer } from '@/features/checkout/components/CartDrawer';
 import { NotificationBell } from './NotificationBell';
 import { ThemeToggle } from './ThemeToggle';
 

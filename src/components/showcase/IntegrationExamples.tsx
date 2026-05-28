@@ -10,7 +10,7 @@
 // ============================================================================
 
 // Ejemplo de uso en un componente de Login
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export function LoginExample() {
   const { login, loading, error } = useAuth();
@@ -66,7 +66,7 @@ export function RegisterExample() {
 // ============================================================================
 
 // Listar productos con paginación
-import { useProducts } from '@/hooks/useProducts';
+import { useProducts } from '@/features/inventory/hooks/useProducts';
 
 export function ProductListExample() {
   const { products, loading, error, meta, goToPage } = useProducts({
@@ -106,7 +106,7 @@ export function ProductListExample() {
 }
 
 // Obtener un producto individual
-import { useProduct } from '@/hooks/useProducts';
+import { useProduct } from '@/features/inventory/hooks/useProducts';
 
 export function ProductDetailExample({ productId }: { productId: string }) {
   const { product, loading, error } = useProduct(productId);
@@ -141,7 +141,7 @@ export function ProductDetailExample({ productId }: { productId: string }) {
 }
 
 // Crear producto (solo admin)
-import { productsService } from '@/services/products.service';
+import { productsService } from '@/features/catalog/services/products.service';
 
 export async function createProductExample() {
   try {
@@ -165,7 +165,7 @@ export async function createProductExample() {
 // ============================================================================
 
 // Subir modelo 3D
-import { assetsService } from '@/services/assets.service';
+import { assetsService } from '@/features/inventory/services/assets.service';
 import { useState } from 'react';
 
 export function UploadAssetExample({ productId }: { productId: string }) {
@@ -220,7 +220,7 @@ export function UploadAssetExample({ productId }: { productId: string }) {
 // ============================================================================
 
 // Obtener perfil del usuario actual
-import { usersService } from '@/services/users.service';
+import { usersService } from '@/features/auth/services/users.service';
 
 export async function getUserProfileExample() {
   try {

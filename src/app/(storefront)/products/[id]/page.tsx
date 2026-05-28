@@ -3,15 +3,15 @@
 import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useProduct } from '@/hooks/useProducts';
-import { useAuth } from '@/hooks/useAuth';
-import { useCart } from '@/hooks/useCart';
-import { useWishlist } from '@/hooks/useWishlist';
-import { ProductViewer3D } from '@/components/viewer3d/ProductViewer3D';
+import { useProduct } from '@/features/inventory/hooks/useProducts';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useCart } from '@/features/checkout/hooks/useCart';
+import { useWishlist } from '@/features/engagement/hooks/useWishlist';
+import { ProductViewer3D } from '@/features/catalog/components/viewer3d/ProductViewer3D';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ProductReviews } from '@/components/storefront/ProductReviews';
+import { ProductReviews } from '@/features/engagement/components/ProductReviews';
 import { 
   ArrowLeft, 
   ShoppingCart, 

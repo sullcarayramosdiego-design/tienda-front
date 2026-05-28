@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useLoyalty } from '@/hooks/useLoyalty';
-import type { LoyaltyTier, PointsTransaction } from '@/services/loyalty.service';
+import { useLoyalty } from '@/features/engagement/hooks/useLoyalty';
+import type { LoyaltyTier, PointsTransaction } from '@/features/engagement/services/loyalty.service';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

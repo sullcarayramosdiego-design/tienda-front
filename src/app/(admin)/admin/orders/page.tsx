@@ -4,8 +4,8 @@ import React from 'react';
 import { ShoppingBag, TableProperties } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { OrderKanban } from '@/components/admin';
+import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
+import { OrderKanban } from '@/features/admin/components';
 
 export default function OrdersPage() {
   return (

@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { ShoppingBag } from 'lucide-react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { OrderTable } from '@/components/admin';
+import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
+import { OrderTable } from '@/features/admin/components';
 
 export default function OrdersListPage() {
   return (

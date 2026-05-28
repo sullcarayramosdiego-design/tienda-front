@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { subscriptionService, SubscriptionPlan, Subscription } from '@/services/subscription.service';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

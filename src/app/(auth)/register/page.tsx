@@ -30,8 +30,8 @@ import { registerSchema, type RegisterFormData } from "@/lib/validators/auth.sch
 import { cn } from "@/lib/utils";
 import { Mail, Lock, Eye, EyeOff, Loader2, Sparkles, User, ShieldAlert, X } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
-import { useAuth } from "@/hooks/useAuth";
-import { referralsService } from "@/services/referrals.service";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { referralsService } from "@/features/engagement/services/referrals.service";
 
 export default function RegisterPage() {
   const router = useRouter();

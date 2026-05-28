@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { Users as UsersIcon } from 'lucide-react';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { UserTable } from '@/components/admin';
+import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
+import { UserTable } from '@/features/admin/components';
 
 export default function UsersManagementPage() {
   return (

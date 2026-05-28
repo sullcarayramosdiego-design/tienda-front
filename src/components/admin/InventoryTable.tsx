@@ -49,11 +49,31 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '@/components/ui/sheet';
+import { MoreHorizontal, SlidersHorizontal, Settings, Layers } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
 import { cn } from '@/lib/utils';
 import { productsService } from '@/services/products.service';
+import { variantsService } from '@/services/variants.service';
+import { VariantBuilder, VariantDraft } from './VariantBuilder';
+import { VariantsManager } from './VariantsManager';
 import { inventoryService, LowStockAlert, InventoryMovement } from '@/services/inventory.service';
 import type { Product } from '@/types/api';
 import { Asset3DUpload } from './Asset3DUpload';
@@ -92,6 +112,12 @@ export function InventoryTable() {
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   const [submittingCategory, setSubmittingCategory] = useState(false);
+
+  // Estados para variantes
+  const [variantDrafts, setVariantDrafts] = useState<VariantDraft[]>([]);
+  const [hasVariants, setHasVariants] = useState(false);
+  const [isVariantsOpen, setIsVariantsOpen] = useState(false);
+  const [variantsSheetProduct, setVariantsSheetProduct] = useState<Product | null>(null);
 
   // Estados de Modales
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
@@ -204,7 +230,7 @@ export function InventoryTable() {
     
     try {
       setSubmittingCreate(true);
-      await productsService.create({
+      const createdProduct = await productsService.create({
         name: newProductName.trim(),
         description: newProductDescription.trim(),
         sku: newProductSku.trim().toUpperCase(),
@@ -212,6 +238,19 @@ export function InventoryTable() {
         stock: stockNum,
         categoryId: newProductCategoryId || undefined,
       });
+
+      if (hasVariants && variantDrafts.length > 0) {
+        await variantsService.bulkCreate(
+          createdProduct.id,
+          variantDrafts.map((d) => ({
+            name: d.name,
+            sku: d.sku,
+            price: parseFloat(d.price),
+            stock: parseInt(d.stock, 10),
+            attributes: d.attributes,
+          }))
+        );
+      }
       toast({
         type: 'success',
         title: 'Producto Creado 🎁',
@@ -223,6 +262,8 @@ export function InventoryTable() {
       setNewProductPrice('');
       setNewProductStock('0');
       setNewProductCategoryId('');
+      setVariantDrafts([]);
+      setHasVariants(false);
       setIsCreateOpen(false);
       fetchData();
     } catch (error: any) {
@@ -549,379 +590,176 @@ export function InventoryTable() {
 
   return (
     <div className="space-y-6">
-      {/* Tarjetas de Métricas Rápidas */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Total Productos */}
-        <Card className="bg-card/75 border-primary/5 hover:border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
-          <div className="absolute right-0 bottom-0 translate-y-6 translate-x-2 opacity-5 scale-150">
-            <Package className="h-24 w-24 text-primary group-hover:scale-110 transition-transform duration-500" />
+      {/* Encabezado y Acciones */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        {/* Buscador y Filtros */}
+        <div className="flex flex-1 items-center gap-2 w-full sm:max-w-md">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Buscar producto o SKU..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 border-border bg-transparent shadow-none"
+            />
           </div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-              Total de Catálogo
-              <Package className="h-4 w-4 text-primary" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-black text-foreground">
-                {filteredProducts.length} {filteredProducts.length !== products.length && <span className="text-sm font-normal text-muted-foreground">/ {products.length}</span>} <span className="text-xs font-bold text-muted-foreground">Productos</span>
-              </div>
-            )}
-            <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
-              Catálogo activo de modelos 3D y tangibles
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Alertas Stock Crítico */}
-        <Card className="bg-card/75 border-primary/5 hover:border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
-          <div className="absolute right-0 bottom-0 translate-y-6 translate-x-2 opacity-5 scale-150">
-            <AlertTriangle className="h-24 w-24 text-rose-500 group-hover:scale-110 transition-transform duration-500" />
-          </div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-              Alertas de Stock
-              <AlertTriangle className="h-4 w-4 text-rose-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-8 w-16" />
-            ) : (
-              <div className="text-2xl font-black text-rose-500">
-                {filteredProducts.filter(p => p.stock < 10).length} {filteredProducts.length !== products.length && <span className="text-sm font-normal text-rose-500/70">/ {lowStockAlerts.length}</span>} <span className="text-xs font-bold text-rose-500/80">Críticos</span>
-              </div>
-            )}
-            <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
-              Productos con stock menor a 10 unidades
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Auditoría */}
-        <Card className="bg-card/75 border-primary/5 hover:border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
-          <div className="absolute right-0 bottom-0 translate-y-6 translate-x-2 opacity-5 scale-150">
-            <CheckCircle className="h-24 w-24 text-emerald-500 group-hover:scale-110 transition-transform duration-500" />
-          </div>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-              Estado de Sistema
-              <CheckCircle className="h-4 w-4 text-emerald-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-black text-emerald-500">
-              AUDITABLE
-            </div>
-            <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
-              Todos los movimientos registran audit logs ACID
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Buscador y Acciones */}
-      <div className="bg-card/40 p-4 rounded-xl border border-primary/5">
-        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
-          {/* Campo de Búsqueda + Toggle Filtros */}
-          <div className="flex gap-2 flex-1">
-            <div className="relative flex-1 group">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <Input
-                type="text"
-                placeholder="Buscar por SKU o nombre..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 transition-all text-xs"
-              />
-            </div>
-            {/* Botón Filtros */}
-            <Button
-              type="button"
-              variant={showColumnFilters ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowColumnFilters((v) => !v)}
-              className={cn(
-                "h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 cursor-pointer shrink-0 transition-all",
-                showColumnFilters
-                  ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
-                  : 'border-primary/15 hover:bg-primary/5'
-              )}
-            >
-              <Sliders className="h-3.5 w-3.5" />
-              Filtros
-              {hasActiveFilters && !showColumnFilters && (
-                <span className="ml-0.5 inline-flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[9px] font-black">
-                  !
-                </span>
-              )}
-            </Button>
-            {/* Botón Limpiar */}
-            {hasActiveFilters && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={clearAllFilters}
-                className="h-10 px-3 rounded-xl text-xs font-bold gap-1 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer shrink-0"
-                title="Desactivar todos los filtros"
-              >
-                <X className="h-3.5 w-3.5" />
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9 px-3 border-border shadow-none relative cursor-pointer">
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                Filtros
+                {hasActiveFilters && (
+                  <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                  </span>
+                )}
               </Button>
-            )}
-          </div>
+            </SheetTrigger>
+             <SheetContent className="w-[90vw] sm:max-w-md flex flex-col gap-0 p-0">
+              <SheetHeader className="px-6 py-4 border-b border-border/40 shrink-0 mb-0">
+                <SheetTitle className="text-base font-bold">Filtros Avanzados</SheetTitle>
+                <SheetDescription className="text-xs">Refina la búsqueda del inventario.</SheetDescription>
+              </SheetHeader>
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-muted-foreground">Categoría</Label>
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-primary/5 text-xs">
+                      <SelectValue placeholder="Todas las categorías" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-xs cursor-pointer">Todas</SelectItem>
+                      {categoriesList.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id} className="text-xs cursor-pointer">{cat.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs font-bold text-muted-foreground">Estado del Stock</Label>
+                  <Select value={stockStatusFilter} onValueChange={setStockStatusFilter}>
+                    <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-primary/5 text-xs">
+                      <SelectValue placeholder="Cualquier estado" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-xs cursor-pointer">Todos</SelectItem>
+                      <SelectItem value="in_stock" className="text-xs cursor-pointer">En stock</SelectItem>
+                      <SelectItem value="low_stock" className="text-xs cursor-pointer">Por agotar</SelectItem>
+                      <SelectItem value="out_of_stock" className="text-xs cursor-pointer">Agotado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="pt-4 mt-auto">
+                  <Button variant="secondary" className="w-full h-10 rounded-xl text-xs font-bold cursor-pointer" onClick={clearAllFilters}>
+                    Limpiar Filtros
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
 
-          {/* Acciones */}
-          <div className="flex gap-2 shrink-0">
-            <Button onClick={() => setIsCategoryCreateOpen(true)} variant="outline" className="flex-1 sm:flex-initial h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 border-primary/15 text-foreground hover:bg-primary/5 cursor-pointer shadow-sm">
-              <Plus className="h-4 w-4" />
-              Nueva Categoría
-            </Button>
-            <Button onClick={() => setIsCreateOpen(true)} className="flex-1 sm:flex-initial h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer shadow-sm shadow-primary/10">
-              <Plus className="h-4 w-4" />
-              Nuevo Producto
-            </Button>
-            <Button onClick={fetchData} variant="outline" size="sm" className="h-10 px-3.5 rounded-xl text-xs font-bold gap-1 cursor-pointer">
-              <RefreshCw className="h-3.5 w-3.5" />
-              Sincronizar
-            </Button>
-          </div>
+        {/* Acciones Rápidas */}
+        <div className="flex items-center gap-2 shrink-0">
+          <Button variant="outline" size="sm" onClick={fetchData} className="h-9 w-9 p-0 border-border shadow-none cursor-pointer">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setIsCategoryCreateOpen(true)} className="h-9 border-border shadow-none hidden sm:flex cursor-pointer">
+            Nueva Categoría
+          </Button>
+          <Button size="sm" onClick={() => setIsCreateOpen(true)} className="h-9 shadow-none cursor-pointer">
+            <Plus className="h-4 w-4 mr-1.5" /> Nuevo Producto
+          </Button>
         </div>
       </div>
 
       {/* Tabla Principal */}
-      <Card className="bg-card/40 border-primary/5">
-        <CardContent className="p-0">
-          <div className="rounded-xl border border-primary/5 overflow-hidden">
-            <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow>
-                  {renderSortHeader('sku', 'SKU')}
-                  {renderSortHeader('name', 'Producto')}
-                  {renderSortHeader('category', 'Categoría')}
-                  {renderSortHeader('price', 'Precio')}
-                  {renderSortHeader('stock', 'Stock Disponible', 'center')}
-                  {renderSortHeader('status', 'Estado')}
-                  <TableHead className="font-bold text-xs text-right">Acciones</TableHead>
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent bg-muted/20">
+              {renderSortHeader('name', 'Producto')}
+              {renderSortHeader('stock', 'Stock', 'center')}
+              {renderSortHeader('status', 'Estado')}
+              <TableHead className="text-right font-medium text-xs pr-4">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, idx) => (
+                <TableRow key={idx}>
+                  <TableCell><Skeleton className="h-10 w-full" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
+                  <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                 </TableRow>
-                {/* Fila de Filtros por Columna */}
-                {showColumnFilters && (
-                  <TableRow className="bg-primary/5 border-b border-primary/10">
-                    <TableHead className="py-1.5 px-2">
-                      <Input
-                        placeholder="SKU..."
-                        value={skuFilter}
-                        onChange={(e) => setSkuFilter(e.target.value)}
-                        className="h-7 text-[11px] rounded-lg bg-background border-primary/15 focus-visible:ring-1 focus-visible:ring-primary/40 w-full min-w-[70px]"
-                      />
-                    </TableHead>
-                    <TableHead className="py-1.5 px-2">
-                      <Input
-                        placeholder="Nombre..."
-                        value={nameFilter}
-                        onChange={(e) => setNameFilter(e.target.value)}
-                        className="h-7 text-[11px] rounded-lg bg-background border-primary/15 focus-visible:ring-1 focus-visible:ring-primary/40 w-full min-w-[100px]"
-                      />
-                    </TableHead>
-                    <TableHead className="py-1.5 px-2">
-                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                        <SelectTrigger className="h-7 text-[11px] rounded-lg bg-background border-primary/15 cursor-pointer min-w-[110px]">
-                          <SelectValue placeholder="Categoría" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card">
-                          <SelectItem value="all" className="text-xs cursor-pointer">Todas</SelectItem>
-                          {categoriesList.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.id} className="text-xs cursor-pointer">{cat.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </TableHead>
-                    <TableHead className="py-1.5 px-2">
-                      <div className="flex gap-1 items-center min-w-[110px]">
-                        <Input
-                          placeholder="Min"
-                          value={priceMinFilter}
-                          onChange={(e) => setPriceMinFilter(e.target.value)}
-                          className="h-7 text-[11px] rounded-lg bg-background border-primary/15 focus-visible:ring-1 focus-visible:ring-primary/40 w-full"
-                          type="number"
-                          min="0"
-                        />
-                        <span className="text-[10px] text-muted-foreground shrink-0">–</span>
-                        <Input
-                          placeholder="Max"
-                          value={priceMaxFilter}
-                          onChange={(e) => setPriceMaxFilter(e.target.value)}
-                          className="h-7 text-[11px] rounded-lg bg-background border-primary/15 focus-visible:ring-1 focus-visible:ring-primary/40 w-full"
-                          type="number"
-                          min="0"
-                        />
+              ))
+            ) : filteredProducts.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="h-32 text-center text-sm text-muted-foreground">
+                  No se encontraron productos.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredProducts.map((p) => {
+                const status = getStockStatus(p.stock);
+                return (
+                  <TableRow key={p.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell className="py-3">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="font-medium text-sm text-foreground">{p.name}</span>
+                        <span className="text-xs text-muted-foreground uppercase">{p.sku}</span>
                       </div>
-                    </TableHead>
-                    <TableHead className="py-1.5 px-2 text-center">
-                      {/* Sin filtro de columna para stock numérico — usar la de precio */}
-                    </TableHead>
-                    <TableHead className="py-1.5 px-2">
-                      <Select value={stockStatusFilter} onValueChange={setStockStatusFilter}>
-                        <SelectTrigger className="h-7 text-[11px] rounded-lg bg-background border-primary/15 cursor-pointer min-w-[100px]">
-                          <SelectValue placeholder="Estado" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-card">
-                          <SelectItem value="all" className="text-xs cursor-pointer">Todos</SelectItem>
-                          <SelectItem value="in_stock" className="text-xs cursor-pointer">Disponible</SelectItem>
-                          <SelectItem value="low_stock" className="text-xs cursor-pointer">Bajo Stock</SelectItem>
-                          <SelectItem value="out_of_stock" className="text-xs cursor-pointer">Sin Stock</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </TableHead>
-                    <TableHead className="py-1.5 px-2 text-right">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearAllFilters}
-                        className="h-7 px-2 rounded-lg text-[11px] font-bold text-muted-foreground hover:text-foreground gap-1 cursor-pointer"
-                        title="Desactivar todos los filtros"
-                      >
-                        <X className="h-3 w-3" />
-                        Limpiar
-                      </Button>
-                    </TableHead>
-                  </TableRow>
-                )}
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-40" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                      <TableCell align="center"><Skeleton className="h-4 w-8 mx-auto" /></TableCell>
-                      <TableCell><Skeleton className="h-4.5 w-20" /></TableCell>
-                      <TableCell align="right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
-                    </TableRow>
-                  ))
-                ) : filteredProducts.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-xs font-semibold text-muted-foreground">
-                      No se encontraron productos registrados.
+                    </TableCell>
+                    <TableCell className="py-3 text-center">
+                      <span className="text-sm font-medium">{p.stock}</span>
+                    </TableCell>
+                    <TableCell className="py-3">
+                      <Badge variant="outline" className={cn("font-medium text-[10px] uppercase shadow-none border", status.color)}>
+                        {status.label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="py-3 text-right pr-4">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 cursor-pointer">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 shadow-lg rounded-xl border-border">
+                          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Gestión de Inventario</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => openAdjustModal(p)} className="text-xs cursor-pointer">
+                            <Sliders className="mr-2 h-3.5 w-3.5"/> Ajustar Stock
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setVariantsSheetProduct(p); setIsVariantsOpen(true); }} className="text-xs cursor-pointer">
+                            <Layers className="mr-2 h-3.5 w-3.5"/> Gestionar Variantes
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openUploadModal(p)} className="text-xs cursor-pointer">
+                            <Box className="mr-2 h-3.5 w-3.5"/> Assets 3D
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openHistoryModal(p)} className="text-xs cursor-pointer">
+                            <History className="mr-2 h-3.5 w-3.5"/> Historial
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => handleToggleActive(p)} className="text-xs cursor-pointer">
+                            <EyeOff className="mr-2 h-3.5 w-3.5"/> {p.isActive !== false ? 'Desactivar' : 'Activar'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteProduct(p)} className="text-xs text-red-600 focus:text-red-600 cursor-pointer">
+                            <Trash2 className="mr-2 h-3.5 w-3.5"/> Eliminar Producto
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ) : (
-                  filteredProducts.map((p) => {
-                    const status = getStockStatus(p.stock);
-                    return (
-                      <TableRow key={p.id} className="hover:bg-muted/40 transition-colors">
-                        <TableCell className="font-mono text-xs font-bold">{p.sku}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-xs text-foreground">{p.name}</span>
-                            {p.assets && p.assets.length > 0 && (
-                              <span className="text-[9px] font-black text-primary bg-primary/5 px-1 py-0.2 rounded w-fit mt-0.5">
-                                3D VIEW
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-xs text-muted-foreground font-semibold">
-                          {p.category?.name || 'General'}
-                        </TableCell>
-                        <TableCell className="text-xs font-bold text-foreground">
-                          S/. {p.price.toFixed(2)}
-                        </TableCell>
-                        <TableCell className="text-xs font-black text-center text-foreground">
-                          {p.stock}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={status.variant as any} className={cn("px-2.5 py-0.5 text-[9px] font-black border", status.color)}>
-                            {status.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right pr-3">
-                          <div className="flex justify-end items-center gap-0.5">
-
-                            {/* ── Grupo Principal ── */}
-                            <div className="flex items-center gap-0.5 bg-muted/50 rounded-lg px-1 py-0.5">
-                              {/* 3D Assets */}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => openUploadModal(p)}
-                                className="h-7 w-7 rounded-md hover:bg-primary/10 hover:text-primary cursor-pointer text-primary/70 transition-colors"
-                                title="Gestionar recursos 3D / AR"
-                              >
-                                <Box className="h-3.5 w-3.5" />
-                              </Button>
-                              {/* Historial */}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => openHistoryModal(p)}
-                                className="h-7 w-7 rounded-md hover:bg-muted-foreground/10 hover:text-foreground cursor-pointer text-muted-foreground/60 transition-colors"
-                                title="Historial de movimientos"
-                              >
-                                <History className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-
-                            {/* Ajustar Stock — CTA principal */}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openAdjustModal(p)}
-                              className="h-7 px-2.5 rounded-lg border-primary/15 text-[11px] font-bold hover:bg-primary/8 hover:text-primary hover:border-primary/30 cursor-pointer gap-1 mx-1"
-                            >
-                              <Sliders className="h-3 w-3" />
-                              Ajustar
-                            </Button>
-
-                            {/* ── Separador ── */}
-                            <div className="w-px h-5 bg-border/60 mx-0.5 shrink-0" />
-
-                            {/* ── Zona de Peligro ── */}
-                            <div className="flex items-center gap-0.5">
-                              {/* Dar de baja / Activar */}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleToggleActive(p)}
-                                className={cn(
-                                  "h-7 w-7 rounded-md cursor-pointer transition-colors",
-                                  p.isActive !== false
-                                    ? "text-amber-500/80 hover:bg-amber-500/10 hover:text-amber-600"
-                                    : "text-emerald-500/80 hover:bg-emerald-500/10 hover:text-emerald-600"
-                                )}
-                                title={p.isActive !== false ? 'Dar de baja' : 'Activar producto'}
-                              >
-                                <EyeOff className="h-3.5 w-3.5" />
-                              </Button>
-                              {/* Eliminar */}
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeleteProduct(p)}
-                                className="h-7 w-7 rounded-md cursor-pointer text-rose-500/70 hover:bg-rose-500/10 hover:text-rose-600 transition-colors"
-                                title="Eliminar producto permanentemente"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
       {/* MODAL 1: AJUSTE MANUAL DE STOCK */}
       <Dialog open={isAdjustOpen} onOpenChange={setIsAdjustOpen}>
@@ -1261,6 +1099,15 @@ export function InventoryTable() {
                   required
                 />
               </div>
+              <VariantBuilder
+                baseSku={newProductSku}
+                basePrice={newProductPrice}
+                baseStock={newProductStock}
+                onChange={(drafts, enabled) => {
+                  setVariantDrafts(drafts);
+                  setHasVariants(enabled);
+                }}
+              />
             </div>
 
             <DialogFooter className="gap-2 sm:gap-0">
@@ -1341,6 +1188,30 @@ export function InventoryTable() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL 6: GESTIÓN DE VARIANTES EXISTENTES */}
+      <Dialog open={isVariantsOpen} onOpenChange={setIsVariantsOpen}>
+        <DialogContent className="sm:max-w-2xl rounded-xl p-6 shadow-xl bg-card border-primary/5 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="mb-2">
+            <DialogTitle className="text-base font-bold text-foreground">Gestor de Variantes</DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Modifica los precios y stocks de las variantes para <span className="font-bold text-primary">{variantsSheetProduct?.name}</span>.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-2">
+            {variantsSheetProduct && (
+              <VariantsManager productId={variantsSheetProduct.id} />
+            )}
+          </div>
+
+          <DialogFooter className="mt-2">
+            <Button onClick={() => setIsVariantsOpen(false)} variant="outline" className="rounded-xl text-xs font-bold w-full cursor-pointer border-border">
+              Cerrar Gestor
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

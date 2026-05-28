@@ -87,7 +87,47 @@ export interface Product {
   createdAt: string;
   updatedAt: string;
   assets?: Asset3D[];
+  variants?: ProductVariant[];
   category?: any;
+  isActive?: boolean;
+}
+
+// ============================================================================
+// Product Variant Types
+// ============================================================================
+
+export interface VariantAttribute {
+  key: string;
+  value: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  name: string;
+  sku: string;
+  price: number;
+  stock: number;
+  attributes: VariantAttribute[];
+  isActive?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateVariantData {
+  name: string;
+  sku: string;
+  price: number;
+  stock: number;
+  attributes?: VariantAttribute[];
+}
+
+export interface UpdateVariantData {
+  name?: string;
+  sku?: string;
+  price?: number;
+  stock?: number;
+  attributes?: VariantAttribute[];
   isActive?: boolean;
 }
 

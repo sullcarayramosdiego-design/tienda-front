@@ -12,10 +12,11 @@ import {
   Download, 
   AlertCircle, 
   CheckCircle2, 
-  ArrowLeftRight 
+  ArrowLeftRight,
+  Eye
 } from 'lucide-react';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Asset3DUpload } from '@/components/admin';
+import { Asset3DUpload, Asset3DPreviewModal } from '@/components/admin';
 import { productsService } from '@/services/products.service';
 import { assetsService } from '@/services/assets.service';
 import type { Product, Asset3D } from '@/types/api';
@@ -44,6 +45,11 @@ export default function AdminProductsPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [deletingAssetId, setDeletingAssetId] = useState<string | null>(null);
+
+  // Preview states
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewName, setPreviewName] = useState<string>('');
 
   // Load products list from backend
   const loadProducts = useCallback(async () => {
@@ -125,6 +131,12 @@ export default function AdminProductsPage() {
     } finally {
       setDeletingAssetId(null);
     }
+  };
+
+  const openPreviewModal = (url: string, name: string) => {
+    setPreviewUrl(url);
+    setPreviewName(name);
+    setIsPreviewOpen(true);
   };
 
   const filteredProducts = products.filter((p) => {
@@ -311,6 +323,15 @@ export default function AdminProductsPage() {
                           </div>
 
                           <div className="flex items-center gap-1.5 shrink-0">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => openPreviewModal(asset.fileUrl, asset.fileName)}
+                              className="h-8 w-8 rounded-lg hover:bg-primary/5 hover:text-primary text-muted-foreground transition-colors cursor-pointer"
+                              title="Auditar modelo 3D"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                             <a 
                               href={asset.fileUrl} 
                               target="_blank" 
@@ -359,6 +380,13 @@ export default function AdminProductsPage() {
         )}
 
       </div>
+
+      <Asset3DPreviewModal
+        isOpen={isPreviewOpen}
+        onOpenChange={setIsPreviewOpen}
+        assetUrl={previewUrl}
+        assetName={previewName}
+      />
     </ProtectedRoute>
   );
 }

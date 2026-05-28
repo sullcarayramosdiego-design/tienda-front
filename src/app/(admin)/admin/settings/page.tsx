@@ -11,7 +11,10 @@ import {
   Truck,
   ShieldCheck,
   CheckCircle,
-  Database
+  Database,
+  Gift,
+  Percent,
+  Coins
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,9 +34,20 @@ export default function AdminSettingsPage() {
   const { toast } = useToast();
   const [saving, setSaving] = useState(false);
 
-  // Estados de configuración de la Tienda
+  // Estados de configuración de la Tienda y Finanzas
   const [stockThreshold, setStockThreshold] = useState('10');
   const [currency, setCurrency] = useState('PEN');
+  const [taxRate, setTaxRate] = useState('18');
+  const [shippingFee, setShippingFee] = useState('15.00');
+
+  // Estados de Mecánicas de Fidelización (Club 3D)
+  const [vipDiscount, setVipDiscount] = useState('10');
+  const [pointsEquivalence, setPointsEquivalence] = useState('1.00'); // 100 puntos = 1.00
+  const [pointsPerPurchase, setPointsPerPurchase] = useState('5'); // 5 pts por S/1
+  const [pointsReferrer, setPointsReferrer] = useState('500');
+  const [pointsReferee, setPointsReferee] = useState('250');
+
+  // Estados de Pasarelas
   const [paymentCulqi, setPaymentCulqi] = useState(true);
   const [paymentYape, setPaymentYape] = useState(true);
   const [paymentPlin, setPaymentPlin] = useState(true);
@@ -77,6 +91,13 @@ export default function AdminSettingsPage() {
   const handleResetSettings = () => {
     setStockThreshold('10');
     setCurrency('PEN');
+    setTaxRate('18');
+    setShippingFee('15.00');
+    setVipDiscount('10');
+    setPointsEquivalence('1.00');
+    setPointsPerPurchase('5');
+    setPointsReferrer('500');
+    setPointsReferee('250');
     setPaymentCulqi(true);
     setPaymentYape(true);
     setPaymentPlin(true);
@@ -134,43 +155,154 @@ export default function AdminSettingsPage() {
           <Card className="bg-card/40 border-primary/5">
             <CardHeader>
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Truck className="h-4.5 w-4.5 text-primary" /> Gestión Operativa e Inventario
+                <Truck className="h-4.5 w-4.5 text-primary" /> Gestión Financiera y Operativa
               </CardTitle>
               <CardDescription className="text-[11px]">
-                Umbrales críticos del stock de productos y parámetros de facturación.
+                Umbrales críticos, moneda, impuestos (IGV) y tarifas de envío globales.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-xs font-semibold">
-              {/* Umbral de Stock */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Umbral de Stock Crítico (Alerta)</span>
-                <Input
-                  type="number"
-                  value={stockThreshold}
-                  onChange={(e) => setStockThreshold(e.target.value)}
-                  required
-                  className="h-10 rounded-xl bg-muted/30 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
-                />
-                <p className="text-[10px] text-muted-foreground/60 font-medium">Los productos con stock igual o inferior a este número dispararán el banner rojo de alerta.</p>
+              <div className="grid grid-cols-2 gap-4">
+                {/* Umbral de Stock */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Umbral Crítico (Alerta)</span>
+                  <Input
+                    type="number"
+                    value={stockThreshold}
+                    onChange={(e) => setStockThreshold(e.target.value)}
+                    required
+                    className="h-10 rounded-xl bg-muted/30 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                  />
+                </div>
+                {/* Divisa */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Divisa Oficial</span>
+                  <Select value={currency} onValueChange={setCurrency}>
+                    <SelectTrigger className="h-10 rounded-xl bg-muted/30 border-primary/5 text-xs cursor-pointer">
+                      <SelectValue placeholder="Soles (S/.)" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card">
+                      <SelectItem className="text-xs cursor-pointer" value="PEN">Soles Peruanos (S/.)</SelectItem>
+                      <SelectItem className="text-xs cursor-pointer" value="USD">Dólares Americanos ($)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
-              {/* Divisa */}
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Divisa Oficial de la Plataforma</span>
-                <Select value={currency} onValueChange={setCurrency}>
-                  <SelectTrigger className="h-10 rounded-xl bg-muted/30 border-primary/5 text-xs cursor-pointer">
-                    <SelectValue placeholder="Soles (S/.)" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-card">
-                    <SelectItem className="text-xs cursor-pointer" value="PEN">Soles Peruanos (S/.)</SelectItem>
-                    <SelectItem className="text-xs cursor-pointer" value="USD">Dólares Americanos ($)</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                {/* IGV */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Tasa de IGV (%)</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.1"
+                    value={taxRate}
+                    onChange={(e) => setTaxRate(e.target.value)}
+                    required
+                    className="h-10 rounded-xl bg-muted/30 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                  />
+                </div>
+                {/* Envío */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Tarifa Base Envío (S/.)</span>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.10"
+                    value={shippingFee}
+                    onChange={(e) => setShippingFee(e.target.value)}
+                    required
+                    className="h-10 rounded-xl bg-muted/30 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Bloque 2: Pasarelas de Pago Activas */}
+          {/* Bloque 2: Mecánicas de Fidelización (Club 3D) */}
+          <Card className="bg-card/40 border-primary/5 border-violet-500/10">
+            <CardHeader className="bg-violet-500/5 pb-4 border-b border-violet-500/10 rounded-t-xl">
+              <CardTitle className="text-sm font-bold flex items-center gap-2 text-violet-500">
+                <Gift className="h-4.5 w-4.5" /> Mecánicas de Fidelización (Club 3D)
+              </CardTitle>
+              <CardDescription className="text-[11px] text-violet-500/70">
+                Configura los beneficios, descuentos y reglas del sistema de lealtad.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 text-xs font-semibold pt-4">
+              <div className="grid grid-cols-2 gap-4">
+                {/* Descuento VIP */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Dcto. Usuarios VIP (%)</span>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={vipDiscount}
+                      onChange={(e) => setVipDiscount(e.target.value)}
+                      required
+                      className="h-10 rounded-xl pl-9 bg-muted/30 border-primary/5 focus-visible:ring-2 focus-visible:ring-violet-500/40 text-xs"
+                    />
+                    <Percent className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+                {/* Equivalencia Puntos */}
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Valor de 100 Pts (S/.)</span>
+                  <div className="relative">
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.10"
+                      value={pointsEquivalence}
+                      onChange={(e) => setPointsEquivalence(e.target.value)}
+                      required
+                      className="h-10 rounded-xl pl-9 bg-muted/30 border-primary/5 focus-visible:ring-2 focus-visible:ring-violet-500/40 text-xs"
+                    />
+                    <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 pt-2 border-t border-primary/5">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Emisión de Puntos por Compras y Referidos</span>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-muted-foreground">Pts x S/1 Gasto</span>
+                    <Input
+                      type="number"
+                      value={pointsPerPurchase}
+                      onChange={(e) => setPointsPerPurchase(e.target.value)}
+                      className="h-9 rounded-lg bg-muted/30 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-muted-foreground">Bono Patrocinador</span>
+                    <Input
+                      type="number"
+                      value={pointsReferrer}
+                      onChange={(e) => setPointsReferrer(e.target.value)}
+                      className="h-9 rounded-lg bg-muted/30 text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[9px] text-muted-foreground">Bono Invitado</span>
+                    <Input
+                      type="number"
+                      value={pointsReferee}
+                      onChange={(e) => setPointsReferee(e.target.value)}
+                      className="h-9 rounded-lg bg-muted/30 text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Bloque 3: Pasarelas de Pago Activas */}
           <Card className="bg-card/40 border-primary/5">
             <CardHeader>
               <CardTitle className="text-sm font-bold flex items-center gap-2">

@@ -95,6 +95,14 @@ export const productsService = {
     const response = await apiClient.get<ApiResponse<{ id: string; name: string; slug: string; description?: string }[]>>('/products/categories');
     return response.data.data;
   },
+
+  /**
+   * Crear una nueva categoría (requiere rol ADMIN)
+   */
+  async createCategory(data: { name: string; description?: string }): Promise<{ id: string; name: string; slug: string; description?: string }> {
+    const response = await apiClient.post<ApiResponse<{ id: string; name: string; slug: string; description?: string }>>('/products/categories', data);
+    return response.data.data;
+  },
 };
 
 export default productsService;

@@ -28,6 +28,11 @@ export interface Subscription {
   autoRenew: boolean;
   createdAt: string;
   updatedAt: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export const subscriptionService = {

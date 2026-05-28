@@ -48,6 +48,8 @@ export default function StorefrontLayout({
       else if (segment === 'orders') label = 'Mis Pedidos';
       else if (segment === 'loyalty') label = 'Puntos Club 3D';
       else if (segment === 'checkout') label = 'Pasarela de Pago';
+      else if (segment === 'subscription') label = 'Suscripción Premium';
+      else if (segment === 'referrals') label = 'Programa de Referidos';
 
       // Fallback for dynamic UUID/slug routes
       if (segment.match(/^[a-f0-9-]{36}$/i)) label = 'Detalle de Producto';

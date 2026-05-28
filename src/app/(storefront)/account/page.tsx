@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useLoyalty } from '@/hooks/useLoyalty';
 import { subscriptionService } from '@/services/subscription.service';
@@ -17,6 +18,7 @@ import {
   ShieldCheck, 
   TrendingUp, 
   ChevronRight, 
+  ArrowRight,
   Calendar, 
   Mail,
   Zap,

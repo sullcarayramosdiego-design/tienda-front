@@ -22,6 +22,11 @@ export interface LoyaltyAccount {
   transactions: PointsTransaction[];
   createdAt: string;
   updatedAt: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 }
 
 export interface RedeemResult {

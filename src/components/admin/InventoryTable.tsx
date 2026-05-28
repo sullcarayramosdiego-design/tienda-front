@@ -1,18 +1,25 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Package, 
-  AlertTriangle, 
-  History, 
-  Sliders, 
-  Search, 
-  Plus, 
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  Package,
+  AlertTriangle,
+  History,
+  Sliders,
+  Search,
+  Plus,
   Minus,
   RefreshCw,
   CheckCircle,
   FileText,
-  User as UserIcon
+  User as UserIcon,
+  Box,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  X,
+  Trash2,
+  EyeOff,
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -41,6 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/components/ui/toast';
@@ -48,12 +56,24 @@ import { cn } from '@/lib/utils';
 import { productsService } from '@/services/products.service';
 import { inventoryService, LowStockAlert, InventoryMovement } from '@/services/inventory.service';
 import type { Product } from '@/types/api';
+import { Asset3DUpload } from './Asset3DUpload';
 
 export function InventoryTable() {
   const [products, setProducts] = useState<Product[]>([]);
   const [lowStockAlerts, setLowStockAlerts] = useState<LowStockAlert[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortKey, setSortKey] = useState<'sku' | 'name' | 'category' | 'price' | 'stock' | 'status' | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+  // Estados de Filtros por Columna
+  const [showColumnFilters, setShowColumnFilters] = useState(false);
+  const [skuFilter, setSkuFilter] = useState('');
+  const [nameFilter, setNameFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [priceMinFilter, setPriceMinFilter] = useState('');
+  const [priceMaxFilter, setPriceMaxFilter] = useState('');
+  const [stockStatusFilter, setStockStatusFilter] = useState('all');
   const { toast } = useToast();
 
   // Estados de Crear Producto
@@ -67,8 +87,15 @@ export function InventoryTable() {
   const [newProductCategoryId, setNewProductCategoryId] = useState('');
   const [submittingCreate, setSubmittingCreate] = useState(false);
 
+  // Estados de Crear Categoría
+  const [isCategoryCreateOpen, setIsCategoryCreateOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [submittingCategory, setSubmittingCategory] = useState(false);
+
   // Estados de Modales
   const [isAdjustOpen, setIsAdjustOpen] = useState(false);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [adjustType, setAdjustType] = useState<'PURCHASE' | 'DAMAGE' | 'ADJUSTMENT' | 'RETURN'>('ADJUSTMENT');
   const [adjustQuantity, setAdjustQuantity] = useState('1');
@@ -81,13 +108,26 @@ export function InventoryTable() {
   const [historyMovements, setHistoryMovements] = useState<InventoryMovement[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // Estado del Dialog de Confirmación (reemplaza window.confirm)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    type: 'toggle' | 'delete';
+    product: Product | null;
+    submitting: boolean;
+  }>({
+    open: false,
+    type: 'toggle',
+    product: null,
+    submitting: false,
+  });
+
   // Cargar productos y alertas
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [productsData, alertsData] = await Promise.all([
         productsService.list({ limit: 100 }),
-        inventoryService.getLowStockAlerts(10), // Umbral de 10 unidades
+        inventoryService.getLowStockAlerts(10),
       ]);
       const prodArray = Array.isArray(productsData)
         ? productsData
@@ -99,7 +139,6 @@ export function InventoryTable() {
       setProducts(prodArray);
       setLowStockAlerts(alertsData);
     } catch (error: any) {
-      console.error('Error fetching inventory data:', error);
       toast({
         type: 'error',
         title: 'Error al sincronizar inventario',
@@ -120,8 +159,8 @@ export function InventoryTable() {
       try {
         const cats = await productsService.getCategories();
         setCategoriesList(cats);
-      } catch (error) {
-        console.error('Error loading categories:', error);
+      } catch {
+        // Silencioso: categorías son opcionales en la UI
       }
     };
     loadCategories();
@@ -173,14 +212,11 @@ export function InventoryTable() {
         stock: stockNum,
         categoryId: newProductCategoryId || undefined,
       });
-      
       toast({
         type: 'success',
         title: 'Producto Creado 🎁',
         description: `El producto ${newProductName} se ha registrado y agregado al inventario con éxito.`,
       });
-      
-      // Limpiar y Cerrar
       setNewProductName('');
       setNewProductDescription('');
       setNewProductSku('');
@@ -188,11 +224,8 @@ export function InventoryTable() {
       setNewProductStock('0');
       setNewProductCategoryId('');
       setIsCreateOpen(false);
-      
-      // Recargar datos de la tabla
       fetchData();
     } catch (error: any) {
-      console.error('Error creating product:', error);
       toast({
         type: 'error',
         title: 'Error al registrar producto',
@@ -200,6 +233,85 @@ export function InventoryTable() {
       });
     } finally {
       setSubmittingCreate(false);
+    }
+  };
+
+  // Enviar creación del nuevo categoría
+  const handleCreateCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) {
+      toast({ type: 'error', title: 'Error', description: 'El nombre de la categoría es obligatorio.' });
+      return;
+    }
+    try {
+      setSubmittingCategory(true);
+      await productsService.createCategory({
+        name: newCategoryName.trim(),
+        description: newCategoryDescription.trim() || undefined,
+      });
+      toast({
+        type: 'success',
+        title: 'Categoría Creada 📁',
+        description: `La categoría "${newCategoryName}" se registró con éxito.`,
+      });
+      setNewCategoryName('');
+      setNewCategoryDescription('');
+      setIsCategoryCreateOpen(false);
+      const cats = await productsService.getCategories();
+      setCategoriesList(cats);
+    } catch (error: any) {
+      toast({
+        type: 'error',
+        title: 'Error al crear categoría',
+        description: error.response?.data?.message || 'Hubo un error al crear la categoría.',
+      });
+    } finally {
+      setSubmittingCategory(false);
+    }
+  };
+
+  // Abrir dialog de confirmación de baja/alta
+  const handleToggleActive = (product: Product) => {
+    setConfirmDialog({ open: true, type: 'toggle', product, submitting: false });
+  };
+
+  // Abrir dialog de confirmación de eliminación
+  const handleDeleteProduct = (product: Product) => {
+    setConfirmDialog({ open: true, type: 'delete', product, submitting: false });
+  };
+
+  // Ejecutar la acción confirmada
+  const handleConfirmAction = async () => {
+    const { type, product } = confirmDialog;
+    if (!product) return;
+    setConfirmDialog((prev) => ({ ...prev, submitting: true }));
+    try {
+      if (type === 'toggle') {
+        await productsService.update(product.id, {
+          isActive: product.isActive !== false ? false : true,
+        });
+        toast({
+          type: 'success',
+          title: product.isActive !== false ? 'Producto Dado de Baja 🚫' : 'Producto Activado 👍',
+          description: `El producto "${product.name}" se actualizó correctamente.`,
+        });
+      } else {
+        await productsService.delete(product.id);
+        toast({
+          type: 'success',
+          title: 'Producto Eliminado 🗑️',
+          description: `El producto "${product.name}" se eliminó del catálogo de manera permanente.`,
+        });
+      }
+      fetchData();
+    } catch (error: any) {
+      toast({
+        type: 'error',
+        title: type === 'toggle' ? 'Error de actualización' : 'Error de eliminación',
+        description: error.response?.data?.message || 'No se pudo completar la acción.',
+      });
+    } finally {
+      setConfirmDialog({ open: false, type: 'toggle', product: null, submitting: false });
     }
   };
 
@@ -211,6 +323,12 @@ export function InventoryTable() {
     setAdjustDirection('ADD');
     setAdjustReason('');
     setIsAdjustOpen(true);
+  };
+
+  // Manejar apertura de modal de carga 3D
+  const openUploadModal = (product: Product) => {
+    setSelectedProduct(product);
+    setIsUploadOpen(true);
   };
 
   // Enviar ajuste manual de stock
@@ -281,11 +399,131 @@ export function InventoryTable() {
     }
   };
 
-  // Filtrar productos por búsqueda
-  const filteredProducts = products.filter((p) => {
-    const term = searchQuery.toLowerCase();
-    return p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term);
-  });
+  // Ordenamiento callback
+  const handleSort = (key: 'sku' | 'name' | 'category' | 'price' | 'stock' | 'status') => {
+    if (sortKey === key) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else {
+        setSortKey(null); // Quitar ordenamiento en el tercer click
+      }
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  };
+
+  // Helper para renderizar cabecera interactiva
+  const renderSortHeader = (key: 'sku' | 'name' | 'category' | 'price' | 'stock' | 'status', label: string, align: 'left' | 'center' | 'right' = 'left') => {
+    const isSorted = sortKey === key;
+    return (
+      <TableHead 
+        className={cn(
+          "font-bold text-xs select-none cursor-pointer transition-colors hover:text-foreground group",
+          align === 'center' ? 'text-center' : align === 'right' ? 'text-right' : ''
+        )}
+        onClick={() => handleSort(key)}
+      >
+        <div className={cn("flex items-center gap-1", align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : 'justify-start')}>
+          <span>{label}</span>
+          {isSorted ? (
+            sortDirection === 'asc' ? (
+              <ArrowUp className="h-3 w-3 text-primary animate-in fade-in zoom-in duration-200" />
+            ) : (
+              <ArrowDown className="h-3 w-3 text-primary animate-in fade-in zoom-in duration-200" />
+            )
+          ) : (
+            <ArrowUpDown className="h-3 w-3 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
+          )}
+        </div>
+      </TableHead>
+    );
+  };
+
+  // Limpiar todos los filtros
+  const clearAllFilters = () => {
+    setSearchQuery('');
+    setSkuFilter('');
+    setNameFilter('');
+    setCategoryFilter('all');
+    setPriceMinFilter('');
+    setPriceMaxFilter('');
+    setStockStatusFilter('all');
+    setSortKey(null);
+    setSortDirection('asc');
+  };
+
+  const hasActiveFilters = !!(searchQuery || skuFilter || nameFilter ||
+    categoryFilter !== 'all' || priceMinFilter || priceMaxFilter ||
+    stockStatusFilter !== 'all' || sortKey);
+
+  // Filtrar y ordenar productos con useMemo
+  const filteredProducts = useMemo(() => {
+    let result = [...products];
+
+    // 1. Búsqueda global (SKU o nombre)
+    if (searchQuery.trim()) {
+      const term = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) => p.name.toLowerCase().includes(term) || p.sku.toLowerCase().includes(term)
+      );
+    }
+
+    // 2. Filtros por columna
+    if (skuFilter.trim()) {
+      const term = skuFilter.toLowerCase();
+      result = result.filter((p) => p.sku.toLowerCase().includes(term));
+    }
+    if (nameFilter.trim()) {
+      const term = nameFilter.toLowerCase();
+      result = result.filter((p) => p.name.toLowerCase().includes(term));
+    }
+    if (categoryFilter && categoryFilter !== 'all') {
+      result = result.filter(
+        (p) => p.category?.id === categoryFilter || (p as any).categoryId === categoryFilter
+      );
+    }
+    if (priceMinFilter.trim()) {
+      const min = parseFloat(priceMinFilter);
+      if (!isNaN(min)) result = result.filter((p) => p.price >= min);
+    }
+    if (priceMaxFilter.trim()) {
+      const max = parseFloat(priceMaxFilter);
+      if (!isNaN(max)) result = result.filter((p) => p.price <= max);
+    }
+    if (stockStatusFilter && stockStatusFilter !== 'all') {
+      result = result.filter((p) => {
+        if (stockStatusFilter === 'out_of_stock') return p.stock <= 0;
+        if (stockStatusFilter === 'low_stock') return p.stock > 0 && p.stock < 10;
+        if (stockStatusFilter === 'in_stock') return p.stock >= 10;
+        return true;
+      });
+    }
+
+    // 3. Ordenamiento
+    if (sortKey) {
+      result.sort((a, b) => {
+        let valA: any = '';
+        let valB: any = '';
+        if (sortKey === 'sku') { valA = a.sku || ''; valB = b.sku || ''; }
+        else if (sortKey === 'name') { valA = a.name || ''; valB = b.name || ''; }
+        else if (sortKey === 'category') { valA = a.category?.name || 'General'; valB = b.category?.name || 'General'; }
+        else if (sortKey === 'price') { valA = a.price || 0; valB = b.price || 0; }
+        else if (sortKey === 'stock' || sortKey === 'status') { valA = a.stock || 0; valB = b.stock || 0; }
+
+        if (typeof valA === 'string' && typeof valB === 'string') {
+          return sortDirection === 'asc'
+            ? valA.localeCompare(valB, 'es', { sensitivity: 'base' })
+            : valB.localeCompare(valA, 'es', { sensitivity: 'base' });
+        }
+        if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [products, searchQuery, skuFilter, nameFilter, categoryFilter, priceMinFilter, priceMaxFilter, stockStatusFilter, sortKey, sortDirection]);
 
   const getStockStatus = (stock: number) => {
     if (stock <= 0) return { label: 'SIN STOCK', variant: 'destructive', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
@@ -329,7 +567,7 @@ export function InventoryTable() {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="text-2xl font-black text-foreground">
-                {products.length} <span className="text-xs font-bold text-muted-foreground">Productos</span>
+                {filteredProducts.length} {filteredProducts.length !== products.length && <span className="text-sm font-normal text-muted-foreground">/ {products.length}</span>} <span className="text-xs font-bold text-muted-foreground">Productos</span>
               </div>
             )}
             <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
@@ -354,7 +592,7 @@ export function InventoryTable() {
               <Skeleton className="h-8 w-16" />
             ) : (
               <div className="text-2xl font-black text-rose-500">
-                {lowStockAlerts.length} <span className="text-xs font-bold text-rose-500/80">Críticos</span>
+                {filteredProducts.filter(p => p.stock < 10).length} {filteredProducts.length !== products.length && <span className="text-sm font-normal text-rose-500/70">/ {lowStockAlerts.length}</span>} <span className="text-xs font-bold text-rose-500/80">Críticos</span>
               </div>
             )}
             <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
@@ -385,27 +623,72 @@ export function InventoryTable() {
         </Card>
       </div>
 
-      {/* Buscador de Stock */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-center bg-card/40 p-4 rounded-xl border border-primary/5">
-        <div className="relative w-full sm:max-w-md group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-          <Input
-            type="text"
-            placeholder="Buscar producto por SKU o nombre..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 transition-all"
-          />
-        </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button onClick={() => setIsCreateOpen(true)} className="flex-1 sm:flex-initial h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer shadow-sm shadow-primary/10">
-            <Plus className="h-4 w-4" />
-            Nuevo Producto
-          </Button>
-          <Button onClick={fetchData} variant="outline" size="sm" className="h-10 px-3.5 rounded-xl text-xs font-bold gap-1 cursor-pointer">
-            <RefreshCw className="h-3.5 w-3.5" />
-            Sincronizar
-          </Button>
+      {/* Buscador y Acciones */}
+      <div className="bg-card/40 p-4 rounded-xl border border-primary/5">
+        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+          {/* Campo de Búsqueda + Toggle Filtros */}
+          <div className="flex gap-2 flex-1">
+            <div className="relative flex-1 group">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input
+                type="text"
+                placeholder="Buscar por SKU o nombre..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 transition-all text-xs"
+              />
+            </div>
+            {/* Botón Filtros */}
+            <Button
+              type="button"
+              variant={showColumnFilters ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setShowColumnFilters((v) => !v)}
+              className={cn(
+                "h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 cursor-pointer shrink-0 transition-all",
+                showColumnFilters
+                  ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
+                  : 'border-primary/15 hover:bg-primary/5'
+              )}
+            >
+              <Sliders className="h-3.5 w-3.5" />
+              Filtros
+              {hasActiveFilters && !showColumnFilters && (
+                <span className="ml-0.5 inline-flex items-center justify-center h-4 w-4 rounded-full bg-primary text-primary-foreground text-[9px] font-black">
+                  !
+                </span>
+              )}
+            </Button>
+            {/* Botón Limpiar */}
+            {hasActiveFilters && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={clearAllFilters}
+                className="h-10 px-3 rounded-xl text-xs font-bold gap-1 text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer shrink-0"
+                title="Desactivar todos los filtros"
+              >
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            )}
+          </div>
+
+          {/* Acciones */}
+          <div className="flex gap-2 shrink-0">
+            <Button onClick={() => setIsCategoryCreateOpen(true)} variant="outline" className="flex-1 sm:flex-initial h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 border-primary/15 text-foreground hover:bg-primary/5 cursor-pointer shadow-sm">
+              <Plus className="h-4 w-4" />
+              Nueva Categoría
+            </Button>
+            <Button onClick={() => setIsCreateOpen(true)} className="flex-1 sm:flex-initial h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 bg-primary text-primary-foreground hover:bg-primary/95 cursor-pointer shadow-sm shadow-primary/10">
+              <Plus className="h-4 w-4" />
+              Nuevo Producto
+            </Button>
+            <Button onClick={fetchData} variant="outline" size="sm" className="h-10 px-3.5 rounded-xl text-xs font-bold gap-1 cursor-pointer">
+              <RefreshCw className="h-3.5 w-3.5" />
+              Sincronizar
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -416,14 +699,98 @@ export function InventoryTable() {
             <Table>
               <TableHeader className="bg-muted/50">
                 <TableRow>
-                  <TableHead className="font-bold text-xs">SKU</TableHead>
-                  <TableHead className="font-bold text-xs">Producto</TableHead>
-                  <TableHead className="font-bold text-xs">Categoría</TableHead>
-                  <TableHead className="font-bold text-xs">Precio</TableHead>
-                  <TableHead className="font-bold text-xs text-center">Stock Disponible</TableHead>
-                  <TableHead className="font-bold text-xs">Estado</TableHead>
+                  {renderSortHeader('sku', 'SKU')}
+                  {renderSortHeader('name', 'Producto')}
+                  {renderSortHeader('category', 'Categoría')}
+                  {renderSortHeader('price', 'Precio')}
+                  {renderSortHeader('stock', 'Stock Disponible', 'center')}
+                  {renderSortHeader('status', 'Estado')}
                   <TableHead className="font-bold text-xs text-right">Acciones</TableHead>
                 </TableRow>
+                {/* Fila de Filtros por Columna */}
+                {showColumnFilters && (
+                  <TableRow className="bg-primary/5 border-b border-primary/10">
+                    <TableHead className="py-1.5 px-2">
+                      <Input
+                        placeholder="SKU..."
+                        value={skuFilter}
+                        onChange={(e) => setSkuFilter(e.target.value)}
+                        className="h-7 text-[11px] rounded-lg bg-background border-primary/15 focus-visible:ring-1 focus-visible:ring-primary/40 w-full min-w-[70px]"
+                      />
+                    </TableHead>
+                    <TableHead className="py-1.5 px-2">
+                      <Input
+                        placeholder="Nombre..."
+                        value={nameFilter}
+                        onChange={(e) => setNameFilter(e.target.value)}
+                        className="h-7 text-[11px] rounded-lg bg-background border-primary/15 focus-visible:ring-1 focus-visible:ring-primary/40 w-full min-w-[100px]"
+                      />
+                    </TableHead>
+                    <TableHead className="py-1.5 px-2">
+                      <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                        <SelectTrigger className="h-7 text-[11px] rounded-lg bg-background border-primary/15 cursor-pointer min-w-[110px]">
+                          <SelectValue placeholder="Categoría" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card">
+                          <SelectItem value="all" className="text-xs cursor-pointer">Todas</SelectItem>
+                          {categoriesList.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.id} className="text-xs cursor-pointer">{cat.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableHead>
+                    <TableHead className="py-1.5 px-2">
+                      <div className="flex gap-1 items-center min-w-[110px]">
+                        <Input
+                          placeholder="Min"
+                          value={priceMinFilter}
+                          onChange={(e) => setPriceMinFilter(e.target.value)}
+                          className="h-7 text-[11px] rounded-lg bg-background border-primary/15 focus-visible:ring-1 focus-visible:ring-primary/40 w-full"
+                          type="number"
+                          min="0"
+                        />
+                        <span className="text-[10px] text-muted-foreground shrink-0">–</span>
+                        <Input
+                          placeholder="Max"
+                          value={priceMaxFilter}
+                          onChange={(e) => setPriceMaxFilter(e.target.value)}
+                          className="h-7 text-[11px] rounded-lg bg-background border-primary/15 focus-visible:ring-1 focus-visible:ring-primary/40 w-full"
+                          type="number"
+                          min="0"
+                        />
+                      </div>
+                    </TableHead>
+                    <TableHead className="py-1.5 px-2 text-center">
+                      {/* Sin filtro de columna para stock numérico — usar la de precio */}
+                    </TableHead>
+                    <TableHead className="py-1.5 px-2">
+                      <Select value={stockStatusFilter} onValueChange={setStockStatusFilter}>
+                        <SelectTrigger className="h-7 text-[11px] rounded-lg bg-background border-primary/15 cursor-pointer min-w-[100px]">
+                          <SelectValue placeholder="Estado" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-card">
+                          <SelectItem value="all" className="text-xs cursor-pointer">Todos</SelectItem>
+                          <SelectItem value="in_stock" className="text-xs cursor-pointer">Disponible</SelectItem>
+                          <SelectItem value="low_stock" className="text-xs cursor-pointer">Bajo Stock</SelectItem>
+                          <SelectItem value="out_of_stock" className="text-xs cursor-pointer">Sin Stock</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableHead>
+                    <TableHead className="py-1.5 px-2 text-right">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearAllFilters}
+                        className="h-7 px-2 rounded-lg text-[11px] font-bold text-muted-foreground hover:text-foreground gap-1 cursor-pointer"
+                        title="Desactivar todos los filtros"
+                      >
+                        <X className="h-3 w-3" />
+                        Limpiar
+                      </Button>
+                    </TableHead>
+                  </TableRow>
+                )}
               </TableHeader>
               <TableBody>
                 {loading ? (
@@ -474,28 +841,76 @@ export function InventoryTable() {
                             {status.label}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            {/* Ver Historial */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openHistoryModal(p)}
-                              className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary cursor-pointer"
-                              title="Historial de movimientos"
-                            >
-                              <History className="h-4 w-4" />
-                            </Button>
-                            {/* Ajustar Stock */}
+                        <TableCell className="text-right pr-3">
+                          <div className="flex justify-end items-center gap-0.5">
+
+                            {/* ── Grupo Principal ── */}
+                            <div className="flex items-center gap-0.5 bg-muted/50 rounded-lg px-1 py-0.5">
+                              {/* 3D Assets */}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openUploadModal(p)}
+                                className="h-7 w-7 rounded-md hover:bg-primary/10 hover:text-primary cursor-pointer text-primary/70 transition-colors"
+                                title="Gestionar recursos 3D / AR"
+                              >
+                                <Box className="h-3.5 w-3.5" />
+                              </Button>
+                              {/* Historial */}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openHistoryModal(p)}
+                                className="h-7 w-7 rounded-md hover:bg-muted-foreground/10 hover:text-foreground cursor-pointer text-muted-foreground/60 transition-colors"
+                                title="Historial de movimientos"
+                              >
+                                <History className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+
+                            {/* Ajustar Stock — CTA principal */}
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => openAdjustModal(p)}
-                              className="h-8 px-2.5 rounded-lg border-primary/5 text-xs font-bold hover:bg-primary/5 hover:text-primary cursor-pointer gap-1"
+                              className="h-7 px-2.5 rounded-lg border-primary/15 text-[11px] font-bold hover:bg-primary/8 hover:text-primary hover:border-primary/30 cursor-pointer gap-1 mx-1"
                             >
-                              <Sliders className="h-3.5 w-3.5" />
+                              <Sliders className="h-3 w-3" />
                               Ajustar
                             </Button>
+
+                            {/* ── Separador ── */}
+                            <div className="w-px h-5 bg-border/60 mx-0.5 shrink-0" />
+
+                            {/* ── Zona de Peligro ── */}
+                            <div className="flex items-center gap-0.5">
+                              {/* Dar de baja / Activar */}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleToggleActive(p)}
+                                className={cn(
+                                  "h-7 w-7 rounded-md cursor-pointer transition-colors",
+                                  p.isActive !== false
+                                    ? "text-amber-500/80 hover:bg-amber-500/10 hover:text-amber-600"
+                                    : "text-emerald-500/80 hover:bg-emerald-500/10 hover:text-emerald-600"
+                                )}
+                                title={p.isActive !== false ? 'Dar de baja' : 'Activar producto'}
+                              >
+                                <EyeOff className="h-3.5 w-3.5" />
+                              </Button>
+                              {/* Eliminar */}
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeleteProduct(p)}
+                                className="h-7 w-7 rounded-md cursor-pointer text-rose-500/70 hover:bg-rose-500/10 hover:text-rose-600 transition-colors"
+                                title="Eliminar producto permanentemente"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+
                           </div>
                         </TableCell>
                       </TableRow>
@@ -693,6 +1108,46 @@ export function InventoryTable() {
         </DialogContent>
       </Dialog>
 
+        {/* MODAL 4: CARGAR MODELO 3D INLINE */}
+        <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+          <DialogContent className="sm:max-w-md rounded-xl p-6 shadow-xl bg-card border-primary/5">
+            <DialogHeader>
+              <DialogTitle className="text-sm font-bold text-foreground">Asociar Modelo 3D / AR</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Cargue un archivo .glb o .usdz para <span className="font-bold text-primary">{selectedProduct?.name}</span>.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4">
+              {selectedProduct && (
+                <Asset3DUpload 
+                  productId={selectedProduct.id} 
+                  onUploadSuccess={async () => {
+                    toast({
+                      type: 'success',
+                      title: '¡Modelo 3D Vinculado!',
+                      description: 'El modelo se asoció con éxito al producto.'
+                    });
+                    setIsUploadOpen(false);
+                    fetchData(); // Recargar inventario para actualizar badge
+                  }} 
+                />
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsUploadOpen(false)}
+                className="rounded-xl text-xs cursor-pointer w-full"
+              >
+                Cerrar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
       {/* MODAL 3: CREAR NUEVO PRODUCTO */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="sm:max-w-lg rounded-xl p-6 shadow-xl bg-card border-primary/5">
@@ -823,6 +1278,66 @@ export function InventoryTable() {
                 className="rounded-xl bg-primary text-primary-foreground font-bold text-xs cursor-pointer shadow-md shadow-primary/10"
               >
                 {submittingCreate ? 'Creando...' : 'Crear Producto'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* MODAL 5: CREAR NUEVA CATEGORÍA */}
+      <Dialog open={isCategoryCreateOpen} onOpenChange={setIsCategoryCreateOpen}>
+        <DialogContent className="sm:max-w-md rounded-xl p-6 shadow-xl bg-card border-primary/5">
+          <form onSubmit={handleCreateCategory}>
+            <DialogHeader>
+              <DialogTitle className="text-sm font-bold text-foreground">Crear Nueva Categoría</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Agrega una nueva categoría al catálogo para clasificar tus productos y modelos 3D.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              {/* Nombre */}
+              <div className="grid gap-1">
+                <Label htmlFor="catName" className="text-xs font-bold text-muted-foreground">Nombre de la Categoría</Label>
+                <Input
+                  id="catName"
+                  type="text"
+                  placeholder="Ej: Muebles de Oficina"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  className="h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                  required
+                />
+              </div>
+
+              {/* Descripción */}
+              <div className="grid gap-1">
+                <Label htmlFor="catDesc" className="text-xs font-bold text-muted-foreground">Descripción (Opcional)</Label>
+                <textarea
+                  id="catDesc"
+                  placeholder="Describe qué tipo de productos pertenecerán a esta categoría..."
+                  value={newCategoryDescription}
+                  onChange={(e) => setNewCategoryDescription(e.target.value)}
+                  className="w-full min-w-0 rounded-xl border border-primary/10 bg-muted/40 px-3.5 py-2 text-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 h-20"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsCategoryCreateOpen(false)}
+                className="rounded-xl text-xs cursor-pointer"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={submittingCategory}
+                className="rounded-xl bg-primary text-primary-foreground font-bold text-xs cursor-pointer shadow-md shadow-primary/10"
+              >
+                {submittingCategory ? 'Creando...' : 'Crear Categoría'}
               </Button>
             </DialogFooter>
           </form>

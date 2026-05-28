@@ -88,6 +88,7 @@ export interface Product {
   updatedAt: string;
   assets?: Asset3D[];
   category?: any;
+  isActive?: boolean;
 }
 
 export interface CreateProductData {
@@ -96,6 +97,8 @@ export interface CreateProductData {
   price: number;
   sku: string;
   stock: number;
+  categoryId?: string;
+  isActive?: boolean;
 }
 
 export interface UpdateProductData {
@@ -104,6 +107,8 @@ export interface UpdateProductData {
   price?: number;
   sku?: string;
   stock?: number;
+  categoryId?: string;
+  isActive?: boolean;
 }
 
 export interface ProductListResponse {

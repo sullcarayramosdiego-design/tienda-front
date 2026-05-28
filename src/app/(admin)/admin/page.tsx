@@ -1,323 +1,299 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  TrendingUp, 
-  ShoppingBag, 
-  Users as UsersIcon, 
-  Package, 
-  ArrowRight,
-  ShieldAlert,
-  AlertTriangle,
-  Receipt,
-  LayoutDashboard,
-  Calendar
-} from 'lucide-react';
-import Link from 'next/link';
+import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/components/ui/toast';
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Alert, AlertTitle, AlertDescription, AlertAction } from '@/components/ui/alert';
-import reportsService from '@/services/reports.service';
-import productsService from '@/services/products.service';
-import inventoryService from '@/services/inventory.service';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
+  BarChart, Bar,
+  LineChart, Line,
+  ComposedChart, Scatter,
+  PieChart, Pie, Cell,
+  Tooltip, Legend
+} from 'recharts';
+import { 
+  ChartContainer, 
+  ChartTooltip, 
+  ChartTooltipContent
+} from '@/components/ui/chart';
+import { DollarSign, Filter, ShoppingBag, Users as UsersIcon, CreditCard, Tag } from 'lucide-react';
+import { reportsService } from '@/services/reports.service';
+import { productsService } from '@/services/products.service';
 
 export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    revenue: 0,
-    orders: 0,
-    users: 0,
-    products: 0,
-    lowStockAlerts: 0,
+  const [period, setPeriod] = useState<'30d' | 'year' | 'all'>('30d');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
+  const [data, setData] = useState<any>({
+    finance: null,
+    users: null,
+    productsAnalytics: null,
   });
-  const { toast } = useToast();
-
-  const loadStats = useCallback(async () => {
-    try {
-      setLoading(true);
-      // Cargar reportes financieros, analíticas de usuarios, catálogo y alertas críticas en paralelo
-      const [financeData, userData, productsData, alertsData] = await Promise.all([
-        reportsService.getFinanceSummary(),
-        reportsService.getAnalyticsUsers(),
-        productsService.list({ limit: 1 }),
-        inventoryService.getLowStockAlerts(10),
-      ]);
-
-      // Extraer totales de productos de forma segura
-      const totalProducts = (productsData as any).meta?.total 
-        || (productsData as any).total 
-        || (Array.isArray(productsData) ? productsData.length : 0);
-
-      setStats({
-        revenue: financeData?.totalRevenue || 0,
-        orders: financeData?.orderCount || 0,
-        users: userData?.totalUsers || 0,
-        products: totalProducts,
-        lowStockAlerts: alertsData?.length || 0,
-      });
-    } catch (error: any) {
-      console.error('Error loading dashboard stats:', error);
-      toast({
-        type: 'error',
-        title: 'Error al sincronizar dashboard',
-        description: error.response?.data?.message || 'Error de conexión con el backend.',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
 
   useEffect(() => {
-    loadStats();
-  }, [loadStats]);
+    async function loadData() {
+      setLoading(true);
+      try {
+        let startDate: string | undefined;
+        let endDate: string | undefined;
+        
+        const now = new Date();
+        if (period === '30d') {
+          const past = new Date(now);
+          past.setDate(now.getDate() - 30);
+          startDate = past.toISOString();
+          endDate = now.toISOString();
+        } else if (period === 'year') {
+          const past = new Date(now.getFullYear(), 0, 1);
+          startDate = past.toISOString();
+          endDate = now.toISOString();
+        }
 
-  // Formateador de moneda S/.
+        const [finance, users, productsAnalytics] = await Promise.all([
+          reportsService.getFinanceSummary(startDate, endDate),
+          reportsService.getAnalyticsUsers(startDate, endDate),
+          reportsService.getAnalyticsProducts(startDate, endDate),
+        ]);
+        setData({ finance, users, productsAnalytics });
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [period]);
+
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('es-PE', {
-      style: 'currency',
-      currency: 'PEN',
-    }).format(value);
+    return new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(value || 0);
   };
 
+  // --- MAPPING REAL DATA TO CHARTS ---
+  const paymentMethodsData = data.finance?.paymentMethods?.map((pm: any) => ({
+    name: pm.method,
+    ingresos: pm.revenue,
+  })) || [];
+
+  const categoriesData = data.productsAnalytics?.categoriesBreakdown?.map((cat: any) => ({
+    name: cat.category,
+    ventas: cat.revenue,
+  })) || [];
+
+  const dailyUsersData = data.users?.dailyRegistrations?.map((d: any) => ({
+    date: d.date.substring(5, 10),
+    usuarios: d.count,
+  })) || [];
+
+  const topProductsData = data.productsAnalytics?.topProducts
+    ?.filter((p: any) => selectedCategory ? p.category === selectedCategory : true)
+    ?.map((p: any) => ({
+      name: p.name.substring(0, 15) + '...',
+      unidades: p.unitsSold,
+      ingresos: p.revenue,
+    })) || [];
+
+  if (loading) {
+    return <div className="p-4 text-center text-muted-foreground animate-pulse font-bold flex flex-col items-center justify-center min-h-screen">Cargando analíticas...</div>;
+  }
+
   return (
-    <ProtectedRoute requireAdmin>
-      <div className="space-y-6 w-full p-4">
-        {/* Banner Encabezado */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-primary/5 pb-6">
-          <div>
-            <h1 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
-              <LayoutDashboard className="h-8 w-8 text-primary" />
-              Panel de Control Principal
-            </h1>
-            <p className="text-xs text-muted-foreground font-semibold mt-1">
-              Vista general consolidada del rendimiento de la tienda, catálogo e inventario.
-            </p>
+    <div className="w-full min-h-full p-0 animate-in fade-in duration-500 bg-background flex flex-col md:flex-row-reverse gap-2 lg:gap-4">
+      
+      {/* SIDEBAR DE FILTROS A LA DERECHA */}
+      <div className="w-full md:w-48 lg:w-56 bg-primary/5 rounded-none md:rounded-2xl p-4 flex flex-col gap-4 border-l border-primary/10 md:border md:border-primary/20 shrink-0">
+        <div className="flex items-center gap-2 text-primary font-bold border-b border-primary/20 pb-2">
+          <Filter className="h-4 w-4" />
+          <span className="text-sm">Filtros</span>
+        </div>
+        
+        <div className="flex gap-2">
+          <div className="grid grid-cols-1 gap-1 text-[10px] flex-1">
+            <button 
+              onClick={() => setPeriod('30d')}
+              className={`rounded p-1.5 text-center font-bold shadow-sm transition-colors ${period === '30d' ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-primary/20'}`}
+            >
+              Últimos 30 días
+            </button>
+            <button 
+              onClick={() => setPeriod('year')}
+              className={`rounded p-1.5 text-center font-bold shadow-sm transition-colors ${period === 'year' ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-primary/20'}`}
+            >
+              Este Año
+            </button>
+            <button 
+              onClick={() => setPeriod('all')}
+              className={`rounded p-1.5 text-center font-bold shadow-sm transition-colors ${period === 'all' ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-primary/20'}`}
+            >
+              Histórico
+            </button>
           </div>
-          <Button 
-            onClick={loadStats} 
-            variant="outline" 
-            className="self-start md:self-auto gap-2 font-bold text-xs h-10 px-4 rounded-xl cursor-pointer"
-          >
-            Refrescar Datos
-          </Button>
+          <div className="flex items-center shrink-0">
+            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-background/50 rounded px-1.5 py-2 rotate-180" style={{ writingMode: 'vertical-rl' }}>Periodo</div>
+          </div>
         </div>
 
-        {/* Notificaciones y Alertas Críticas */}
-        {stats.lowStockAlerts > 0 && (
-          <Alert variant="destructive" className="border-destructive/20 rounded-2xl animate-pulse">
-            <AlertTriangle className="h-5 w-5 shrink-0 text-destructive" />
-            <AlertTitle className="text-xs font-bold">Alerta de Inventario</AlertTitle>
-            <AlertDescription className="text-xs font-semibold mt-0.5">
-              Hay <span className="font-extrabold">{stats.lowStockAlerts} productos</span> con stock crítico (bajo 10 unidades).
-            </AlertDescription>
-            <AlertAction className="top-1/2 -translate-y-1/2 right-4">
-              <Link href="/admin/inventory">
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="border-destructive/20 text-destructive hover:bg-destructive/10 h-8 px-3 rounded-lg font-bold text-[10px] cursor-pointer"
+        <div className="flex gap-2 mt-4">
+          <div className="grid grid-cols-2 gap-1 text-[10px] flex-1">
+            {data.productsAnalytics?.categoriesBreakdown?.slice(0,6).map((c: any) => {
+              const isSelected = selectedCategory === c.category;
+              return (
+                <button 
+                  key={c.category} 
+                  onClick={() => setSelectedCategory(isSelected ? null : c.category)}
+                  className={`rounded p-1 flex items-center justify-center text-center font-medium shadow-sm transition-colors overflow-hidden text-ellipsis whitespace-nowrap ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-background text-foreground hover:bg-primary/20'}`}
+                  title={c.category}
                 >
-                  Gestionar Stock
-                </Button>
-              </Link>
-            </AlertAction>
-          </Alert>
-        )}
-
-        {/* Cuadrícula de Métricas Clave */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Revenue */}
-          <Card className="bg-card/70 border-primary/5 hover:border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
-            <div className="absolute right-0 bottom-0 translate-y-6 translate-x-2 opacity-5 scale-150">
-              <TrendingUp className="h-24 w-24 text-emerald-500 group-hover:scale-110 transition-transform duration-500" />
-            </div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-                Ingresos Totales
-                <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <Skeleton className="h-8 w-24" />
-              ) : (
-                <div className="text-2xl font-black text-foreground">
-                  {formatCurrency(stats.revenue)}
-                </div>
-              )}
-              <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
-                Facturación acumulada real
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Orders */}
-          <Card className="bg-card/70 border-primary/5 hover:border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
-            <div className="absolute right-0 bottom-0 translate-y-6 translate-x-2 opacity-5 scale-150">
-              <ShoppingBag className="h-24 w-24 text-primary group-hover:scale-110 transition-transform duration-500" />
-            </div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-                Pedidos Totales
-                <ShoppingBag className="h-3.5 w-3.5 text-primary" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-black text-foreground">
-                  {stats.orders}
-                </div>
-              )}
-              <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
-                Órdenes procesadas en tienda
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Users */}
-          <Card className="bg-card/70 border-primary/5 hover:border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
-            <div className="absolute right-0 bottom-0 translate-y-6 translate-x-2 opacity-5 scale-150">
-              <UsersIcon className="h-24 w-24 text-indigo-500 group-hover:scale-110 transition-transform duration-500" />
-            </div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-                Usuarios Clientes
-                <UsersIcon className="h-3.5 w-3.5 text-indigo-500" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-black text-foreground">
-                  {stats.users}
-                </div>
-              )}
-              <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
-                Cuentas activas en base
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Products */}
-          <Card className="bg-card/70 border-primary/5 hover:border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden group">
-            <div className="absolute right-0 bottom-0 translate-y-6 translate-x-2 opacity-5 scale-150">
-              <Package className="h-24 w-24 text-amber-500 group-hover:scale-110 transition-transform duration-500" />
-            </div>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center justify-between">
-                Productos Catálogo
-                <Package className="h-3.5 w-3.5 text-amber-500" />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-black text-foreground">
-                  {stats.products}
-                </div>
-              )}
-              <p className="text-[10px] font-semibold text-muted-foreground/80 mt-1">
-                Artículos listados a la venta
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Secciones de Gestión Rápida */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-          {/* Panel de Accesos Directos */}
-          <Card className="bg-card/40 border-primary/5 p-6 space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-foreground">Gestión Operativa</h3>
-              <p className="text-[10px] text-muted-foreground font-semibold">Accesos directos a los flujos principales de administración.</p>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <Link href="/admin/orders" className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-primary/5 hover:bg-muted/60 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                    <ShoppingBag className="h-4 w-4" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-bold">Pedidos y Despacho</div>
-                    <div className="text-[9px] text-muted-foreground">Kanban drag-and-drop en tiempo real.</div>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-
-              <Link href="/admin/inventory" className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-primary/5 hover:bg-muted/60 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
-                    <Package className="h-4 w-4" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-bold">Control de Inventario</div>
-                    <div className="text-[9px] text-muted-foreground">Alertas críticas, ingresos y egresos.</div>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-
-              <Link href="/admin/finance" className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-primary/5 hover:bg-muted/60 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                    <Receipt className="h-4 w-4" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-bold">Libro Contable y Finanzas</div>
-                    <div className="text-[9px] text-muted-foreground">Historial, ticket promedio e informes CSV.</div>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-            </div>
-          </Card>
-
-          {/* Panel de Estadísticas Generales */}
-          <Card className="bg-card/40 border-primary/5 p-6 space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-foreground">Analíticas & Seguridad</h3>
-              <p className="text-[10px] text-muted-foreground font-semibold">Control administrativo de accesos y visualización de datos.</p>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <Link href="/admin/analytics/users" className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-primary/5 hover:bg-muted/60 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
-                    <UsersIcon className="h-4 w-4" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-bold">Métricas y Cuentas</div>
-                    <div className="text-[9px] text-muted-foreground">Conversión de ventas y perfiles administrativos.</div>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-
-              <Link href="/admin/products" className="flex items-center justify-between p-3 rounded-xl bg-muted/30 border border-primary/5 hover:bg-muted/60 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-500">
-                    <Package className="h-4 w-4" />
-                  </div>
-                  <div className="text-left">
-                    <div className="text-xs font-bold">Catálogo & Activos 3D</div>
-                    <div className="text-[9px] text-muted-foreground">Gestión de stock, cargas de modelos GLB y visor 3D.</div>
-                  </div>
-                </div>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </Link>
-            </div>
-          </Card>
+                  <span className="truncate w-full block">{c.category}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center shrink-0">
+            <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest bg-background/50 rounded px-1.5 py-2 rotate-180" style={{ writingMode: 'vertical-rl' }}>Categorías</div>
+          </div>
         </div>
       </div>
-    </ProtectedRoute>
+
+      {/* ÁREA PRINCIPAL */}
+      <div className="flex-1 flex flex-col gap-2 lg:gap-4 min-w-0">
+        
+        {/* TOP KPIs REALES */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-3">
+          <Card className="shadow-none border-border bg-card rounded-xl">
+            <CardContent className="p-3 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Ingreso Total</p>
+                <p className="text-lg lg:text-xl font-black text-primary tracking-tighter">{formatCurrency(data.finance?.totalRevenue)}</p>
+              </div>
+              <DollarSign className="h-6 w-6 text-primary/30" />
+            </CardContent>
+          </Card>
+          <Card className="shadow-none border-border bg-card rounded-xl">
+            <CardContent className="p-3 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Pedidos Pagados</p>
+                <p className="text-lg lg:text-xl font-black text-foreground tracking-tighter">{data.finance?.orderCount}</p>
+              </div>
+              <ShoppingBag className="h-6 w-6 text-foreground/30" />
+            </CardContent>
+          </Card>
+          <Card className="shadow-none border-border bg-card rounded-xl">
+            <CardContent className="p-3 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Ticket Promedio</p>
+                <p className="text-lg lg:text-xl font-black text-secondary tracking-tighter">{formatCurrency(data.finance?.averageTicket)}</p>
+              </div>
+              <CreditCard className="h-6 w-6 text-secondary/30" />
+            </CardContent>
+          </Card>
+          <Card className="shadow-none border-border bg-card rounded-xl">
+            <CardContent className="p-3 flex items-center justify-between">
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Usuarios Activos</p>
+                <p className="text-lg lg:text-xl font-black text-accent tracking-tighter">{data.users?.activeBuyersCount}</p>
+              </div>
+              <UsersIcon className="h-6 w-6 text-accent/30" />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* CONTENIDO PRINCIPAL BENTO GRID */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-2 lg:gap-4 flex-1">
+          
+          {/* COLUMNA IZQUIERDA (Categorías y Pagos) */}
+          <div className="flex flex-col gap-2 lg:gap-4 xl:col-span-1">
+            <Card className="shadow-none border-border rounded-xl flex-1 flex flex-col">
+              <CardHeader className="pb-0 p-3">
+                <CardTitle className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                  <CreditCard className="h-3.5 w-3.5 text-primary" /> Ingresos por Pago
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 flex-1 min-h-[140px]">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <BarChart data={paymentMethodsData} layout="vertical" margin={{ left: -15, right: 20, top: 0, bottom: 0 }}>
+                    <XAxis type="number" hide />
+                    <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} width={85} style={{ fontSize: '9px', fill: 'var(--foreground)', fontWeight: 600 }} />
+                    <Tooltip cursor={{ fill: 'var(--muted)', opacity: 0.3 }} formatter={(val: any) => formatCurrency(Number(val))} />
+                    <Bar dataKey="ingresos" fill="var(--primary)" radius={[0, 4, 4, 0]} barSize={12} label={{ position: 'right', fill: 'var(--foreground)', fontSize: 9, fontWeight: 700 }} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-none border-border rounded-xl flex-1 flex flex-col">
+              <CardHeader className="pb-0 p-3">
+                <CardTitle className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                  <Tag className="h-3.5 w-3.5 text-secondary" /> Ventas por Categoría
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 flex-1 min-h-[140px]">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <BarChart data={categoriesData} layout="vertical" margin={{ left: -15, right: 20, top: 0, bottom: 0 }}>
+                    <XAxis type="number" hide />
+                    <YAxis type="category" dataKey="name" tickLine={false} axisLine={false} width={85} style={{ fontSize: '9px', fill: 'var(--foreground)', fontWeight: 600 }} />
+                    <Tooltip cursor={{ fill: 'var(--muted)', opacity: 0.3 }} formatter={(val: any) => formatCurrency(Number(val))} />
+                    <Bar dataKey="ventas" fill="var(--secondary)" radius={[0, 4, 4, 0]} barSize={12} label={{ position: 'right', fill: 'var(--foreground)', fontSize: 9, fontWeight: 700 }} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* COLUMNAS DERECHAS (Evolución y Productos) */}
+          <div className="flex flex-col gap-2 lg:gap-4 xl:col-span-2">
+            
+            {/* Top Productos (Bar+Line Composed) */}
+            <Card className="shadow-none border-border rounded-xl flex-1 flex flex-col min-h-[200px]">
+              <CardHeader className="pb-0 p-3">
+                <CardTitle className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                  <ShoppingBag className="h-3.5 w-3.5 text-accent" /> Rendimiento de Top Productos
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 flex-1">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <ComposedChart data={topProductsData} margin={{ left: -15, right: 10, top: 10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--muted-foreground)" strokeOpacity={0.15} />
+                    <XAxis dataKey="name" tickLine={false} axisLine={false} tickMargin={5} style={{ fontSize: '9px', fill: 'var(--muted-foreground)' }} />
+                    <YAxis yAxisId="left" tickLine={false} axisLine={false} tickFormatter={(val) => `S/${val/1000}k`} style={{ fontSize: '9px', fill: 'var(--muted-foreground)' }} />
+                    <YAxis yAxisId="right" orientation="right" tickLine={false} axisLine={false} style={{ fontSize: '9px', fill: 'var(--muted-foreground)' }} />
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }} />
+                    <Legend wrapperStyle={{ fontSize: '10px' }} />
+                    <Bar yAxisId="left" dataKey="ingresos" name="Ingresos Generados" barSize={25} fill="var(--primary)" radius={[4, 4, 0, 0]} />
+                    <Line yAxisId="right" type="monotone" name="Unidades Vendidas" dataKey="unidades" stroke="var(--accent)" strokeWidth={3} dot={{ r: 4 }} />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Evolución de Usuarios */}
+            <Card className="shadow-none border-border rounded-xl flex-1 flex flex-col min-h-[200px]">
+              <CardHeader className="pb-0 p-3">
+                <CardTitle className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                  <UsersIcon className="h-3.5 w-3.5 text-primary" /> Adquisición Diaria de Usuarios
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-2 flex-1">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <AreaChart data={dailyUsersData} margin={{ left: -15, right: 10, top: 10, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="fillUsers" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--muted-foreground)" strokeOpacity={0.15} />
+                    <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={5} style={{ fontSize: '9px', fill: 'var(--muted-foreground)' }} />
+                    <YAxis tickLine={false} axisLine={false} style={{ fontSize: '9px', fill: 'var(--muted-foreground)' }} />
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }} />
+                    <Area type="monotone" name="Nuevos Usuarios" dataKey="usuarios" stroke="var(--primary)" strokeWidth={2} fill="url(#fillUsers)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

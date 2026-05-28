@@ -17,7 +17,11 @@ import {
   Moon,
   Sparkles,
   Award,
-  Gift
+  Gift,
+  BarChart2,
+  Package,
+  Heart,
+  Shield
 } from 'lucide-react';
 import { useTheme } from '@/providers';
 
@@ -53,21 +57,24 @@ import { NotificationBell } from './NotificationBell';
 
 const adminNavigationGroups = [
   {
-    label: '📊 ANALÍTICA Y RENDIMIENTO',
+    label: 'Analítica y Rendimiento',
+    icon: BarChart2,
     links: [
       { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
       { href: '/admin/analytics', label: 'Métricas y Reportes', icon: TrendingUp },
     ],
   },
   {
-    label: '📦 GESTIÓN OPERATIVA',
+    label: 'Gestión Operativa',
+    icon: Package,
     links: [
       { href: '/admin/orders', label: 'Pedidos y Despachos', icon: ShoppingCart },
       { href: '/admin/inventory', label: 'Inventario 3D', icon: Box },
     ],
   },
   {
-    label: '📈 MARKETING & FIDELIZACIÓN',
+    label: 'Marketing & Fidelización',
+    icon: Heart,
     links: [
       { href: '/admin/subscriptions', label: 'Suscripciones VIP', icon: Sparkles },
       { href: '/admin/loyalty', label: 'Club de Puntos', icon: Award },
@@ -75,7 +82,8 @@ const adminNavigationGroups = [
     ],
   },
   {
-    label: '⚙️ ADMINISTRACIÓN',
+    label: 'Administración',
+    icon: Shield,
     links: [
       { href: '/admin/users', label: 'Cuentas de Usuario', icon: Users },
       { href: '/admin/finance', label: 'Finanzas', icon: Wallet },
@@ -212,12 +220,15 @@ export function AdminSidebar() {
       <SidebarSeparator className="mx-auto my-1 w-[calc(100%-2rem)] group-data-[collapsible=icon]:w-[calc(100%-1rem)]" />
 
       <SidebarContent className="gap-2">
-        {adminNavigationGroups.map((group) => (
-          <SidebarGroup key={group.label} className="py-1">
-            <SidebarGroupLabel className="text-[10px] font-bold tracking-wider text-muted-foreground uppercase px-2 h-6">
-              {group.label}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
+        {adminNavigationGroups.map((group) => {
+          const GroupIcon = group.icon;
+          return (
+            <SidebarGroup key={group.label} className="py-1">
+              <SidebarGroupLabel className="flex items-center gap-2 text-[10px] font-bold tracking-wider text-muted-foreground uppercase px-2 h-6">
+                <GroupIcon className="h-3.5 w-3.5" />
+                {group.label}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
               <SidebarMenu>
                 {group.links.map((link) => {
                   const Icon = link.icon;
@@ -239,7 +250,8 @@ export function AdminSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        ))}
+          );
+        })}
       </SidebarContent>
 
       <SidebarSeparator className="mx-auto my-1 w-[calc(100%-2rem)] group-data-[collapsible=icon]:w-[calc(100%-1rem)]" />

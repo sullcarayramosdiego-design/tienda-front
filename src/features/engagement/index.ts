@@ -1,3 +1,4 @@
+export * from './components/LoyaltyDashboard';
 export * from './components/LoyaltyPointsBadge';
 export * from './components/MarketingFeatures';
 export * from './components/MarketingHero';

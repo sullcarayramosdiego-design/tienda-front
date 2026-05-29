@@ -8,7 +8,7 @@ import { ProductCard } from '@/features/catalog';
 import { ProductViewer3D } from '@/features/catalog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { 
   ArrowRight, 
@@ -22,10 +22,12 @@ import {
   Clock,
   ExternalLink,
   Zap,
-  XCircle
+  XCircle,
+  Check
 } from 'lucide-react';
 import { useOrders } from '@/features/checkout';
 import { useLoyalty, useWishlist } from '@/features/engagement';
+import { subscriptionService, type SubscriptionPlan } from '@/features/subscriptions';
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuth();
@@ -36,12 +38,32 @@ export default function HomePage() {
   // Fetch products for recommendations (unfiltered, page 1)
   const { products, loading } = useProducts({ page: 1, limit: 3 });
 
+  // Plans state for Guest Pricing Section
+  const [plans, setPlans] = React.useState<SubscriptionPlan[]>([]);
+  const [loadingPlans, setLoadingPlans] = React.useState(true);
+
   React.useEffect(() => {
     if (isAuthenticated) {
       fetchAccount();
       fetchMyOrders();
     }
   }, [isAuthenticated, fetchAccount, fetchMyOrders]);
+
+  // Load plans for the guest landing view
+  React.useEffect(() => {
+    async function loadPlans() {
+      try {
+        setLoadingPlans(true);
+        const data = await subscriptionService.getPlans();
+        setPlans(data);
+      } catch (err) {
+        console.error('Error al cargar planes en landing:', err);
+      } finally {
+        setLoadingPlans(false);
+      }
+    }
+    loadPlans();
+  }, []);
 
   // Slice to only show exactly 3 premium recommendations on the dashboard
   const featuredProducts = React.useMemo(() => {
@@ -135,7 +157,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="space-y-1">
               <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
-                {activeOrdersCount} <span className="text-sm font-bold text-muted-foreground font-sans">{activeOrdersCount === 1 ? 'En Camino' : 'En Camino'}</span>
+                {activeOrdersCount} <span className="text-sm font-bold text-muted-foreground font-sans">En Camino</span>
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Haciendo seguimiento en tiempo real.
@@ -456,6 +478,127 @@ export default function HomePage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Pricing / Plans Section */}
+      <section className="py-16 sm:py-24 bg-background border-t border-primary/5">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 space-y-4">
+            <Badge className="gap-2 text-xs bg-primary/10 border-primary/20 text-primary hover:bg-primary/20">
+              <Sparkles className="h-3.5 w-3.5 animate-pulse text-secondary" />
+              <span>Planes Club Premium 3D</span>
+            </Badge>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-extrabold text-foreground">
+              Membresías VIP exclusivas
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+              Desbloquea Realidad Aumentada interactiva, descuentos automáticos en catálogo, envíos exprés gratuitos y acumulación de puntos acelerada.
+            </p>
+          </div>
+
+          {loadingPlans ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto animate-pulse">
+              {[1, 2, 3].map((n) => (
+                <Skeleton key={n} className="h-96 rounded-3xl bg-primary/5 border border-primary/5" />
+              ))}
+            </div>
+          ) : plans.length === 0 ? (
+            <div className="text-center text-sm text-muted-foreground py-10">
+              No hay planes de suscripción disponibles en este momento.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto items-stretch">
+              {plans.map((plan) => {
+                const isRecommended = plan.name.toLowerCase().includes('plata');
+                return (
+                  <Card 
+                    key={plan.id}
+                    className={`border rounded-3xl overflow-hidden relative flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 ${
+                      isRecommended 
+                        ? 'border-primary bg-primary/5 shadow-lg shadow-primary/5 ring-1 ring-primary/50' 
+                        : 'border-primary/10 bg-card/60'
+                    }`}
+                  >
+                    {isRecommended && (
+                      <div className="absolute top-0 right-0 left-0 bg-primary text-primary-foreground text-center py-1 text-[10px] font-black uppercase tracking-widest">
+                        Plan Recomendado
+                      </div>
+                    )}
+
+                    <div>
+                      <CardHeader className={`pb-4 ${isRecommended ? 'pt-8' : 'pt-6'}`}>
+                        <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Membresía</span>
+                        <CardTitle className="text-lg font-heading font-extrabold mt-1 text-foreground">
+                          {plan.name}
+                        </CardTitle>
+                        <CardDescription className="text-[11px] text-muted-foreground leading-relaxed mt-1.5">
+                          {plan.description}
+                        </CardDescription>
+                      </CardHeader>
+
+                      <CardContent className="px-6 py-2 space-y-6">
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-3xl font-heading font-black text-foreground">
+                            S/. {plan.price.toFixed(0)}
+                          </span>
+                          <span className="text-xs font-bold text-muted-foreground">
+                            /mes
+                          </span>
+                        </div>
+
+                        <ul className="space-y-3 pt-2">
+                          <li className="flex items-center gap-2.5 text-xs">
+                            <Check className="h-4.5 w-4.5 text-primary shrink-0" />
+                            <span className="text-foreground">Acceso 3D interactivo prioritario</span>
+                          </li>
+                          <li className="flex items-center gap-2.5 text-xs">
+                            {plan.features.arEnabled ? (
+                              <Check className="h-4.5 w-4.5 text-primary shrink-0" />
+                            ) : (
+                              <span className="h-4.5 w-4.5 text-muted-foreground/30 shrink-0 text-center select-none font-bold block">-</span>
+                            )}
+                            <span className={plan.features.arEnabled ? 'text-foreground font-semibold' : 'text-muted-foreground/50'}>
+                              Realidad Aumentada en móviles
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2.5 text-xs">
+                            {plan.features.premiumDiscounts ? (
+                              <Check className="h-4.5 w-4.5 text-primary shrink-0" />
+                            ) : (
+                              <span className="h-4.5 w-4.5 text-muted-foreground/30 shrink-0 text-center select-none font-bold block">-</span>
+                            )}
+                            <span className={plan.features.premiumDiscounts ? 'text-foreground font-semibold' : 'text-muted-foreground/50'}>
+                              10% Descuento directo en catálogo
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-2.5 text-xs">
+                            <Check className="h-4.5 w-4.5 text-primary shrink-0" />
+                            <span className="text-foreground">Envíos VIP y Soporte 24/7</span>
+                          </li>
+                        </ul>
+                      </CardContent>
+                    </div>
+
+                    <div className="p-6 pt-2">
+                      <Button 
+                        asChild
+                        className={`w-full rounded-2xl font-bold cursor-pointer h-11 px-6 active:scale-98 transition-all duration-300 shadow-md ${
+                          isRecommended 
+                            ? 'bg-primary hover:bg-primary/95 text-white shadow-primary/10' 
+                            : 'bg-card text-foreground border border-primary/20 hover:bg-primary hover:text-white shadow-primary/5'
+                        }`}
+                      >
+                        <Link href="/login">
+                          Registrarme y Suscribirme <ArrowRight className="h-4 w-4 ml-1.5 shrink-0" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </div>

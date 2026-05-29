@@ -4,6 +4,10 @@ const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 const prefix = process.env.NEXT_PUBLIC_API_PREFIX || '';
 const API_BASE_URL = prefix ? `${baseUrl}/${prefix}` : baseUrl;
 
+if (typeof window !== 'undefined') {
+  console.log('🔌 [API Client] Conectado a API_BASE_URL:', API_BASE_URL);
+}
+
 /**
  * Cliente HTTP configurado con interceptores para autenticación JWT
  * y manejo automático de refresh tokens

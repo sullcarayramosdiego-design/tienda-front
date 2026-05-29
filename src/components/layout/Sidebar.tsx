@@ -17,7 +17,9 @@ import {
   ChevronsUpDown,
   Settings,
   Sun,
-  Moon
+  Moon,
+  Award,
+  Gift
 } from 'lucide-react';
 import { useTheme } from '@/providers';
 import {
@@ -128,12 +130,6 @@ function NavUser({ user, onLogout }: { user: UserType; onLogout: () => void }) {
                 Mi Perfil
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
-              <Link href="/account/orders" className="flex w-full items-center gap-2">
-                <ShoppingBag className="size-4 text-muted-foreground" />
-                Mis Pedidos
-              </Link>
-            </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-primary/5" />
             <DropdownMenuItem 
               onClick={onLogout}
@@ -154,16 +150,33 @@ export function Sidebar() {
   const { user, isAuthenticated, logout } = useAuth();
   const { state } = useSidebar();
 
-  // Dynamic Navigation Links depending on Authentication
-  const navigationLinks = [
-    { href: '/', label: 'Inicio', icon: Home, matchExact: true },
-    { href: '/catalog', label: 'Catálogo 3D', icon: Box, matchExact: false },
+  // Dynamic Navigation Groups depending on Authentication
+  const navigationGroups = [
+    {
+      label: 'Explorar',
+      links: [
+        { href: '/', label: 'Inicio', icon: Home, matchExact: true },
+        { href: '/catalog', label: 'Catálogo 3D', icon: Box, matchExact: false },
+      ]
+    },
     ...(isAuthenticated ? [
-      // Cart is active on /cart AND /checkout (checkout is the cart flow)
-      { href: '/cart', label: 'Mi Carrito', icon: ShoppingCart, matchExact: false, alsoActiveOn: ['/checkout'] },
-      { href: '/wishlist', label: 'Favoritos', icon: Heart, matchExact: false },
-      { href: '/account/orders', label: 'Mis Pedidos', icon: ShoppingBag, matchExact: false },
-    ] : []),
+      {
+        label: 'Mi Actividad',
+        links: [
+          { href: '/cart', label: 'Mi Carrito', icon: ShoppingCart, matchExact: false, alsoActiveOn: ['/checkout'] },
+          { href: '/wishlist', label: 'Favoritos', icon: Heart, matchExact: false },
+          { href: '/orders', label: 'Mis Pedidos', icon: ShoppingBag, matchExact: false },
+        ]
+      },
+      {
+        label: 'Fidelización',
+        links: [
+          { href: '/loyalty', label: 'Club Puntos 3D', icon: Award, matchExact: false },
+          { href: '/referrals', label: 'Programa de Referidos', icon: Gift, matchExact: false },
+          { href: '/subscription', label: 'Suscripción Premium', icon: Sparkles, matchExact: false },
+        ]
+      }
+    ] : [])
   ];
 
   return (
@@ -208,41 +221,41 @@ export function Sidebar() {
 
       {/* Main Navigation Content */}
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navegación</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navigationLinks.map((link) => {
-                const Icon = link.icon;
-                // isActive: exact match for home, prefix match for others,
-                // plus any extra paths defined in alsoActiveOn
-                const alsoActive = (link as any).alsoActiveOn ?? [];
-                const isActive = link.matchExact
-                  ? pathname === link.href
-                  : pathname.startsWith(link.href) || alsoActive.some((p: string) => pathname.startsWith(p));
+        {navigationGroups.map((group) => (
+          <SidebarGroup key={group.label}>
+            <SidebarGroupLabel className="font-black uppercase tracking-wider text-[10px] text-muted-foreground/60">{group.label}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.links.map((link) => {
+                  const Icon = link.icon;
+                  const alsoActive = (link as any).alsoActiveOn ?? [];
+                  const isActive = link.matchExact
+                    ? pathname === link.href
+                    : pathname.startsWith(link.href) || alsoActive.some((p: string) => pathname.startsWith(p));
 
-                return (
-                  <SidebarMenuItem key={link.href}>
-                    <SidebarMenuButton 
-                      asChild 
-                      isActive={isActive} 
-                      tooltip={link.label}
-                      className={cn(
-                        "cursor-pointer font-semibold rounded-lg",
-                        isActive && "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/10 focus:text-primary-foreground focus:bg-gradient-to-r"
-                      )}
-                    >
-                      <Link href={link.href}>
-                        <Icon className={cn(isActive && "text-white")} />
-                        <span>{link.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                  return (
+                    <SidebarMenuItem key={link.href}>
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive} 
+                        tooltip={link.label}
+                        className={cn(
+                          "cursor-pointer font-semibold rounded-lg",
+                          isActive && "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/10 focus:text-primary-foreground focus:bg-gradient-to-r"
+                        )}
+                      >
+                        <Link href={link.href}>
+                          <Icon className={cn(isActive && "text-white")} />
+                          <span>{link.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarSeparator className="mx-auto my-1 w-[calc(100%-2rem)] group-data-[collapsible=icon]:w-[calc(100%-1rem)]" />

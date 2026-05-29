@@ -1,5 +1,12 @@
-import { LoyaltyDashboard } from '@/features/engagement';
+'use client';
 
-export default function LoyaltyPage() {
-  return <LoyaltyDashboard />;
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function LoyaltyRedirectPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/loyalty');
+  }, [router]);
+  return null;
 }

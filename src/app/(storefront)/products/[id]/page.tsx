@@ -40,6 +40,7 @@ export default function ProductDetailPage({
   const { isAuthenticated } = useAuth();
   
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [addedNotify, setAddedNotify] = useState(false);
   const [favNotify, setFavNotify] = useState(false);
 
@@ -55,16 +56,41 @@ export default function ProductDetailPage({
     }).format(value);
   };
 
+  const displayedPrice = selectedVariant ? selectedVariant.price : (product?.price ?? 0);
+  const displayedStock = selectedVariant ? selectedVariant.stock : (product?.stock ?? 0);
+  const displayedSku = selectedVariant ? selectedVariant.sku : (product?.sku ?? '');
+  const displayedName = selectedVariant ? `${product?.name ?? ''} (${selectedVariant.name})` : (product?.name ?? '');
+
   const handleAddToCart = () => {
     if (!product) return;
-    addItem(product, quantity);
+    const cartProduct = selectedVariant
+      ? {
+          ...product,
+          id: `${product.id}-${selectedVariant.id}`,
+          name: `${product.name} (${selectedVariant.name})`,
+          price: selectedVariant.price,
+          sku: selectedVariant.sku,
+          stock: selectedVariant.stock,
+        }
+      : product;
+    addItem(cartProduct, quantity);
     setAddedNotify(true);
     setTimeout(() => setAddedNotify(false), 3000);
   };
 
   const handleToggleFav = () => {
     if (!product) return;
-    toggleItem(product);
+    const favProduct = selectedVariant
+      ? {
+          ...product,
+          id: `${product.id}-${selectedVariant.id}`,
+          name: `${product.name} (${selectedVariant.name})`,
+          price: selectedVariant.price,
+          sku: selectedVariant.sku,
+          stock: selectedVariant.stock,
+        }
+      : product;
+    toggleItem(favProduct);
     setFavNotify(true);
     setTimeout(() => setFavNotify(false), 3000);
   };
@@ -141,22 +167,9 @@ export default function ProductDetailPage({
             </div>
 
             {/* Gesture Tip panel */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border border-primary/10 bg-card/60 backdrop-blur-md rounded-2xl">
-              <div className="flex items-center gap-2.5 text-xs text-muted-foreground font-semibold">
-                <Sparkles className="h-4.5 w-4.5 text-primary animate-pulse" />
-                <span>Interactúa con el modelo arrastrando y haciendo zoom.</span>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[10px] font-black uppercase text-muted-foreground mr-1 flex items-center gap-1">
-                  <Wallet className="h-3.5 w-3.5 text-primary" /> Pagos:
-                </span>
-                <span className="px-2.5 py-1 text-[9px] font-extrabold rounded-md bg-[#00D47C]/10 text-[#00AF66] border border-[#00D47C]/15 shadow-sm uppercase tracking-wider select-none">
-                  Yape
-                </span>
-                <span className="px-2.5 py-1 text-[9px] font-extrabold rounded-md bg-[#00D2D3]/10 text-[#00A8A9] border border-[#00D2D3]/15 shadow-sm uppercase tracking-wider select-none">
-                  Plin
-                </span>
-              </div>
+            <div className="flex items-center gap-2.5 p-4 border border-primary/10 bg-card/60 backdrop-blur-md rounded-2xl justify-center">
+              <Sparkles className="h-4.5 w-4.5 text-primary animate-pulse shrink-0" />
+              <span className="text-xs text-muted-foreground font-semibold text-center">Interactúa con el modelo arrastrando y haciendo zoom.</span>
             </div>
           </div>
 
@@ -170,25 +183,25 @@ export default function ProductDetailPage({
               <div className="flex items-center gap-2">
                 <span className={cn(
                   "px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded-md border",
-                  product.stock > 0
+                  displayedStock > 0
                     ? "bg-[#00D47C]/10 border-[#00D47C]/20 text-[#00AF66]"
                     : "bg-destructive/10 border-destructive/20 text-destructive"
                 )}>
-                  {product.stock > 0 ? 'Stock Disponible' : 'Agotado'}
+                  {displayedStock > 0 ? 'Stock Disponible' : 'Agotado'}
                 </span>
                 <span className="text-xs font-bold text-muted-foreground font-mono">
-                  SKU: {product.sku}
+                  SKU: {displayedSku}
                 </span>
               </div>
 
               {/* Product Name */}
               <h1 className="text-3xl sm:text-4xl font-heading font-extrabold tracking-tight text-foreground leading-tight">
-                {product.name}
+                {displayedName}
               </h1>
 
               {/* Price */}
               <div className="text-3xl font-heading font-black text-primary">
-                {formatPrice(product.price)}
+                {formatPrice(displayedPrice)}
               </div>
             </div>
 
@@ -203,6 +216,57 @@ export default function ProductDetailPage({
                 {product.description || 'Este producto cuenta con una increíble experiencia de visualización tridimensional optimizada en WebGL. Ideal para examinar acabados y geometrías exactas.'}
               </p>
             </div>
+
+            {/* Product Variants Selector */}
+            {product.variants && product.variants.length > 0 && (
+              <>
+                <hr className="border-primary/5" />
+                <div className="space-y-4">
+                  <h3 className="text-sm font-heading font-bold uppercase tracking-wider text-muted-foreground">
+                    Variantes Disponibles
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3">
+                    {product.variants.map((v: any) => {
+                      const isSelected = selectedVariant?.id === v.id;
+                      return (
+                        <button
+                          key={v.id}
+                          onClick={() => {
+                            setSelectedVariant(isSelected ? null : v);
+                            if (v.stock < quantity) {
+                              setQuantity(Math.max(1, v.stock));
+                            }
+                          }}
+                          className={cn(
+                            "flex flex-col text-left p-3.5 rounded-2xl border transition-all cursor-pointer relative overflow-hidden",
+                            isSelected
+                              ? "border-primary bg-primary/5 shadow-md shadow-primary/5"
+                              : "border-primary/10 bg-card/40 hover:bg-card/80 hover:border-primary/20"
+                          )}
+                        >
+                          {isSelected && (
+                            <div className="absolute top-0 right-0 w-3 h-3 bg-primary rounded-bl-lg flex items-center justify-center">
+                              <div className="w-1.5 h-1.5 bg-background rounded-full" />
+                            </div>
+                          )}
+                          <span className="text-xs font-bold text-foreground line-clamp-1">{v.name}</span>
+                          <span className="text-[10px] text-muted-foreground font-mono mt-0.5">SKU: {v.sku}</span>
+                          <div className="flex justify-between items-center mt-2 w-full">
+                            <span className="text-xs font-black text-primary">{formatPrice(v.price)}</span>
+                            <span className={cn(
+                              "text-[9px] font-bold px-1.5 py-0.5 rounded",
+                              v.stock > 0 ? "bg-[#00D47C]/10 text-[#00AF66]" : "bg-destructive/10 text-destructive"
+                            )}>
+                              {v.stock > 0 ? `${v.stock} disp.` : 'Agotado'}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            )}
 
             <hr className="border-primary/5" />
 
@@ -229,8 +293,8 @@ export default function ProductDetailPage({
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                      disabled={quantity >= product.stock}
+                      onClick={() => setQuantity(Math.min(displayedStock, quantity + 1))}
+                      disabled={quantity >= displayedStock}
                       className="h-8 w-8 rounded-lg border-primary/10 cursor-pointer"
                     >
                       <Plus className="h-4 w-4" />
@@ -304,44 +368,17 @@ export default function ProductDetailPage({
               </div>
             )}
 
-            <hr className="border-primary/5" />
 
-            {/* Trust Accordion Panel */}
-            <div className="space-y-4 pt-1">
-              <div className="flex items-center gap-3.5 text-xs sm:text-sm font-medium">
-                <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
-                <div className="space-y-0.5">
-                  <span className="font-bold text-foreground">Garantía Certificada</span>
-                  <p className="text-xs text-muted-foreground">12 meses de cobertura oficial de fábrica.</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3.5 text-xs sm:text-sm font-medium">
-                <Truck className="h-5 w-5 text-primary shrink-0" />
-                <div className="space-y-0.5">
-                  <span className="font-bold text-foreground">Envío a Todo el Perú</span>
-                  <p className="text-xs text-muted-foreground">Entrega exprés en Lima (24h) y envíos rápidos a provincias.</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3.5 text-xs sm:text-sm font-medium">
-                <RotateCcw className="h-5 w-5 text-primary shrink-0" />
-                <div className="space-y-0.5">
-                  <span className="font-bold text-foreground">Devoluciones Flexibles</span>
-                  <p className="text-xs text-muted-foreground">Cambios y devoluciones gratis durante los primeros 7 días.</p>
-                </div>
-              </div>
-            </div>
-
-            <hr className="border-primary/5" />
-
-            {/* ================================================= */}
-            {/* PRODUCT REVIEWS COMPONENT (under product info)   */}
-            {/* ================================================= */}
-            <ProductReviews />
 
           </div>
 
+        </div>
+
+        {/* ================================================= */}
+        {/* PRODUCT REVIEWS COMPONENT (Full width at bottom)  */}
+        {/* ================================================= */}
+        <div className="mt-2">
+          <ProductReviews productId={product.id} />
         </div>
       </main>
     </div>

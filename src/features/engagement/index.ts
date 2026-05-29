@@ -9,4 +9,5 @@ export * from './hooks/useWishlist';
 export * from './services/loyalty.service';
 export * from './services/referrals.service';
 export * from './services/wishlist.service';
+export * from './services/reviews.service';
 export * from './stores/wishlist.store';

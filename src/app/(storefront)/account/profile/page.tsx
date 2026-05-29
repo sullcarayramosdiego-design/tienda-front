@@ -3,10 +3,10 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function SubscriptionRedirectPage() {
+export default function ProfileRedirectPage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace('/subscription');
+    router.replace('/account');
   }, [router]);
   return null;
 }

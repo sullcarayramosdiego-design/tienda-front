@@ -52,7 +52,9 @@ export default function StorefrontLayout({
       else if (segment === 'referrals') label = 'Programa de Referidos';
 
       // Fallback for dynamic UUID/slug routes
-      if (segment.match(/^[a-f0-9-]{36}$/i)) label = 'Detalle de Producto';
+      if (segment.match(/^[a-f0-9-]{36}$/i)) {
+        label = pathname.includes('/orders') ? 'Detalle de Pedido' : 'Detalle de Producto';
+      }
 
       base.push({ label, href: currentPath });
     });
@@ -98,7 +100,12 @@ export default function StorefrontLayout({
 
           {/* Main child viewport with premium spacing */}
           <main className={`flex-1 w-full mx-auto ${
-            pathname.startsWith('/catalog') 
+            pathname.startsWith('/catalog') ||
+            pathname.startsWith('/loyalty') ||
+            pathname.startsWith('/referrals') ||
+            pathname.startsWith('/subscription') ||
+            pathname.startsWith('/orders') ||
+            pathname.startsWith('/account')
               ? "max-w-none px-4 sm:px-6 lg:px-8 pt-0" 
               : "max-w-7xl p-4 sm:p-6 lg:p-8 pt-4"
           }`}>

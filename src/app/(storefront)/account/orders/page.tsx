@@ -1,5 +1,12 @@
-import { OrdersContainer } from '@/features/checkout';
+'use client';
 
-export default function OrdersPage() {
-  return <OrdersContainer />;
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function OrdersRedirectPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/orders');
+  }, [router]);
+  return null;
 }

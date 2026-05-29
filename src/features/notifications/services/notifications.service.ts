@@ -5,7 +5,16 @@ export interface Notification {
   userId: string;
   title: string;
   message: string;
-  type: 'INFO' | 'ORDER_UPDATE' | 'PAYMENT' | 'LOYALTY' | 'SYSTEM' | 'PROMO';
+  type: 
+    | 'ORDER_CONFIRMED' 
+    | 'ORDER_SHIPPED' 
+    | 'ORDER_DELIVERED' 
+    | 'PAYMENT_SUCCESS' 
+    | 'PAYMENT_FAILED' 
+    | 'POINTS_EARNED' 
+    | 'SUBSCRIPTION_RENEWED' 
+    | 'SUBSCRIPTION_EXPIRED' 
+    | 'SYSTEM';
   isRead: boolean;
   createdAt: string;
 }

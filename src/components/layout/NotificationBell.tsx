@@ -97,16 +97,20 @@ export function NotificationBell({ variant = 'ghost' }: NotificationBellProps) {
   // Obtener ícono por tipo
   const getTypeIcon = (type: Notification['type']) => {
     switch (type) {
-      case 'ORDER_UPDATE':
+      case 'ORDER_CONFIRMED':
+      case 'ORDER_SHIPPED':
+      case 'ORDER_DELIVERED':
         return <ShoppingBag className="h-4 w-4 text-blue-500" />;
-      case 'PAYMENT':
+      case 'PAYMENT_SUCCESS':
+      case 'PAYMENT_FAILED':
         return <CreditCard className="h-4 w-4 text-emerald-500" />;
-      case 'LOYALTY':
+      case 'POINTS_EARNED':
+        return <Award className="h-4 w-4 text-amber-500" />;
+      case 'SUBSCRIPTION_RENEWED':
+      case 'SUBSCRIPTION_EXPIRED':
         return <Award className="h-4 w-4 text-amber-500" />;
       case 'SYSTEM':
         return <Settings className="h-4 w-4 text-slate-500" />;
-      case 'PROMO':
-        return <Tag className="h-4 w-4 text-rose-500" />;
       default:
         return <Info className="h-4 w-4 text-primary" />;
     }

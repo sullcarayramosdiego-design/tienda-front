@@ -142,7 +142,7 @@ export function OrderCard({ order, onCancel }: { order: Order; onCancel: (id: st
               className="text-xs h-8 text-primary hover:text-primary group-hover:bg-primary/5 cursor-pointer"
               asChild
             >
-              <Link href={`/account/orders/${order.id}`}>
+              <Link href={`/orders/${order.id}`}>
                 Ver detalle <ChevronRight className="ml-1 h-3 w-3" />
               </Link>
             </Button>

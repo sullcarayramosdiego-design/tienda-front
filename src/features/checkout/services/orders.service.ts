@@ -88,6 +88,17 @@ export const ordersService = {
     const response = await apiClient.delete<{ success: boolean; data: Order }>(`/orders/${id}`);
     return response.data.data;
   },
+
+  /**
+   * Descargar boleta de pago en formato PDF
+   * GET /orders/:id/receipt
+   */
+  async downloadReceipt(id: string): Promise<Blob> {
+    const response = await apiClient.get(`/orders/${id}/receipt`, {
+      responseType: 'blob',
+    });
+    return response.data;
+  },
 };
 
 export default ordersService;

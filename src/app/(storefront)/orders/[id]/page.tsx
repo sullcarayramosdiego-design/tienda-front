@@ -13,7 +13,8 @@ import {
   FileText,
   XCircle,
   RefreshCw,
-  Info
+  Info,
+  Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,8 +37,9 @@ interface PageProps {
 
 export default function OrderDetailPage({ params }: PageProps) {
   const { id } = use(params);
-  const { currentOrder, loading, error, fetchOrderById, cancelOrder } = useOrders();
+  const { currentOrder, loading, error, fetchOrderById, cancelOrder, downloadOrderReceipt } = useOrders();
   const [cancelling, setCancelling] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -55,6 +57,18 @@ export default function OrderDetailPage({ params }: PageProps) {
       console.error('Error al cancelar la orden:', err);
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleDownloadReceipt = async () => {
+    if (!currentOrder) return;
+    setDownloading(true);
+    try {
+      await downloadOrderReceipt(currentOrder.id);
+    } catch (err) {
+      console.error('Error al descargar la boleta:', err);
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -145,40 +159,53 @@ export default function OrderDetailPage({ params }: PageProps) {
           </p>
         </div>
 
-        {/* Global actions (e.g. Cancel order) */}
-        {canCancel && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive gap-2 cursor-pointer w-full md:w-auto"
-                disabled={cancelling}
-              >
-                {cancelling ? <RefreshCw className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-                <span>{cancelling ? 'Cancelando...' : 'Cancelar Pedido'}</span>
-              </Button>
-            </DialogTrigger>
-            <DialogContent showCloseButton={true}>
-              <DialogHeader>
-                <DialogTitle>¿Cancelar pedido #{shortId}?</DialogTitle>
-                <DialogDescription>
-                  Esta acción es irreversible. El stock de los modelos 3D será restaurado automáticamente y el estado cambiará a Cancelado.
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Mantener pedido</Button>
-                </DialogClose>
+        {/* Global actions (e.g. Download Receipt / Cancel order) */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+          {/* Download Receipt PDF */}
+          <Button
+            onClick={handleDownloadReceipt}
+            className="bg-primary hover:bg-primary/95 text-white gap-2 cursor-pointer w-full sm:w-auto active:scale-95 transition-transform"
+            disabled={downloading}
+          >
+            {downloading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+            <span>{downloading ? 'Generando...' : 'Descargar Boleta (PDF)'}</span>
+          </Button>
+
+          {/* Cancel Order */}
+          {canCancel && (
+            <Dialog>
+              <DialogTrigger asChild>
                 <Button
-                  onClick={handleCancel}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
+                  variant="outline"
+                  className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive gap-2 cursor-pointer w-full sm:w-auto active:scale-95 transition-transform"
+                  disabled={cancelling}
                 >
-                  Sí, cancelar
+                  {cancelling ? <RefreshCw className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+                  <span>{cancelling ? 'Cancelando...' : 'Cancelar Pedido'}</span>
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+              </DialogTrigger>
+              <DialogContent showCloseButton={true}>
+                <DialogHeader>
+                  <DialogTitle>¿Cancelar pedido #{shortId}?</DialogTitle>
+                  <DialogDescription>
+                    Esta acción es irreversible. El stock de los modelos 3D será restaurado automáticamente y el estado cambiará a Cancelado.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Mantener pedido</Button>
+                  </DialogClose>
+                  <Button
+                    onClick={handleCancel}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer"
+                  >
+                    Sí, cancelar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </div>
 
       {/* Progress & Info Grid */}

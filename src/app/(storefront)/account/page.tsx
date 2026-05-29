@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth';
 import { usersService } from '@/features/auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,10 +9,25 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/toast';
-import { User, Mail, Shield, Sparkles, KeyRound, Loader2, CheckCircle2, Edit2, X, Save } from 'lucide-react';
+import Link from 'next/link';
+import { 
+  User, 
+  Mail, 
+  Shield, 
+  Sparkles, 
+  KeyRound, 
+  Loader2, 
+  CheckCircle2, 
+  Edit2, 
+  X, 
+  Save, 
+  Crown, 
+  ArrowRight 
+} from 'lucide-react';
+import { subscriptionService } from '@/features/subscriptions';
 
 export default function AccountPage() {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   // Profile Edit States
@@ -25,6 +40,26 @@ export default function AccountPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [updatingPassword, setUpdatingPassword] = useState(false);
+
+  // Subscription States
+  const [activeSub, setActiveSub] = useState<any>(null);
+  const [loadingSub, setLoadingSub] = useState(true);
+
+  // Fetch active subscription on mount
+  useEffect(() => {
+    async function loadSubscription() {
+      try {
+        setLoadingSub(true);
+        const sub = await subscriptionService.getCurrentSubscription();
+        setActiveSub(sub);
+      } catch (err) {
+        console.error('Error al cargar la suscripción en el perfil:', err);
+      } finally {
+        setLoadingSub(false);
+      }
+    }
+    loadSubscription();
+  }, []);
 
   if (!user) {
     return (
@@ -46,23 +81,17 @@ export default function AccountPage() {
 
     setUpdatingProfile(true);
     try {
-      const updatedUser = await usersService.updateProfile({ firstName, lastName });
+      await usersService.updateProfile({ firstName, lastName });
       toast({
-        title: '🎉 ¡Perfil Actualizado!',
-        description: 'Tus datos personales han sido actualizados con éxito.',
+        title: '✨ ¡Perfil Actualizado!',
+        description: 'Tus nombres y apellidos se han actualizado con éxito.',
         type: 'success',
       });
       setIsEditing(false);
-      
-      // Update local storage and context if necessary
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-        window.location.reload(); // Refresh to update layout names in header/sidebar
-      }
     } catch (err: any) {
       toast({
-        title: 'Error al actualizar',
-        description: err.response?.data?.message || 'Ocurrió un error inesperado al actualizar tu perfil.',
+        title: 'Error al actualizar perfil',
+        description: err.response?.data?.message || 'No se pudo guardar tu información en este momento.',
         type: 'error',
       });
     } finally {
@@ -72,16 +101,18 @@ export default function AccountPage() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password.trim()) {
-      toast({ title: 'Contraseña requerida', description: 'Por favor, ingresa tu nueva contraseña.', type: 'error' });
+    if (!password.trim() || !confirmPassword.trim()) {
+      toast({ title: 'Campos requeridos', description: 'Completa ambos campos para restablecer tu contraseña.', type: 'error' });
       return;
     }
+
     if (password.length < 6) {
       toast({ title: 'Contraseña muy corta', description: 'La contraseña debe tener al menos 6 caracteres.', type: 'error' });
       return;
     }
+
     if (password !== confirmPassword) {
-      toast({ title: 'Las contraseñas no coinciden', description: 'Verifica que ambas contraseñas escritas sean iguales.', type: 'error' });
+      toast({ title: 'Las contraseñas no coinciden', description: 'Verifica que ambas contraseñas coincidan exactamente.', type: 'error' });
       return;
     }
 
@@ -94,7 +125,7 @@ export default function AccountPage() {
         type: 'success',
       });
       setPassword('');
-      setConfirmPassword('');
+      confirmPassword && setConfirmPassword('');
     } catch (err: any) {
       toast({
         title: 'Error al cambiar contraseña',
@@ -152,13 +183,40 @@ export default function AccountPage() {
             </CardContent>
           </Card>
 
-          <div className="flex items-center gap-3 p-4 border border-primary/15 bg-gradient-to-r from-primary/5 via-secondary/5 to-transparent rounded-2xl">
-            <Sparkles className="h-5 w-5 text-primary shrink-0 animate-pulse" />
-            <div className="space-y-0.5">
-              <span className="text-xs font-black text-foreground">Socio VIP Club 3D</span>
-              <p className="text-[10px] text-muted-foreground leading-normal">Tienes acceso a todas las funcionalidades tridimensionales interactivas y soporte prioritario.</p>
+          {/* Dynamic VIP Status Card based on Subscription */}
+          {loadingSub ? (
+            <div className="p-4 border border-primary/10 rounded-2xl animate-pulse bg-muted/20 h-20 flex items-center justify-center">
+              <span className="text-xs text-muted-foreground font-semibold">Verificando estatus VIP...</span>
             </div>
-          </div>
+          ) : activeSub && activeSub.status === 'ACTIVE' ? (
+            <div className="flex items-center gap-3 p-4 border border-emerald-500/20 bg-gradient-to-r from-emerald-500/5 via-primary/5 to-transparent rounded-2xl relative overflow-hidden group">
+              <div className="absolute -right-8 -bottom-8 w-16 h-16 bg-emerald-500/10 rounded-full blur-xl group-hover:scale-125 transition-transform duration-500" />
+              <Crown className="h-5 w-5 text-emerald-500 shrink-0 animate-pulse" />
+              <div className="space-y-0.5 relative z-10">
+                <span className="text-xs font-black text-foreground">Socio VIP ({activeSub.plan.name})</span>
+                <p className="text-[10px] text-muted-foreground leading-normal">
+                  Tienes acceso a todas las funcionalidades tridimensionales interactivas, AR y soporte prioritario.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 p-4 border border-primary/10 bg-gradient-to-r from-primary/5 to-transparent rounded-2xl">
+              <div className="flex items-start gap-3">
+                <User className="h-5 w-5 text-primary shrink-0" />
+                <div className="space-y-0.5">
+                  <span className="text-xs font-black text-foreground">Membresía Básica</span>
+                  <p className="text-[10px] text-muted-foreground leading-normal">
+                    Explora y visualiza modelos 3D. Adquiere una suscripción Premium para desbloquear AR y envíos gratis.
+                  </p>
+                </div>
+              </div>
+              <Button asChild size="sm" className="w-full text-[10px] font-bold h-7 rounded-lg bg-primary hover:bg-primary/95 text-white shadow-sm cursor-pointer active:scale-98 transition-transform">
+                <Link href="/subscription">
+                  Adquirir Suscripción Premium <ArrowRight className="h-3 w-3 ml-1" />
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Right Column: Dynamic Profile Forms */}

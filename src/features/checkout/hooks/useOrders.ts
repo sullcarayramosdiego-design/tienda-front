@@ -91,6 +91,31 @@ export function useOrders() {
     }
   }, []);
 
+  /**
+   * Descargar boleta en formato PDF
+   */
+  const downloadOrderReceipt = useCallback(async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const blob = await ordersService.downloadReceipt(id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `boleta-${id.slice(-8).toUpperCase()}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      const message = 'Error al descargar la boleta de pago';
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     orders,
     currentOrder,
@@ -100,5 +125,6 @@ export function useOrders() {
     fetchOrderById,
     createOrder,
     cancelOrder,
+    downloadOrderReceipt,
   };
 }

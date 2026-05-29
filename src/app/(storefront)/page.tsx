@@ -21,19 +21,48 @@ import {
   Sparkle,
   Clock,
   ExternalLink,
-  Zap
+  Zap,
+  XCircle
 } from 'lucide-react';
+import { useOrders } from '@/features/checkout';
+import { useLoyalty, useWishlist } from '@/features/engagement';
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuth();
+  const { account, fetchAccount } = useLoyalty();
+  const { items: wishlistItems } = useWishlist();
+  const { orders, fetchMyOrders } = useOrders();
   
   // Fetch products for recommendations (unfiltered, page 1)
   const { products, loading } = useProducts({ page: 1, limit: 3 });
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      fetchAccount();
+      fetchMyOrders();
+    }
+  }, [isAuthenticated, fetchAccount, fetchMyOrders]);
 
   // Slice to only show exactly 3 premium recommendations on the dashboard
   const featuredProducts = React.useMemo(() => {
     return Array.isArray(products) ? products.slice(0, 3) : [];
   }, [products]);
+
+  // Dynamic Metrics
+  const loyaltyPoints = account?.points ?? 0;
+
+  const activeOrdersCount = React.useMemo(() => {
+    if (!orders) return 0;
+    return orders.filter(
+      (o) => o.status !== 'CANCELLED' && o.status !== 'DELIVERED' && o.status !== 'REFUNDED'
+    ).length;
+  }, [orders]);
+
+  const wishlistCount = wishlistItems?.length ?? 0;
+
+  const recentOrders = React.useMemo(() => {
+    return Array.isArray(orders) ? orders.slice(0, 3) : [];
+  }, [orders]);
 
   // ==========================================
   // 1. WELL-STRUCTURED CUSTOMER DASHBOARD (Logged-In)
@@ -87,7 +116,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="space-y-1">
               <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
-                1,250 <span className="text-sm font-bold text-muted-foreground font-sans">Pts</span>
+                {loyaltyPoints.toLocaleString('es-PE')} <span className="text-sm font-bold text-muted-foreground font-sans">Pts</span>
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Canjeables por descuentos en tus compras 3D.
@@ -106,7 +135,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="space-y-1">
               <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
-                2 <span className="text-sm font-bold text-muted-foreground font-sans">En Camino</span>
+                {activeOrdersCount} <span className="text-sm font-bold text-muted-foreground font-sans">{activeOrdersCount === 1 ? 'En Camino' : 'En Camino'}</span>
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Haciendo seguimiento en tiempo real.
@@ -125,7 +154,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="space-y-1">
               <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
-                4 <span className="text-sm font-bold text-muted-foreground font-sans">Favoritos</span>
+                {wishlistCount} <span className="text-sm font-bold text-muted-foreground font-sans">{wishlistCount === 1 ? 'Favorito' : 'Favoritos'}</span>
               </div>
               <p className="text-[11px] text-muted-foreground">
                 Sincronizados en tu lista de deseos.
@@ -137,39 +166,68 @@ export default function HomePage() {
         {/* Dashboard Sections Grid (Split into Orders Widget & Recommendations) */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* Left Panel: Simulated Recent Orders Widget */}
+          {/* Left Panel: Real Recent Orders Widget */}
           <div className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-2">
               <ShoppingBag className="h-4.5 w-4.5 text-primary" />
               <h3 className="font-heading font-bold text-lg text-foreground">Pedidos Recientes</h3>
             </div>
             
-            <Card className="border-primary/10 bg-card/40 backdrop-blur-md shadow-md">
-              <CardContent className="p-4 space-y-4">
-                <div className="flex items-start justify-between border-b border-primary/5 pb-3">
-                  <div className="space-y-1">
-                    <span className="text-[9px] font-black font-mono text-muted-foreground block uppercase">Cod: 3D-8827A</span>
-                    <span className="text-xs font-bold text-foreground">Impresión 3D PCAS (GLB)</span>
-                    <span className="flex items-center gap-1 text-[10px] text-emerald-500 font-semibold">
-                      <Truck className="h-3.5 w-3.5" /> En Ruta - Llega Hoy
-                    </span>
-                  </div>
-                </div>
+            {recentOrders.length === 0 ? (
+              <Card className="border-primary/10 bg-card/40 backdrop-blur-md shadow-md">
+                <CardContent className="p-6 text-center text-xs text-muted-foreground leading-relaxed">
+                  Aún no has realizado pedidos. ¡Explora el catálogo y adquiere tu primer modelo 3D interactivo!
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-primary/10 bg-card/40 backdrop-blur-md shadow-md">
+                <CardContent className="p-4 divide-y divide-primary/5">
+                  {recentOrders.map((order) => {
+                    const shortId = order.id.slice(-8).toUpperCase();
+                    const firstItem = order.items?.[0]?.product?.name || 'Modelo 3D';
+                    const otherItemsCount = (order.items?.length || 1) - 1;
+                    const displayProducts = otherItemsCount > 0 
+                      ? `${firstItem} y ${otherItemsCount} más` 
+                      : firstItem;
+                    
+                    const statusMap: Record<string, { label: string; color: string; icon: any }> = {
+                      PENDING: { label: 'Pendiente', color: 'text-amber-500', icon: Clock },
+                      CONFIRMED: { label: 'Confirmado', color: 'text-blue-500', icon: Clock },
+                      PROCESSING: { label: 'Procesando', color: 'text-violet-500', icon: Clock },
+                      SHIPPED: { label: 'En camino', color: 'text-cyan-500', icon: Truck },
+                      DELIVERED: { label: 'Entregado', color: 'text-emerald-500', icon: Truck },
+                      CANCELLED: { label: 'Cancelado', color: 'text-red-500', icon: XCircle },
+                      REFUNDED: { label: 'Reembolsado', color: 'text-slate-500', icon: RotateCcw }
+                    };
+                    
+                    const statusCfg = statusMap[order.status] || { label: order.status, color: 'text-primary', icon: Clock };
+                    const StatusIcon = statusCfg.icon;
 
-                <div className="flex items-start justify-between pb-1">
-                  <div className="space-y-1">
-                    <span className="text-[9px] font-black font-mono text-muted-foreground block uppercase">Cod: 3D-1229F</span>
-                    <span className="text-xs font-bold text-foreground">Visor AR Pro</span>
-                    <span className="flex items-center gap-1 text-[10px] text-primary font-semibold">
-                      <Clock className="h-3.5 w-3.5 animate-spin" style={{ animationDuration: '4s' }} /> En Preparación
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                    return (
+                      <div key={order.id} className="py-3 first:pt-0 last:pb-0">
+                        <Link href={`/orders/${order.id}`} className="group hover:opacity-90 transition-opacity block">
+                          <div className="space-y-1">
+                            <span className="text-[9px] font-black font-mono text-muted-foreground block uppercase">
+                              Cod: #{shortId}
+                            </span>
+                            <span className="text-xs font-bold text-foreground group-hover:text-primary transition-colors block truncate">
+                              {displayProducts}
+                            </span>
+                            <span className={`flex items-center gap-1.5 text-[10px] ${statusCfg.color} font-semibold`}>
+                              <StatusIcon className="h-3 w-3" />
+                              {statusCfg.label}
+                            </span>
+                          </div>
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
-          {/* Right Panel: Clean Curated Recommendations Grid (NO Redundant Filters) */}
+          {/* Right Panel: Curated Recommendations Grid */}
           <div className="lg:col-span-8 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

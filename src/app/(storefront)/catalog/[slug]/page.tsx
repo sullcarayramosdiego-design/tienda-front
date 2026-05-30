@@ -7,7 +7,23 @@ import { useProduct } from '@/features/inventory';
 import { useAuth } from '@/features/auth';
 import { useCart } from '@/features/checkout';
 import { useWishlist } from '@/features/engagement';
-import { ProductViewer3D } from '@/features/catalog';
+import dynamic from 'next/dynamic';
+
+const ProductViewer3D = dynamic(
+  () => import('@/features/catalog').then((mod) => mod.ProductViewer3D),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-muted/20 border border-primary/5 rounded-3xl gap-3">
+        <div className="relative">
+          <Sparkles className="h-8 w-8 text-primary animate-pulse" />
+          <div className="absolute inset-0 h-8 w-8 bg-primary/20 blur-xl rounded-full" />
+        </div>
+        <span className="text-xs text-muted-foreground font-semibold">Cargando visualizador 3D...</span>
+      </div>
+    ),
+  }
+);
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';

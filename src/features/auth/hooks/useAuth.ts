@@ -45,16 +45,7 @@ export function useAuth() {
               description: `Has iniciado sesión correctamente como ${tokens.user.firstName || tokens.user.name}.`,
             });
           }
-          
-          // Iniciar la promesa global de 5 segundos
-          if (!authDelayPromise) {
-            authDelayPromise = new Promise(resolve => {
-              setTimeout(() => {
-                authDelayPromise = null;
-                resolve();
-              }, 5000);
-            });
-          }
+          // Sincronización instantánea sin demoras artificiales
         }
       }
 
@@ -71,11 +62,7 @@ export function useAuth() {
       } else {
         setUser(null);
       }
-      
-      // Esperar al retraso artificial global (si fue activado por este u otro componente)
-      if (authDelayPromise) {
-        await authDelayPromise;
-      }
+      // Remoción de espera de retraso artificial
       
       setLoading(false);
     };
@@ -136,9 +123,7 @@ export function useAuth() {
    */
   const logout = useCallback(async () => {
     setLoading(true);
-    
-    // Añadir retraso artificial para que el usuario aprecie el loader
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    // Sincronización instantánea de cierre de sesión
     
     authService.logout();
     setUser(null);

@@ -9,7 +9,7 @@ interface ModelLoaderProps {
   scale?: number;
 }
 
-export function ModelLoader({ modelUrl = '/3D/PCAS.glb', scale = 2.0 }: ModelLoaderProps) {
+export function ModelLoader({ modelUrl = '/3D/PCAS_compressed.glb', scale = 2.0 }: ModelLoaderProps) {
   // Suppress non-critical GLTF texture warnings
   useEffect(() => {
     const originalError = console.error;
@@ -96,5 +96,5 @@ export function ModelLoader({ modelUrl = '/3D/PCAS.glb', scale = 2.0 }: ModelLoa
   return <primitive object={clonedScene} scale={scale} />;
 }
 
-// Preload the model for optimal performance
-useGLTF.preload('/3D/PCAS.glb');
+// Preload the model for optimal performance when used
+// useGLTF.preload('/3D/PCAS_compressed.glb');

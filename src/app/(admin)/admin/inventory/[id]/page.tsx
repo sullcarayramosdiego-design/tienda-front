@@ -1,15 +1,14 @@
-'use client';
-
 import { Card } from '@/components/ui/card';
 import { AssetUploadZone } from '@/features/inventory';
-import { use } from 'react';
 
-export default function InventoryDetailPage({
-  params,
-}: {
+export const dynamic = 'force-dynamic';
+
+type Props = {
   params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+};
+
+export default async function InventoryDetailPage({ params }: Props) {
+  const { id } = await params;
 
   return (
     <div className="space-y-6">

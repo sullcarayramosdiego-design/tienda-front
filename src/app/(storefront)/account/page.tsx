@@ -152,7 +152,7 @@ export default function AccountPage() {
         
         {/* Left Column: Profile Card Summary */}
         <div className="space-y-6 lg:col-span-1">
-          <Card className="border-primary/10 bg-card/60 backdrop-blur-md rounded-3xl overflow-hidden relative shadow-md">
+          <Card className="border-primary/10 bg-card/60 backdrop-blur-md rounded-2xl overflow-hidden relative shadow-md">
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary to-secondary" />
             <CardContent className="pt-8 pb-6 flex flex-col items-center text-center space-y-4">
               <Avatar className="h-20 w-20 border-2 border-primary/20 shadow-md shadow-primary/10">
@@ -210,7 +210,7 @@ export default function AccountPage() {
                   </p>
                 </div>
               </div>
-              <Button asChild size="sm" className="w-full text-[10px] font-bold h-7 rounded-lg bg-primary hover:bg-primary/95 text-white shadow-sm cursor-pointer active:scale-98 transition-transform">
+              <Button asChild size="sm" className="w-full text-[10px] font-bold h-7 rounded-lg bg-primary hover:bg-primary/95 text-white shadow-sm active:scale-98 transition-transform">
                 <Link href="/subscription">
                   Adquirir Suscripción Premium <ArrowRight className="h-3 w-3 ml-1" />
                 </Link>
@@ -223,7 +223,7 @@ export default function AccountPage() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Card: Profile Info Edit */}
-          <Card className="border-primary/10 bg-card/60 backdrop-blur-md rounded-3xl shadow-md">
+          <Card className="border-primary/10 bg-card/60 backdrop-blur-md rounded-2xl shadow-md">
             <CardHeader className="pb-3 border-b border-primary/5 flex flex-row items-center justify-between">
               <div>
                 <CardTitle className="text-base font-heading font-bold text-foreground">Información Personal</CardTitle>
@@ -234,7 +234,7 @@ export default function AccountPage() {
                   onClick={() => setIsEditing(true)} 
                   variant="outline" 
                   size="sm" 
-                  className="rounded-xl border-primary/15 hover:bg-primary/5 text-xs gap-1.5 h-8 cursor-pointer"
+                  className="rounded-xl border-primary/15 hover:bg-primary/5 text-xs gap-1.5 h-8"
                 >
                   <Edit2 className="h-3.5 w-3.5" /> Editar
                 </Button>
@@ -243,7 +243,7 @@ export default function AccountPage() {
                   onClick={() => setIsEditing(false)} 
                   variant="ghost" 
                   size="sm" 
-                  className="rounded-xl hover:bg-muted text-xs gap-1 h-8 cursor-pointer text-muted-foreground"
+                  className="rounded-xl hover:bg-muted text-xs gap-1 h-8 text-muted-foreground"
                 >
                   <X className="h-3.5 w-3.5" /> Cancelar
                 </Button>
@@ -295,7 +295,7 @@ export default function AccountPage() {
                     <Button 
                       type="submit" 
                       disabled={updatingProfile} 
-                      className="rounded-xl h-10 px-4 font-bold text-xs gap-1.5 cursor-pointer"
+                      className="rounded-xl h-10 px-4 font-bold text-xs gap-1.5"
                     >
                       {updatingProfile ? (
                         <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Guardando...</>
@@ -310,7 +310,7 @@ export default function AccountPage() {
           </Card>
 
           {/* Card: Password Change Form */}
-          <Card className="border-primary/10 bg-card/60 backdrop-blur-md rounded-3xl shadow-md">
+          <Card className="border-primary/10 bg-card/60 backdrop-blur-md rounded-2xl shadow-md">
             <CardHeader className="pb-3 border-b border-primary/5">
               <CardTitle className="text-base font-heading font-bold text-foreground flex items-center gap-2">
                 <KeyRound className="h-4.5 w-4.5 text-primary" /> Restablecer Contraseña
@@ -346,7 +346,7 @@ export default function AccountPage() {
                   <Button 
                     type="submit" 
                     disabled={updatingPassword} 
-                    className="rounded-xl h-10 px-4 font-bold text-xs gap-1.5 cursor-pointer bg-primary hover:bg-primary/95 text-primary-foreground shadow-md"
+                    className="rounded-xl h-10 px-4 font-bold text-xs gap-1.5 bg-primary hover:bg-primary/95 text-primary-foreground shadow-md"
                   >
                     {updatingPassword ? (
                       <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Guardando...</>

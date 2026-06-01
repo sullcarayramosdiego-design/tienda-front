@@ -52,13 +52,13 @@ import {
 } from '@/components/ui/dialog';
 
 const STATUS_LABELS: Record<OrderStatus, { label: string; color: string }> = {
-  PENDING: { label: 'Pendiente', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20' },
-  CONFIRMED: { label: 'Confirmado', color: 'bg-blue-500/10 text-blue-500 border-blue-500/20' },
-  PROCESSING: { label: 'Procesando', color: 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20' },
-  SHIPPED: { label: 'Enviado', color: 'bg-purple-500/10 text-purple-500 border-purple-500/20' },
-  DELIVERED: { label: 'Entregado', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' },
-  CANCELLED: { label: 'Cancelado', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' },
-  REFUNDED: { label: 'Reembolsado', color: 'bg-teal-500/10 text-teal-500 border-teal-500/20' },
+  PENDING: { label: 'Pendiente', color: 'text-amber-500 border-amber-500/20' },
+  CONFIRMED: { label: 'Confirmado', color: 'text-blue-500 border-blue-500/20' },
+  PROCESSING: { label: 'Procesando', color: 'text-indigo-500 border-indigo-500/20' },
+  SHIPPED: { label: 'Enviado', color: 'text-purple-500 border-purple-500/20' },
+  DELIVERED: { label: 'Entregado', color: 'text-emerald-500 border-emerald-500/20' },
+  CANCELLED: { label: 'Cancelado', color: 'text-rose-500 border-rose-500/20' },
+  REFUNDED: { label: 'Reembolsado', color: 'text-teal-500 border-teal-500/20' },
 };
 
 export function OrderTable() {
@@ -158,8 +158,8 @@ export function OrderTable() {
   };
 
   const getStatusBadge = (status: OrderStatus) => {
-    const s = STATUS_LABELS[status] || { label: status, color: 'bg-muted text-muted-foreground border-muted-foreground/10' };
-    return <Badge variant="outline" className={cn("font-bold text-[10px] uppercase border px-2 py-0.5 rounded-full shrink-0", s.color)}>{s.label}</Badge>;
+    const s = STATUS_LABELS[status] || { label: status, color: 'text-muted-foreground border-border' };
+    return <Badge variant="outline" className={cn("font-mono font-medium text-[10px] uppercase border px-2 py-0.5 rounded-sm shrink-0 bg-transparent", s.color)}>{s.label}</Badge>;
   };
 
   const openDetails = (order: Order) => {
@@ -170,30 +170,30 @@ export function OrderTable() {
   return (
     <div className="space-y-6">
       {/* Controles de búsqueda y filtros */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-center bg-card/40 p-4 rounded-xl border border-primary/5">
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-center pb-4 border-b border-border">
         <div className="flex flex-col sm:flex-row gap-4 w-full md:max-w-2xl">
           {/* Búsqueda */}
           <div className="relative w-full sm:max-w-md group">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4.5 w-4.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-foreground transition-colors" />
             <Input
               type="text"
               placeholder="Buscar por ID de pedido o cliente..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="pl-10 h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 transition-all text-xs"
+              className="pl-10 h-9 rounded-sm bg-transparent border-border focus-visible:ring-1 focus-visible:ring-foreground shadow-none transition-all text-xs"
             />
           </div>
 
           {/* Filtro de Estado */}
           <div className="w-full sm:w-52 shrink-0">
             <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-              <SelectTrigger className="h-10 rounded-xl bg-muted/30 border-primary/5 text-xs cursor-pointer">
+              <SelectTrigger className="h-9 rounded-sm bg-transparent border-border shadow-none text-xs cursor-pointer">
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Filter className="h-3.5 w-3.5" />
                   <SelectValue placeholder="Filtrar por Estado" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="bg-card">
+              <SelectContent className="bg-card rounded-sm border-border">
                 <SelectItem className="text-xs cursor-pointer" value="ALL">Todos los estados</SelectItem>
                 {Object.entries(STATUS_LABELS).map(([status, { label }]) => (
                   <SelectItem key={status} className="text-xs cursor-pointer" value={status}>
@@ -206,26 +206,26 @@ export function OrderTable() {
         </div>
 
         <div className="flex gap-2 w-full md:w-auto shrink-0 justify-end">
-          <Button onClick={fetchOrders} variant="outline" size="sm" className="h-10 px-3.5 rounded-xl text-xs font-bold gap-1 cursor-pointer">
+          <Button onClick={fetchOrders} variant="outline" size="sm" className="h-9 px-3 rounded-sm border-border shadow-none text-xs font-semibold gap-1 cursor-pointer">
             <RefreshCw className="h-3.5 w-3.5" />
             Sincronizar
           </Button>
           <Link href="/admin/orders">
-            <Button variant="secondary" size="sm" className="h-10 px-3.5 rounded-xl text-xs font-bold gap-1.5 cursor-pointer">
+            <Button variant="secondary" size="sm" className="h-9 px-3 rounded-sm shadow-none text-xs font-semibold gap-1.5 cursor-pointer">
               <ClipboardList className="h-3.5 w-3.5" />
-              Ver Tablero Kanban
+              Tablero Kanban
             </Button>
           </Link>
         </div>
       </div>
 
       {/* Tabla de Pedidos */}
-      <Card className="bg-card/40 border-primary/5">
-        <CardContent className="p-0">
-          <div className="rounded-xl border border-primary/5 overflow-hidden">
+      <div className="w-full">
+        <div>
+          <div className="rounded-sm border border-border overflow-hidden bg-transparent">
             <Table>
-              <TableHeader className="bg-muted/50">
-                <TableRow>
+              <TableHeader className="bg-transparent border-b border-border">
+                <TableRow className="hover:bg-transparent">
                   <TableHead className="font-bold text-xs">Pedido</TableHead>
                   <TableHead className="font-bold text-xs">Cliente</TableHead>
                   <TableHead className="font-bold text-xs">Fecha de Emisión</TableHead>
@@ -265,11 +265,11 @@ export function OrderTable() {
                     const totalItems = order.items.reduce((sum, i) => sum + i.quantity, 0);
 
                     return (
-                      <TableRow key={order.id} className="hover:bg-muted/40 transition-colors">
+                      <TableRow key={order.id} className="hover:bg-muted/10 transition-colors duration-75">
                         {/* ID Pedido */}
                         <TableCell>
-                          <span className="font-black text-xs text-primary bg-primary/5 px-2 py-0.5 rounded font-mono">
-                            #{order.id.slice(0, 8).toUpperCase()}
+                          <span className="font-mono text-[11px] text-foreground border border-border px-1.5 py-0.5 rounded-sm">
+                            {order.id.slice(0, 8).toUpperCase()}
                           </span>
                         </TableCell>
 
@@ -286,17 +286,17 @@ export function OrderTable() {
                         </TableCell>
 
                         {/* Fecha */}
-                        <TableCell className="text-xs text-muted-foreground font-semibold">
+                        <TableCell className="text-[11px] text-muted-foreground font-mono">
                           {formatDate(order.createdAt)}
                         </TableCell>
 
                         {/* Cant. Items */}
-                        <TableCell className="text-xs text-foreground font-black text-center">
+                        <TableCell className="text-[11px] font-mono text-foreground text-center">
                           {totalItems}
                         </TableCell>
 
                         {/* Total */}
-                        <TableCell className="text-xs font-bold text-foreground">
+                        <TableCell className="text-[11px] font-mono text-foreground">
                           {formatCurrency(order.total)}
                         </TableCell>
 
@@ -311,12 +311,12 @@ export function OrderTable() {
                             defaultValue={order.status}
                             onValueChange={(val: any) => handleRoleChange(order.id, val)}
                           >
-                            <SelectTrigger className="h-8 w-32 rounded-lg bg-muted/30 border-primary/5 text-[11px] cursor-pointer">
+                            <SelectTrigger className="h-7 w-32 rounded-sm bg-transparent border-border text-[10px] uppercase font-mono shadow-none cursor-pointer">
                               <SelectValue placeholder="Estado" />
                             </SelectTrigger>
-                            <SelectContent className="bg-card">
+                            <SelectContent className="bg-card rounded-sm border-border">
                               {Object.entries(STATUS_LABELS).map(([status, { label }]) => (
-                                <SelectItem key={status} className="text-xs cursor-pointer" value={status}>
+                                <SelectItem key={status} className="text-[10px] uppercase font-mono cursor-pointer" value={status}>
                                   {label}
                                 </SelectItem>
                               ))}
@@ -346,9 +346,9 @@ export function OrderTable() {
 
           {/* Paginación */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between p-4 border-t border-primary/5">
-              <span className="text-xs font-bold text-muted-foreground">
-                Página <span className="text-foreground">{page}</span> de <span className="text-foreground">{totalPages}</span> (Total: <span className="text-foreground">{totalCount}</span>)
+            <div className="flex items-center justify-between p-4 border-t border-border mt-4">
+              <span className="text-[11px] font-mono text-muted-foreground uppercase">
+                Página <span className="text-foreground">{page}</span> / <span className="text-foreground">{totalPages}</span> — <span className="text-foreground">{totalCount}</span> Reg.
               </span>
               <div className="flex gap-2">
                 <Button
@@ -374,16 +374,16 @@ export function OrderTable() {
               </div>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* DIALOG: DETALLES COMPLETOS DEL PEDIDO */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="rounded-xl bg-card border-primary/5 max-w-2xl overflow-y-auto max-h-[85vh]" showCloseButton={true}>
-          <DialogHeader className="border-b border-primary/5 pb-4">
-            <DialogTitle className="text-base font-black text-foreground flex items-center gap-2">
-              <ShoppingBag className="h-5 w-5 text-primary" />
-              Detalles del Pedido: #{selectedOrder?.id.slice(0, 8).toUpperCase()}
+        <DialogContent className="rounded-sm bg-card border-border shadow-2xl max-w-2xl overflow-y-auto max-h-[85vh]" showCloseButton={true}>
+          <DialogHeader className="border-b border-border pb-4">
+            <DialogTitle className="text-[14px] uppercase font-mono text-foreground flex items-center gap-2 tracking-wider">
+              <ShoppingBag className="h-4 w-4" />
+              PEDIDO #{selectedOrder?.id.slice(0, 8).toUpperCase()}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Visualiza el desglose de productos facturados, datos de envío y facturación.

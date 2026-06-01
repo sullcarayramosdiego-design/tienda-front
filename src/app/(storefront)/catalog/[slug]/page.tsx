@@ -14,12 +14,19 @@ const ProductViewer3D = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="w-full h-full min-h-[400px] flex flex-col items-center justify-center bg-muted/20 border border-primary/5 rounded-3xl gap-3">
-        <div className="relative">
-          <Sparkles className="h-8 w-8 text-primary animate-pulse" />
-          <div className="absolute inset-0 h-8 w-8 bg-primary/20 blur-xl rounded-full" />
+      <div className="relative w-full h-full bg-muted/10 flex flex-col items-center justify-center overflow-hidden min-h-[400px]">
+        <Skeleton className="absolute inset-0 bg-gradient-to-r from-muted/5 via-muted/10 to-muted/5 animate-pulse rounded-none" />
+        <div className="absolute inset-8 lg:inset-16 border border-border/20 rounded-[2rem] pointer-events-none flex flex-col items-center justify-center">
+          <div className="space-y-4 text-center">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-foreground/30 font-mono animate-pulse">
+              [ INICIALIZANDO ENTORNO 3D ]
+            </span>
+            <div className="w-24 h-[1px] bg-border/20 mx-auto" />
+            <span className="text-[9px] uppercase tracking-[0.1em] font-medium text-foreground/20 font-mono block animate-pulse">
+              Tolerancia Geométrica Superior
+            </span>
+          </div>
         </div>
-        <span className="text-xs text-muted-foreground font-semibold">Cargando visualizador 3D...</span>
       </div>
     ),
   }

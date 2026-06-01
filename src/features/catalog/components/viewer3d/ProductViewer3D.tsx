@@ -3,8 +3,16 @@
 import React, { Suspense, useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import { Scene } from '@/components/canvas/Scene';
+import dynamic from 'next/dynamic';
 import { Sparkles } from 'lucide-react';
+
+const Scene = dynamic(
+  () => import('@/components/canvas/Scene').then((mod) => mod.Scene),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
 
 interface ProductViewer3DProps {
   modelUrl?: string;
@@ -81,7 +89,6 @@ export function ProductViewer3D({
           alpha: true,
           powerPreference: 'high-performance',
         }}
-        className="rounded-2xl"
       >
         <Suspense fallback={<LoadingFallback />}>
           <Scene modelUrl={modelUrl} scale={scale} />

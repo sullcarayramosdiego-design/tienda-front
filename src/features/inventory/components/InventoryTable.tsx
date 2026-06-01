@@ -567,31 +567,31 @@ export function InventoryTable() {
   }, [products, searchQuery, skuFilter, nameFilter, categoryFilter, priceMinFilter, priceMaxFilter, stockStatusFilter, sortKey, sortDirection]);
 
   const getStockStatus = (stock: number) => {
-    if (stock <= 0) return { label: 'SIN STOCK', variant: 'destructive', color: 'bg-rose-500/10 text-rose-500 border-rose-500/20' };
-    if (stock < 10) return { label: 'BAJO STOCK', variant: 'outline', color: 'bg-amber-500/10 text-amber-500 border-amber-500/20 animate-pulse' };
-    return { label: 'DISPONIBLE', variant: 'outline', color: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' };
+    if (stock <= 0) return { label: 'SIN STOCK', variant: 'destructive', color: 'text-rose-500 border-border' };
+    if (stock < 10) return { label: 'BAJO STOCK', variant: 'outline', color: 'text-amber-500 border-border' };
+    return { label: 'DISPONIBLE', variant: 'outline', color: 'text-emerald-500 border-border' };
   };
 
   const getMovementBadge = (type: InventoryMovement['movementType']) => {
     switch (type) {
       case 'PURCHASE':
-        return <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 font-extrabold text-[10px]">COMPRA</Badge>;
+        return <Badge variant="outline" className="text-emerald-500 border-border bg-transparent font-mono text-[10px] rounded-sm uppercase">COMPRA</Badge>;
       case 'SALE':
-        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20 font-extrabold text-[10px]">VENTA</Badge>;
+        return <Badge variant="outline" className="text-blue-500 border-border bg-transparent font-mono text-[10px] rounded-sm uppercase">VENTA</Badge>;
       case 'RETURN':
-        return <Badge variant="outline" className="bg-purple-500/10 text-purple-500 border-purple-500/20 font-extrabold text-[10px]">RETORNO</Badge>;
+        return <Badge variant="outline" className="text-purple-500 border-border bg-transparent font-mono text-[10px] rounded-sm uppercase">RETORNO</Badge>;
       case 'DAMAGE':
-        return <Badge variant="outline" className="bg-rose-500/10 text-rose-500 border-rose-500/20 font-extrabold text-[10px]">DAÑADO</Badge>;
+        return <Badge variant="outline" className="text-rose-500 border-border bg-transparent font-mono text-[10px] rounded-sm uppercase">DAÑADO</Badge>;
       case 'ADJUSTMENT':
       default:
-        return <Badge variant="outline" className="bg-amber-500/10 text-amber-500 border-amber-500/20 font-extrabold text-[10px]">AJUSTE</Badge>;
+        return <Badge variant="outline" className="text-amber-500 border-border bg-transparent font-mono text-[10px] rounded-sm uppercase">AJUSTE</Badge>;
     }
   };
 
   return (
     <div className="space-y-6">
       {/* Encabezado y Acciones */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-border">
         {/* Buscador y Filtros */}
         <div className="flex flex-1 items-center gap-2 w-full sm:max-w-md">
           <div className="relative flex-1">
@@ -601,12 +601,12 @@ export function InventoryTable() {
               placeholder="Buscar producto o SKU..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 h-9 border-border bg-transparent shadow-none"
+              className="pl-9 h-9 rounded-sm border-border bg-transparent focus-visible:ring-1 focus-visible:ring-foreground shadow-none text-xs"
             />
           </div>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9 px-3 border-border shadow-none relative cursor-pointer">
+              <Button variant="outline" size="sm" className="h-9 px-3 rounded-sm border-border shadow-none relative cursor-pointer text-xs font-semibold">
                 <SlidersHorizontal className="h-4 w-4 mr-2" />
                 Filtros
                 {hasActiveFilters && (
@@ -617,7 +617,7 @@ export function InventoryTable() {
                 )}
               </Button>
             </SheetTrigger>
-             <SheetContent className="w-[90vw] sm:max-w-md flex flex-col gap-0 p-0">
+             <SheetContent className="w-[90vw] sm:max-w-md flex flex-col gap-0 p-0 border-l border-border bg-card">
               <SheetHeader className="px-6 py-4 border-b border-border/40 shrink-0 mb-0">
                 <SheetTitle className="text-base font-bold">Filtros Avanzados</SheetTitle>
                 <SheetDescription className="text-xs">Refina la búsqueda del inventario.</SheetDescription>
@@ -626,10 +626,10 @@ export function InventoryTable() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-muted-foreground">Categoría</Label>
                   <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-primary/5 text-xs">
+                    <SelectTrigger className="h-9 rounded-sm bg-transparent border-border text-xs">
                       <SelectValue placeholder="Todas las categorías" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-card rounded-sm border-border">
                       <SelectItem value="all" className="text-xs cursor-pointer">Todas</SelectItem>
                       {categoriesList.map(cat => (
                         <SelectItem key={cat.id} value={cat.id} className="text-xs cursor-pointer">{cat.name}</SelectItem>
@@ -640,10 +640,10 @@ export function InventoryTable() {
                 <div className="space-y-2">
                   <Label className="text-xs font-bold text-muted-foreground">Estado del Stock</Label>
                   <Select value={stockStatusFilter} onValueChange={setStockStatusFilter}>
-                    <SelectTrigger className="h-10 rounded-xl bg-muted/40 border-primary/5 text-xs">
+                    <SelectTrigger className="h-9 rounded-sm bg-transparent border-border text-xs">
                       <SelectValue placeholder="Cualquier estado" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-card rounded-sm border-border">
                       <SelectItem value="all" className="text-xs cursor-pointer">Todos</SelectItem>
                       <SelectItem value="in_stock" className="text-xs cursor-pointer">En stock</SelectItem>
                       <SelectItem value="low_stock" className="text-xs cursor-pointer">Por agotar</SelectItem>
@@ -652,7 +652,7 @@ export function InventoryTable() {
                   </Select>
                 </div>
                 <div className="pt-4 mt-auto">
-                  <Button variant="secondary" className="w-full h-10 rounded-xl text-xs font-bold cursor-pointer" onClick={clearAllFilters}>
+                  <Button variant="secondary" className="w-full h-9 rounded-sm text-xs font-bold cursor-pointer" onClick={clearAllFilters}>
                     Limpiar Filtros
                   </Button>
                 </div>
@@ -663,23 +663,23 @@ export function InventoryTable() {
 
         {/* Acciones Rápidas */}
         <div className="flex items-center gap-2 shrink-0">
-          <Button variant="outline" size="sm" onClick={fetchData} className="h-9 w-9 p-0 border-border shadow-none cursor-pointer">
+          <Button variant="outline" size="sm" onClick={fetchData} className="h-9 w-9 p-0 rounded-sm border-border shadow-none cursor-pointer">
             <RefreshCw className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setIsCategoryCreateOpen(true)} className="h-9 border-border shadow-none hidden sm:flex cursor-pointer">
+          <Button variant="outline" size="sm" onClick={() => setIsCategoryCreateOpen(true)} className="h-9 rounded-sm border-border shadow-none hidden sm:flex cursor-pointer text-xs font-semibold">
             Nueva Categoría
           </Button>
-          <Button size="sm" onClick={() => setIsCreateOpen(true)} className="h-9 shadow-none cursor-pointer">
+          <Button size="sm" onClick={() => setIsCreateOpen(true)} className="h-9 rounded-sm shadow-none cursor-pointer text-xs font-semibold">
             <Plus className="h-4 w-4 mr-1.5" /> Nuevo Producto
           </Button>
         </div>
       </div>
 
       {/* Tabla Principal */}
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm overflow-hidden">
+      <div className="border border-border rounded-sm overflow-hidden bg-transparent">
         <Table>
           <TableHeader>
-            <TableRow className="hover:bg-transparent bg-muted/20">
+            <TableRow className="hover:bg-transparent border-b border-border bg-transparent">
               {renderSortHeader('name', 'Producto')}
               {renderSortHeader('stock', 'Stock', 'center')}
               {renderSortHeader('status', 'Estado')}
@@ -706,18 +706,18 @@ export function InventoryTable() {
               filteredProducts.map((p) => {
                 const status = getStockStatus(p.stock);
                 return (
-                  <TableRow key={p.id} className="hover:bg-muted/30 transition-colors">
+                  <TableRow key={p.id} className="hover:bg-muted/10 transition-colors duration-75">
                     <TableCell className="py-3">
                       <div className="flex flex-col gap-0.5">
                         <span className="font-medium text-sm text-foreground">{p.name}</span>
-                        <span className="text-xs text-muted-foreground uppercase">{p.sku}</span>
+                        <span className="font-mono text-[10px] text-muted-foreground uppercase border border-border bg-transparent rounded-sm px-1.5 py-0.5 mt-1 w-max">{p.sku}</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-3 text-center">
-                      <span className="text-sm font-medium">{p.stock}</span>
+                      <span className="text-sm font-mono font-normal">{p.stock}</span>
                     </TableCell>
                     <TableCell className="py-3">
-                      <Badge variant="outline" className={cn("font-medium text-[10px] uppercase shadow-none border", status.color)}>
+                      <Badge variant="outline" className={cn("font-mono font-medium text-[10px] uppercase shadow-none border bg-transparent rounded-sm", status.color)}>
                         {status.label}
                       </Badge>
                     </TableCell>

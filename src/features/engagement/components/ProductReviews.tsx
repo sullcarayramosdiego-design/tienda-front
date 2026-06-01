@@ -1,13 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Star, MessageSquare, ThumbsUp, PlusCircle, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Label } from '@/components/ui/label';
+import { Star, MessageSquare, ThumbsUp, CheckCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/features/auth';
 import { reviewsService, Review } from '../services/reviews.service';
+import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '@/lib/utils';
 
 export function ProductReviews({ productId }: { productId: string }) {
   const { isAuthenticated, user } = useAuth();
@@ -22,7 +20,6 @@ export function ProductReviews({ productId }: { productId: string }) {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // Cargar reseñas desde el backend
   const fetchReviews = useCallback(async () => {
     if (!productId) return;
     try {
@@ -41,19 +38,20 @@ export function ProductReviews({ productId }: { productId: string }) {
     fetchReviews();
   }, [fetchReviews]);
 
-  // Helper para renderizar estrellas
   const renderStars = (rating: number, interactive = false, onClick?: (rating: number) => void) => {
     return (
-      <div className="flex gap-0.5">
+      <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((star) => (
           <Star
             key={star}
             onClick={() => interactive && onClick && onClick(star)}
-            className={`h-4 w-4 ${
+            className={cn(
+              "h-3 w-3 transition-all",
               star <= rating
-                ? 'fill-amber-400 text-amber-400'
-                : 'text-muted-foreground/30 fill-transparent'
-            } ${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
+                ? 'fill-foreground text-foreground'
+                : 'text-muted-foreground/30 fill-transparent',
+              interactive ? 'cursor-pointer hover:scale-125' : ''
+            )}
           />
         ))}
       </div>
@@ -61,7 +59,6 @@ export function ProductReviews({ productId }: { productId: string }) {
   };
 
   const handleHelpful = (id: string) => {
-    // Simulación visual en frontend del botón de utilidad
     setReviews((prev) =>
       prev.map((rev) =>
         rev.id === id ? { ...rev, helpfulCount: (rev as any).helpfulCount ? (rev as any).helpfulCount + 1 : 1 } : rev
@@ -89,246 +86,193 @@ export function ProductReviews({ productId }: { productId: string }) {
       setSuccessMsg(true);
       setTimeout(() => setSuccessMsg(false), 5000);
       
-      // Recargar listado completo
       await fetchReviews();
     } catch (err: any) {
       console.error('Error publicando reseña:', err);
       const msg = err.response?.data?.message;
       setErrorMessage(
-        Array.isArray(msg) ? msg[0] : msg || 'No se pudo publicar la reseña. Es posible que ya hayas opinado sobre este producto.'
+        Array.isArray(msg) ? msg[0] : msg || 'Imposible registrar. Verifica tu sesión o compras previas.'
       );
     } finally {
       setSubmitLoading(false);
     }
   };
 
-  // Helper para formatear fechas reales de base de datos
   const formatReviewDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
       return date.toLocaleDateString('es-PE', {
         year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      });
+        month: '2-digit',
+        day: '2-digit',
+      }).replace(/\//g, '.');
     } catch (e) {
-      return 'Hace poco';
+      return 'RECIENTE';
     }
   };
 
-  // Calcular valoraciones promedio
   const averageRating = totalReviews > 0
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
     : '0.0';
 
   return (
-    <Card className="border-primary/10 bg-card/60 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden mt-6">
-      <CardHeader className="pb-4 border-b border-primary/5">
-        <div className="flex items-center justify-between flex-wrap gap-4">
-          <div>
-            <CardTitle className="text-xl font-heading font-extrabold flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-primary" /> Reseñas de Clientes
-            </CardTitle>
-            <CardDescription className="text-xs font-semibold text-muted-foreground mt-0.5">
-              Opiniones y valoraciones de compradores verificados
-            </CardDescription>
+    <div className="w-full space-y-12">
+      {/* HEADER ROW */}
+      <div className="flex items-end justify-between border-b border-border pb-4">
+        <div>
+          <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground mb-1">Feedback</h2>
+          <div className="text-2xl font-black tracking-tight text-foreground flex items-center gap-4">
+            {averageRating}
+            <div className="flex gap-1">{renderStars(Math.round(parseFloat(averageRating)))}</div>
           </div>
-          <Button
-            onClick={() => {
-              if (!isAuthenticated) {
-                setErrorMessage('⚠️ Debes iniciar sesión para calificar este producto y dejar un comentario.');
-                setShowAddForm(false);
-                return;
-              }
-              setShowAddForm(!showAddForm);
-              setErrorMessage('');
-            }}
-            size="sm"
-            variant="outline"
-            disabled={loading}
-            className="border-primary/15 hover:bg-primary/5 rounded-xl cursor-pointer text-xs font-bold gap-1.5"
-          >
-            <PlusCircle className="h-4 w-4" />
-            {showAddForm ? 'Cancelar' : 'Escribir Reseña'}
-          </Button>
         </div>
-      </CardHeader>
+        
+        <button
+          onClick={() => {
+            if (!isAuthenticated) {
+              setErrorMessage('AUTENTICACIÓN REQUERIDA PARA OPINAR.');
+              setShowAddForm(false);
+              return;
+            }
+            setShowAddForm(!showAddForm);
+            setErrorMessage('');
+          }}
+          disabled={loading}
+          className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground border-b border-foreground pb-1 hover:text-muted-foreground hover:border-muted-foreground transition-colors disabled:opacity-50"
+        >
+          {showAddForm ? 'CANCELAR' : 'NUEVO REPORTE'}
+        </button>
+      </div>
 
-      <CardContent className="p-6">
+      {/* MESSAGES */}
+      <AnimatePresence>
+        {successMsg && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="text-[10px] font-bold uppercase tracking-[0.2em] text-foreground bg-foreground/5 p-4 border-l-2 border-foreground"
+          >
+            REGISTRO COMPLETADO CORRECTAMENTE.
+          </motion.div>
+        )}
+        
+        {errorMessage && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="text-[10px] font-bold uppercase tracking-[0.2em] text-destructive bg-destructive/5 p-4 border-l-2 border-destructive"
+          >
+            {errorMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ADD FORM */}
+      <AnimatePresence>
+        {showAddForm && (
+          <motion.form 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            onSubmit={handleSubmitReview} 
+            className="space-y-6 bg-muted/20 p-8 border border-border"
+          >
+            <div className="space-y-4">
+              <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground block">
+                Nivel de Satisfacción
+              </label>
+              <div className="flex items-center gap-4">
+                {renderStars(newRating, true, setNewRating)}
+                <span className="text-[10px] font-mono text-muted-foreground">[{newRating}.0]</span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <label htmlFor="rev-comment" className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground block">
+                Reporte Detallado
+              </label>
+              <textarea
+                id="rev-comment"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Ingresa tus observaciones sobre topología, materiales y entrega..."
+                required
+                rows={4}
+                className="w-full bg-transparent border-b border-border focus:border-foreground transition-colors p-2 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none outline-none font-medium"
+              />
+            </div>
+
+            <div className="pt-4 flex justify-end">
+              <button
+                type="submit"
+                disabled={submitLoading}
+                className="h-10 px-8 bg-foreground text-background font-bold uppercase tracking-[0.1em] text-[10px] transition-colors hover:bg-foreground/90 disabled:opacity-50 flex items-center justify-center"
+              >
+                {submitLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : 'SUBIR REPORTE'}
+              </button>
+            </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      {/* REVIEWS LIST */}
+      <div className="space-y-0">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-10 space-y-3">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            <span className="text-xs font-bold text-muted-foreground">Cargando valoraciones reales...</span>
+          <div className="py-12 flex items-center gap-4 text-[10px] font-mono tracking-widest uppercase text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" /> Recuperando registros...
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="py-12 text-[10px] font-bold tracking-widest uppercase text-muted-foreground border-b border-border">
+            0 REGISTROS ENCONTRADOS.
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* COLUMNA IZQUIERDA - CALIFICACIONES Y RESUMEN (lg:col-span-4) */}
-            <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-28">
-              
-              {/* Bloque de Resumen */}
-              <div className="p-5 rounded-2xl bg-primary/5 border border-primary/5 space-y-4">
-                <div className="text-center pb-4 border-b border-primary/5">
-                  <span className="text-5xl font-heading font-black text-foreground">{averageRating}</span>
-                  <div className="flex justify-center my-2">{renderStars(Math.round(parseFloat(averageRating)))}</div>
-                  <span className="text-xs font-bold text-muted-foreground">{totalReviews} valoraciones</span>
-                </div>
+          reviews.map((rev) => {
+            const fullName = rev.user
+              ? `${rev.user.firstName} ${rev.user.lastName}`
+              : 'ANÓNIMO';
 
-                <div className="space-y-2">
-                  {[5, 4, 3, 2, 1].map((stars) => {
-                    const count = reviews.filter((r) => r.rating === stars).length;
-                    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
-                    return (
-                      <div key={stars} className="flex items-center gap-3 text-xs font-bold text-muted-foreground">
-                        <span className="w-3 text-right">{stars}</span>
-                        <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
-                        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-amber-400 to-amber-500 rounded-full transition-all duration-500"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        <span className="w-8 text-right font-mono text-[10px]">{percentage.toFixed(0)}%</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Mensajes de éxito y error */}
-              {successMsg && (
-                <div className="flex items-center gap-2 p-3 bg-[#00D47C]/10 border border-[#00D47C]/20 text-[#00AF66] rounded-2xl text-xs font-bold animate-fade-in">
-                  <CheckCircle className="h-4.5 w-4.5" />
-                  <span>¡Tu reseña ha sido publicada exitosamente!</span>
-                </div>
-              )}
-
-              {errorMessage && (
-                <div className="flex items-start gap-2.5 p-3.5 bg-destructive/10 border border-destructive/20 text-destructive rounded-2xl text-xs font-bold animate-fade-in">
-                  <AlertCircle className="h-4.5 w-4.5 shrink-0 mt-0.5" />
-                  <div className="flex-1 space-y-1">
-                    <span>{errorMessage}</span>
-                    {!isAuthenticated && (
-                      <div className="flex gap-2 mt-2">
-                        <Button asChild size="xs" className="h-7 text-[10px] font-bold bg-destructive text-destructive-foreground hover:bg-destructive/90 cursor-pointer rounded-lg">
-                          <a href="/login">Iniciar Sesión</a>
-                        </Button>
-                        <Button asChild variant="outline" size="xs" className="h-7 text-[10px] font-bold border-destructive/20 hover:bg-destructive/5 text-destructive cursor-pointer rounded-lg">
-                          <a href="/register">Registrarse</a>
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Formulario para Añadir Opinión */}
-              {showAddForm && (
-                <form onSubmit={handleSubmitReview} className="space-y-4 p-4 border border-primary/10 rounded-2xl bg-card animate-fade-in shadow-inner">
-                  <h4 className="text-sm font-bold text-foreground">Escribe tu opinión</h4>
-                  
-                  <div className="space-y-1.5">
-                    <Label className="text-xs font-bold text-muted-foreground">Tu Calificación</Label>
-                    <div className="flex items-center gap-2">
-                      {renderStars(newRating, true, setNewRating)}
-                      <span className="text-xs font-mono font-bold text-amber-500">({newRating} estrellas)</span>
+            return (
+              <div key={rev.id} className="py-8 border-b border-border flex flex-col md:flex-row gap-6 md:gap-12 group">
+                {/* Meta sidebar */}
+                <div className="w-full md:w-48 shrink-0 space-y-4">
+                  <div className="space-y-1">
+                    <div className="text-xs font-bold uppercase tracking-widest text-foreground truncate">
+                      {fullName}
+                    </div>
+                    <div className="text-[10px] font-mono text-muted-foreground">
+                      ID: {rev.id.split('-')[0].toUpperCase()}
                     </div>
                   </div>
-
-                  <div className="space-y-1.5">
-                    <Label htmlFor="rev-comment" className="text-xs font-bold text-muted-foreground">Comentario</Label>
-                    <textarea
-                      id="rev-comment"
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Cuéntanos qué te pareció el visor 3D, la calidad del producto y el despacho..."
-                      required
-                      rows={3}
-                      className="w-full rounded-xl border border-primary/10 focus:border-primary/20 bg-background/50 p-3 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-primary/20"
-                    />
+                  <div className="text-[10px] font-mono text-muted-foreground">
+                    {formatReviewDate(rev.createdAt)}
                   </div>
+                  {renderStars(rev.rating)}
+                </div>
 
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={submitLoading}
-                    className="w-full bg-primary hover:bg-primary/95 text-primary-foreground font-bold rounded-xl h-9 text-xs cursor-pointer active:scale-95 transition-all flex items-center justify-center gap-1.5"
-                  >
-                    {submitLoading && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                    Publicar Reseña
-                  </Button>
-                </form>
-              )}
-            </div>
-
-            {/* COLUMNA DERECHA - HILO DE COMENTARIOS (lg:col-span-8) */}
-            <div className="lg:col-span-8 space-y-4">
-              <h3 className="text-sm font-bold text-muted-foreground/80 uppercase tracking-wider mb-2">
-                Hilos y Opiniones de Compradores
-              </h3>
-              
-              <div className="divide-y divide-primary/5 space-y-4 shadow-sm border border-primary/5 bg-background/40 backdrop-blur-sm rounded-2xl p-5">
-                {reviews.length === 0 ? (
-                  <div className="text-center py-10 text-muted-foreground text-xs font-bold">
-                    Aún no hay opiniones para este producto. ¡Sé el primero en calificarlo!
+                {/* Content */}
+                <div className="flex-1 space-y-6">
+                  <p className="text-sm text-foreground/80 leading-relaxed font-medium">
+                    {rev.comment}
+                  </p>
+                  
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => handleHelpful(rev.id)}
+                      className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors group/btn"
+                    >
+                      <ThumbsUp className="h-3 w-3 transition-transform group-hover/btn:-translate-y-0.5" />
+                      <span>Verificado Útil ({(rev as any).helpfulCount || 0})</span>
+                    </button>
                   </div>
-                ) : (
-                  reviews.map((rev, index) => {
-                    const initials = rev.user
-                      ? `${rev.user.firstName?.[0] || ''}${rev.user.lastName?.[0] || ''}`.toUpperCase()
-                      : 'U';
-                    const fullName = rev.user
-                      ? `${rev.user.firstName} ${rev.user.lastName}`
-                      : 'Usuario';
-
-                    return (
-                      <div key={rev.id} className={`pt-4 ${index === 0 ? 'pt-0' : ''} space-y-2.5`}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8 rounded-full border border-primary/10 shadow-sm">
-                              <AvatarFallback className="bg-primary/10 text-primary text-xs font-extrabold">
-                                {initials}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-xs font-bold text-foreground">{fullName}</span>
-                                <span className="px-1.5 py-0.5 text-[8px] font-black bg-[#00D47C]/10 text-[#00AF66] rounded-md border border-[#00D47C]/15 uppercase tracking-wide flex items-center gap-0.5">
-                                  Verificado
-                                </span>
-                              </div>
-                              <span className="text-[10px] text-muted-foreground/60 font-semibold">
-                                {formatReviewDate(rev.createdAt)}
-                              </span>
-                            </div>
-                          </div>
-                          {renderStars(rev.rating)}
-                        </div>
-
-                        <p className="text-xs sm:text-sm text-foreground/80 leading-relaxed pl-11">
-                          {rev.comment}
-                        </p>
-
-                        <div className="flex items-center gap-4 pl-11">
-                          <button
-                            type="button"
-                            onClick={() => handleHelpful(rev.id)}
-                            className="flex items-center gap-1 text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-                          >
-                            <ThumbsUp className="h-3 w-3" />
-                            <span>¿Útil? ({(rev as any).helpfulCount || 0})</span>
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+                </div>
               </div>
-            </div>
-
-          </div>
+            );
+          })
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

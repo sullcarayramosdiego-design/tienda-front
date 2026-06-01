@@ -1,14 +1,13 @@
-'use client';
-
 import { Card } from '@/components/ui/card';
-import { use } from 'react';
 
-export default function OrderDetailPage({
-  params,
-}: {
+export const dynamic = 'force-dynamic';
+
+type Props = {
   params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+};
+
+export default async function OrderDetailPage({ params }: Props) {
+  const { id } = await params;
 
   return (
     <div className="space-y-6">

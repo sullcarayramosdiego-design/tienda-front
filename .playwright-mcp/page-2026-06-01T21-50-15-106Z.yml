@@ -1,0 +1,11 @@
+- generic [active]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - img [ref=e5]
+      - generic [ref=e8]:
+        - generic [ref=e9]: TIENDA 3D
+        - generic [ref=e10]: EXPERIENCE
+    - paragraph [ref=e13]: Cargando permisos y verificando sesión...
+  - button "Open Next.js Dev Tools" [ref=e19] [cursor=pointer]:
+    - img [ref=e20]
+  - alert [ref=e23]

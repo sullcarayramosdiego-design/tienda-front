@@ -144,7 +144,7 @@ export function ProductListIntegrated() {
           <button
             onClick={() => updateQueryParams({ only3D: !only3D })}
             className={cn(
-              "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none",
+              "relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none",
               only3D ? "bg-primary" : "bg-muted"
             )}
           >
@@ -172,7 +172,7 @@ export function ProductListIntegrated() {
           <Button
             variant="outline"
             onClick={clearAllFilters}
-            className="w-full gap-2 border-destructive/20 text-destructive hover:bg-destructive/5 hover:text-destructive cursor-pointer rounded-xl font-bold uppercase tracking-wider text-xs h-10"
+            className="w-full gap-2 border-destructive/20 text-destructive hover:bg-destructive/5 hover:text-destructive rounded-xl font-bold uppercase tracking-wider text-xs h-10"
           >
             <Trash2 className="h-4 w-4" />
             Limpiar Filtros
@@ -200,14 +200,14 @@ export function ProductListIntegrated() {
               <button
                 type="button"
                 onClick={() => { setSearchVal(''); updateQueryParams({ search: null }); }}
-                className="absolute right-16 top-3 text-muted-foreground hover:text-foreground cursor-pointer"
+                className="absolute right-16 top-3 text-muted-foreground hover:text-foreground"
               >
                 <X className="h-5 w-5" />
               </button>
             )}
             <button
               type="submit"
-              className="absolute right-2 top-2 h-7 px-3 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:bg-primary/95 transition-all cursor-pointer"
+              className="absolute right-2 top-2 h-7 px-3 bg-primary text-primary-foreground text-xs font-bold rounded-lg hover:bg-primary/95 transition-all"
             >
               Buscar
             </button>
@@ -218,7 +218,7 @@ export function ProductListIntegrated() {
             <Button
               variant="outline"
               onClick={() => setShowMobileFilters(true)}
-              className="flex lg:hidden items-center justify-center gap-2 w-full sm:w-auto h-11 border-primary/10 bg-card/40 rounded-xl cursor-pointer"
+              className="flex lg:hidden items-center justify-center gap-2 w-full sm:w-auto h-11 border-primary/10 bg-card/40 rounded-xl"
             >
               <SlidersHorizontal className="h-4.5 w-4.5 text-primary" />
               <span>Filtros</span>
@@ -240,30 +240,30 @@ export function ProductListIntegrated() {
             {activeSearch && (
               <span className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-full">
                 Búsqueda: "{activeSearch}"
-                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => updateQueryParams({ search: null })} />
+                <X className="h-3 w-3 hover:text-foreground" onClick={() => updateQueryParams({ search: null })} />
               </span>
             )}
             {selectedCategory && (
               <span className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-full">
                 Categoría: {selectedCategory}
-                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => updateQueryParams({ category: null })} />
+                <X className="h-3 w-3 hover:text-foreground" onClick={() => updateQueryParams({ category: null })} />
               </span>
             )}
             {(priceRange.min !== undefined || priceRange.max !== undefined) && (
               <span className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-full">
                 Precio: S/ {priceRange.min ?? 0} - S/ {priceRange.max ?? 'Max'}
-                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => updateQueryParams({ minPrice: null, maxPrice: null })} />
+                <X className="h-3 w-3 hover:text-foreground" onClick={() => updateQueryParams({ minPrice: null, maxPrice: null })} />
               </span>
             )}
             {only3D && (
               <span className="flex items-center gap-1.5 px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-xs font-semibold rounded-full">
                 Sólo 3D / AR
-                <X className="h-3 w-3 cursor-pointer hover:text-foreground" onClick={() => updateQueryParams({ only3D: null })} />
+                <X className="h-3 w-3 hover:text-foreground" onClick={() => updateQueryParams({ only3D: null })} />
               </span>
             )}
             <button
               onClick={clearAllFilters}
-              className="text-xs font-bold text-destructive hover:underline ml-1 cursor-pointer"
+              className="text-xs font-bold text-destructive hover:underline ml-1"
             >
               Borrar todo
             </button>
@@ -294,7 +294,7 @@ export function ProductListIntegrated() {
             </AlertDescription>
           </Alert>
         ) : filteredProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-card/20 border border-primary/5 rounded-3xl backdrop-blur-sm">
+          <div className="flex flex-col items-center justify-center py-20 text-center space-y-4 bg-card/20 border border-primary/5 rounded-2xl backdrop-blur-sm">
             <div className="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center text-primary">
               <PackageOpen className="h-8 w-8" />
             </div>
@@ -305,7 +305,7 @@ export function ProductListIntegrated() {
               </p>
             </div>
             {activeFiltersCount > 0 && (
-              <Button onClick={clearAllFilters} size="sm" className="bg-primary text-primary-foreground font-bold cursor-pointer">
+              <Button onClick={clearAllFilters} size="sm" className="bg-primary text-primary-foreground font-bold">
                 Ver todos los productos
               </Button>
             )}
@@ -340,7 +340,7 @@ export function ProductListIntegrated() {
                     variant="outline"
                     onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1}
-                    className="h-9 w-9 p-0 border-primary/10 rounded-xl cursor-pointer"
+                    className="h-9 w-9 p-0 border-primary/10 rounded-xl"
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </Button>
@@ -352,7 +352,7 @@ export function ProductListIntegrated() {
                         variant={page === i + 1 ? 'default' : 'outline'}
                         onClick={() => handlePageChange(i + 1)}
                         className={cn(
-                          "h-9 min-w-9 px-3 text-xs font-bold rounded-xl cursor-pointer transition-all duration-300",
+                          "h-9 min-w-9 px-3 text-xs font-bold rounded-xl transition-all duration-300",
                           page === i + 1 
                             ? "bg-primary text-primary-foreground shadow-md shadow-primary/15"
                             : "border-primary/10 hover:bg-primary/5 hover:text-primary"
@@ -367,7 +367,7 @@ export function ProductListIntegrated() {
                     variant="outline"
                     onClick={() => handlePageChange(page + 1)}
                     disabled={page === meta.totalPages}
-                    className="h-9 w-9 p-0 border-primary/10 rounded-xl cursor-pointer"
+                    className="h-9 w-9 p-0 border-primary/10 rounded-xl"
                   >
                     <ChevronRight className="h-5 w-5" />
                   </Button>
@@ -396,7 +396,7 @@ export function ProductListIntegrated() {
               </span>
               <button 
                 onClick={() => setShowMobileFilters(false)}
-                className="p-1 rounded-lg border border-primary/10 hover:bg-muted cursor-pointer"
+                className="p-1 rounded-lg border border-primary/10 hover:bg-muted"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -415,7 +415,7 @@ export function ProductListIntegrated() {
                 <button
                   onClick={() => updateQueryParams({ only3D: !only3D })}
                   className={cn(
-                    "relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none",
+                    "relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-300 ease-in-out focus:outline-none",
                     only3D ? "bg-primary" : "bg-muted"
                   )}
                 >
@@ -444,7 +444,7 @@ export function ProductListIntegrated() {
             <div className="pt-6 border-t border-primary/5 mt-6 space-y-3">
               <Button
                 onClick={() => setShowMobileFilters(false)}
-                className="w-full bg-primary text-primary-foreground font-bold h-10 rounded-xl cursor-pointer"
+                className="w-full bg-primary text-primary-foreground font-bold h-10 rounded-xl"
               >
                 Aplicar Filtros
               </Button>
@@ -452,7 +452,7 @@ export function ProductListIntegrated() {
                 <Button
                   variant="outline"
                   onClick={() => { clearAllFilters(); setShowMobileFilters(false); }}
-                  className="w-full gap-2 border-destructive/20 text-destructive hover:bg-destructive/5 cursor-pointer h-10 rounded-xl font-bold uppercase tracking-wider text-xs"
+                  className="w-full gap-2 border-destructive/20 text-destructive hover:bg-destructive/5 h-10 rounded-xl font-bold uppercase tracking-wider text-xs"
                 >
                   <Trash2 className="h-4 w-4" />
                   Limpiar Todo

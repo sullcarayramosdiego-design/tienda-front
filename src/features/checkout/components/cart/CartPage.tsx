@@ -54,7 +54,7 @@ export function CartPage() {
             Parece que aún no has agregado productos 3D a tu carrito. ¡Explora nuestro catálogo tridimensional y vive la experiencia!
           </p>
         </div>
-        <Button asChild size="lg" className="rounded-2xl bg-primary hover:bg-primary/95 shadow-md shadow-primary/15 font-bold cursor-pointer h-12 px-8">
+        <Button asChild size="lg" className="rounded-2xl bg-primary hover:bg-primary/95 shadow-md shadow-primary/15 font-bold h-12 px-8">
           <Link href="/catalog" className="flex items-center gap-2">
             <ArrowLeft className="h-4.5 w-4.5" />
             Explorar Catálogo 3D
@@ -85,7 +85,7 @@ export function CartPage() {
             <h3 className="font-heading font-bold text-lg text-foreground">Detalle del Pedido</h3>
             <button
               onClick={clearCart}
-              className="text-xs font-bold text-destructive hover:underline flex items-center gap-1.5 cursor-pointer"
+              className="text-xs font-bold text-destructive hover:underline flex items-center gap-1.5"
             >
               <Trash2 className="h-4 w-4" />
               Vaciar Carrito
@@ -136,7 +136,7 @@ export function CartPage() {
                         size="icon"
                         onClick={() => updateQuantity(product.id, quantity - 1)}
                         disabled={quantity <= 1}
-                        className="h-8 w-8 rounded-lg border-primary/10 cursor-pointer"
+                        className="h-8 w-8 rounded-lg border-primary/10"
                       >
                         <Minus className="h-3.5 w-3.5" />
                       </Button>
@@ -146,7 +146,7 @@ export function CartPage() {
                         size="icon"
                         onClick={() => updateQuantity(product.id, quantity + 1)}
                         disabled={quantity >= product.stock}
-                        className="h-8 w-8 rounded-lg border-primary/10 cursor-pointer"
+                        className="h-8 w-8 rounded-lg border-primary/10"
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </Button>
@@ -161,7 +161,7 @@ export function CartPage() {
                       {/* Remove Button */}
                       <button
                         onClick={() => removeItem(product.id)}
-                        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg border border-transparent hover:border-destructive/10 transition-colors cursor-pointer"
+                        className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/5 rounded-lg border border-transparent hover:border-destructive/10 transition-colors"
                         aria-label="Eliminar producto"
                       >
                         <Trash2 className="h-4.5 w-4.5" />
@@ -241,7 +241,7 @@ export function CartPage() {
               {/* Secure checkout CTA button */}
               <Button
                 onClick={handleCheckoutRedirect}
-                className="w-full h-12 font-bold tracking-wider bg-primary hover:bg-primary/95 text-primary-foreground rounded-2xl shadow-lg shadow-primary/15 cursor-pointer active:scale-98 transition-all flex items-center justify-center gap-2"
+                className="w-full h-12 font-bold tracking-wider bg-primary hover:bg-primary/95 text-primary-foreground rounded-2xl shadow-lg shadow-primary/15 active:scale-98 transition-all flex items-center justify-center gap-2"
               >
                 <span>Proceder al Pago</span>
                 <ArrowRight className="h-5 w-5" />

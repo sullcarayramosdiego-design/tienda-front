@@ -18,8 +18,29 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'E-Commerce Platform',
-  description: 'Modern e-commerce with 3D product visualization',
+  title: {
+    default: '3D Experience Store — Tecnología y Lujo en Tu Hogar',
+    template: '%s | 3D Experience Store',
+  },
+  description: 'Descubre muebles y decoración tecnológica de ultra-lujo con nuestro visualizador interactivo 3D. Diseños minimalistas, durabilidad excepcional y personalización a medida.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: '3D Experience Store — Tecnología y Lujo en Tu Hogar',
+    description: 'Descubre muebles y decoración tecnológica de ultra-lujo con nuestro visualizador interactivo 3D. Diseños minimalistas, durabilidad excepcional y personalización a medida.',
+    url: '/',
+    siteName: '3D Experience Store',
+    locale: 'es_PE',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '3D Experience Store — Tecnología y Lujo en Tu Hogar',
+    description: 'Descubre muebles y decoración tecnológica de ultra-lujo con nuestro visualizador interactivo 3D. Diseños minimalistas, durabilidad excepcional y personalización a medida.',
+    creator: '@3dexperience',
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
+    <html lang="es-PE" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{

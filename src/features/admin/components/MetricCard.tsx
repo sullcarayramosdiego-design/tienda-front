@@ -14,33 +14,33 @@ export function MetricCard({ title, value, trend, trendLabel, loading }: MetricC
   const isPositive = trend !== undefined && trend >= 0;
   
   return (
-    <Card className="shadow-sm border-muted/40 bg-transparent">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="flex flex-col p-4 border-l border-border bg-transparent">
+      <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {title}
+      </div>
+      <div>
         {loading ? (
-          <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+          <div className="h-8 w-24 bg-muted animate-pulse rounded-sm" />
         ) : (
           <div className="flex flex-col gap-1">
-            <div className="text-3xl font-semibold tracking-tight">{value}</div>
+            <div className="text-3xl font-mono tracking-tight font-normal text-foreground">{value}</div>
             {trend !== undefined && (
               <div className="flex items-center text-xs mt-1">
                 <span
                   className={cn(
-                    "flex items-center font-medium",
-                    isPositive ? "text-emerald-600/80 dark:text-emerald-400/80" : "text-rose-600/80 dark:text-rose-400/80"
+                    "flex items-center font-semibold text-[11px] uppercase",
+                    isPositive ? "text-emerald-500" : "text-rose-500"
                   )}
                 >
                   {isPositive ? <ArrowUpIcon className="mr-1 h-3 w-3" /> : <ArrowDownIcon className="mr-1 h-3 w-3" />}
                   {Math.abs(trend)}%
                 </span>
-                {trendLabel && <span className="ml-1.5 text-muted-foreground">{trendLabel}</span>}
+                {trendLabel && <span className="ml-1.5 text-[11px] text-muted-foreground">{trendLabel}</span>}
               </div>
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

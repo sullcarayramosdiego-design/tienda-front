@@ -14,6 +14,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const productId = resolvedParams.id;
 
+  if (productId === 'default') {
+    return {
+      title: 'Pieza de Diseño Exclusivo 3D | Tienda 3D',
+      description: 'Explora muebles y elementos de diseño industrial de alta precisión con simulación y visualización 3D interactiva en tiempo real.',
+    };
+  }
+
   try {
     // Obtener los datos reales del producto en el servidor
     const product = await productsService.getById(productId);
@@ -59,10 +66,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+import { connection } from 'next/server';
+
+export async function generateStaticParams() {
+  return [{ id: 'default' }]; // Next.js 16 requiere al menos un elemento para validar tipos en compilación con cacheComponents
+}
+
 /**
  * 2. Componente de Página Servidor que delega la interactividad
  * de los hooks, modales y renderizadores al cliente sin penalizar el SEO.
  */
-export default function ProductDetailPage({ params }: Props) {
+export default async function ProductDetailPage({ params }: Props) {
+  const { id } = await params;
+  if (id === 'default') {
+    return <div className="min-h-screen bg-background" />;
+  }
+  await connection(); // Hace que la página sea renderizada dinámicamente en tiempo de solicitud
   return <ProductDetailPageClient params={params} />;
 }

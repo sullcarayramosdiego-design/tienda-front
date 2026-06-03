@@ -32,9 +32,19 @@ export default function AccountPage() {
 
   // Profile Edit States
   const [isEditing, setIsEditing] = useState(false);
-  const [firstName, setFirstName] = useState(user?.firstName || '');
-  const [lastName, setLastName] = useState(user?.lastName || '');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
+
+  // Sincronizar campos de edición con el usuario actual
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || '');
+      setLastName(user.lastName || '');
+      setPhone(user.phone || '');
+    }
+  }, [user]);
 
   // Password Reset States
   const [password, setPassword] = useState('');
@@ -81,10 +91,14 @@ export default function AccountPage() {
 
     setUpdatingProfile(true);
     try {
-      await usersService.updateProfile({ firstName, lastName });
+      await usersService.updateProfile({ 
+        firstName, 
+        lastName,
+        phone: phone || undefined
+      });
       toast({
         title: '✨ ¡Perfil Actualizado!',
-        description: 'Tus nombres y apellidos se han actualizado con éxito.',
+        description: 'Tus datos personales se han actualizado con éxito.',
         type: 'success',
       });
       setIsEditing(false);
@@ -263,9 +277,15 @@ export default function AccountPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 p-3.5 rounded-2xl bg-primary/5 border border-primary/5">
-                    <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Correo Electrónico</span>
-                    <p className="text-sm font-bold text-foreground">{user.email}</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5 p-3.5 rounded-2xl bg-primary/5 border border-primary/5">
+                      <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Correo Electrónico</span>
+                      <p className="text-sm font-bold text-foreground truncate">{user.email}</p>
+                    </div>
+                    <div className="space-y-1.5 p-3.5 rounded-2xl bg-primary/5 border border-primary/5">
+                      <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Número de Celular</span>
+                      <p className="text-sm font-bold text-foreground">{user.phone || 'No registrado'}</p>
+                    </div>
                   </div>
                 </div>
               ) : (
@@ -289,6 +309,17 @@ export default function AccountPage() {
                         placeholder="Apellidos"
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-muted-foreground">Número de Celular</label>
+                    <Input 
+                      type="tel"
+                      value={phone} 
+                      onChange={(e) => setPhone(e.target.value)} 
+                      className="rounded-xl h-10 border-primary/10" 
+                      placeholder="Ej. +51 987654321"
+                    />
                   </div>
 
                   <div className="flex gap-2 justify-end pt-2">

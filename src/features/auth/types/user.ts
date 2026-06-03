@@ -7,6 +7,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  phone?: string;
   role: 'CUSTOMER' | 'ADMIN' | 'SUPER_ADMIN';
   isActive?: boolean;
   createdAt: string;
@@ -17,6 +18,7 @@ export interface UpdateUserData {
   firstName?: string;
   lastName?: string;
   email?: string;
+  phone?: string;
   password?: string;
 }
 

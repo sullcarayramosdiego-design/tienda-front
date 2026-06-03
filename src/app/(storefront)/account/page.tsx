@@ -34,6 +34,7 @@ export default function AccountPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   // Password Reset States
@@ -61,6 +62,15 @@ export default function AccountPage() {
     loadSubscription();
   }, []);
 
+  // Synchronize form fields when user or editing changes
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || '');
+      setLastName(user.lastName || '');
+      setPhone(user.phone || '');
+    }
+  }, [user, isEditing]);
+
   if (!user) {
     return (
       <Card className="border-primary/10 bg-card/60 backdrop-blur-md p-6 text-center">
@@ -81,10 +91,11 @@ export default function AccountPage() {
 
     setUpdatingProfile(true);
     try {
-      await usersService.updateProfile({ firstName, lastName });
+      const cleanPhone = phone.replace(/\D/g, '');
+      await usersService.updateProfile({ firstName, lastName, phone: cleanPhone || undefined });
       toast({
         title: '✨ ¡Perfil Actualizado!',
-        description: 'Tus nombres y apellidos se han actualizado con éxito.',
+        description: 'Tus datos de perfil se han actualizado con éxito.',
         type: 'success',
       });
       setIsEditing(false);
@@ -261,6 +272,10 @@ export default function AccountPage() {
                       <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Apellidos</span>
                       <p className="text-sm font-bold text-foreground">{user.lastName}</p>
                     </div>
+                    <div className="space-y-1.5 p-3.5 rounded-2xl bg-primary/5 border border-primary/5 sm:col-span-2">
+                      <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Teléfono / Celular</span>
+                      <p className="text-sm font-bold text-foreground">{user.phone || 'No registrado'}</p>
+                    </div>
                   </div>
 
                   <div className="space-y-1.5 p-3.5 rounded-2xl bg-primary/5 border border-primary/5">
@@ -289,6 +304,16 @@ export default function AccountPage() {
                         placeholder="Apellidos"
                       />
                     </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-muted-foreground">Teléfono / Celular</label>
+                    <Input 
+                      value={phone} 
+                      onChange={(e) => setPhone(e.target.value)} 
+                      className="rounded-xl h-10 border-primary/10" 
+                      placeholder="Ej: 51918941272"
+                    />
                   </div>
 
                   <div className="flex gap-2 justify-end pt-2">

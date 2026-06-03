@@ -37,14 +37,7 @@ export default function AccountPage() {
   const [phone, setPhone] = useState(user?.phone || '');
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
-  // Sincronizar campos de edición con el usuario actual
-  useEffect(() => {
-    if (user) {
-      setFirstName(user.firstName || '');
-      setLastName(user.lastName || '');
-      setPhone(user.phone || '');
-    }
-  }, [user]);
+
 
   // Password Reset States
   const [password, setPassword] = useState('');
@@ -281,19 +274,12 @@ export default function AccountPage() {
                       <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Apellidos</span>
                       <p className="text-sm font-bold text-foreground">{user.lastName}</p>
                     </div>
-                    <div className="space-y-1.5 p-3.5 rounded-2xl bg-primary/5 border border-primary/5 sm:col-span-2">
-                      <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Teléfono / Celular</span>
-                      <p className="text-sm font-bold text-foreground">{user.phone || 'No registrado'}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5 p-3.5 rounded-2xl bg-primary/5 border border-primary/5">
                       <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Correo Electrónico</span>
                       <p className="text-sm font-bold text-foreground truncate">{user.email}</p>
                     </div>
                     <div className="space-y-1.5 p-3.5 rounded-2xl bg-primary/5 border border-primary/5">
-                      <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Número de Celular</span>
+                      <span className="text-[9px] font-black text-primary uppercase tracking-widest block">Teléfono / Celular</span>
                       <p className="text-sm font-bold text-foreground">{user.phone || 'No registrado'}</p>
                     </div>
                   </div>

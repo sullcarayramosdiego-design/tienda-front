@@ -49,7 +49,7 @@ import {
   Wallet,
   CheckCircle2
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, transformGoogleDriveUrl } from '@/lib/utils';
 
 export default function ProductPage({
   params,
@@ -122,18 +122,9 @@ export default function ProductPage({
   // Loading Skeleton State
   if (loading) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 max-w-7xl space-y-8 animate-pulse">
-        <Skeleton className="h-6 w-48 bg-primary/5 rounded-xl" />
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-          <div className="lg:col-span-7 aspect-square w-full bg-primary/5 rounded-3xl" />
-          <div className="lg:col-span-5 space-y-6">
-            <Skeleton className="h-4 w-24 bg-primary/5" />
-            <Skeleton className="h-10 w-3/4 bg-primary/5" />
-            <Skeleton className="h-8 w-1/3 bg-primary/5" />
-            <Skeleton className="h-20 w-full bg-primary/5" />
-            <Skeleton className="h-12 w-full bg-primary/5" />
-          </div>
-        </div>
+      <div className="w-full h-screen bg-background flex flex-col items-center justify-center space-y-4">
+        <Skeleton className="h-12 w-64 bg-muted animate-pulse" />
+        <span className="text-[10px] font-mono tracking-widest uppercase text-muted-foreground animate-pulse">Cargando detalles...</span>
       </div>
     );
   }
@@ -141,12 +132,8 @@ export default function ProductPage({
   // Error State
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center max-w-lg space-y-6">
-        <Alert variant="destructive" className="border-destructive/20 bg-destructive/5 rounded-2xl">
-          <AlertDescription className="font-semibold">
-            {error || 'El producto seleccionado no existe o no pudo ser cargado.'}
-          </AlertDescription>
-        </Alert>
+      <div className="w-full h-screen bg-background flex flex-col items-center justify-center gap-6">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground uppercase">Elemento No Encontrado</h1>
         <Button asChild className="bg-primary text-primary-foreground font-bold cursor-pointer rounded-xl">
           <Link href="/catalog" className="flex items-center gap-2">
             <ArrowLeft className="h-4 w-4" />
@@ -184,7 +171,7 @@ export default function ProductPage({
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-primary/5 via-muted/30 to-secondary/5">
                   <img
                     key={activeImageIndex}
-                    src={productImages[activeImageIndex]}
+                    src={transformGoogleDriveUrl(productImages[activeImageIndex])}
                     alt={product.name}
                     className="max-w-full max-h-[85%] object-contain rounded-2xl shadow-2xl border border-primary/5 transition-all duration-300"
                     onError={(e) => {

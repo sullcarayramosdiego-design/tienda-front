@@ -3,7 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { Sparkles, Eye } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, transformGoogleDriveUrl } from '@/lib/utils';
 import { useCart } from '@/features/checkout';
 import { useState } from 'react';
 
@@ -59,7 +59,7 @@ export function ProductCard({ id, name, price, has3D = true, sku, slug, image }:
           
           {image && !imageError ? (
             <img 
-              src={image} 
+              src={transformGoogleDriveUrl(image)} 
               alt={name} 
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 z-10"
               onError={() => setImageError(true)}

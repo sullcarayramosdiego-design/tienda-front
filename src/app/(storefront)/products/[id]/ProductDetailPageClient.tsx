@@ -44,7 +44,7 @@ import {
   Minus,
   Plus
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, transformGoogleDriveUrl } from '@/lib/utils';
 
 export default function ProductDetailPageClient({
   params,
@@ -174,7 +174,7 @@ export default function ProductDetailPageClient({
               initial={{ opacity: 0, scale: 1.02 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              src={productImages[activeImageIndex]}
+              src={transformGoogleDriveUrl(productImages[activeImageIndex])}
               alt={product.name}
               className="max-w-full max-h-[80%] object-contain rounded-2xl shadow-2xl border border-primary/5"
             />

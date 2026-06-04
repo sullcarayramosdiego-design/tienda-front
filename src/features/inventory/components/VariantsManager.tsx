@@ -17,7 +17,7 @@ import {
 import { variantsService } from '@/features/inventory/services/variants.service';
 import type  { ProductVariant } from '@/features/inventory';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { cn, transformGoogleDriveUrl } from '@/lib/utils';
 
 interface VariantsManagerProps {
   productId: string;
@@ -326,7 +326,7 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
                             <>
                               <div className="relative h-7 w-7 rounded border bg-muted overflow-hidden shrink-0">
                                 <img
-                                  src={v.images[0]}
+                                  src={transformGoogleDriveUrl(v.images[0])}
                                   alt=""
                                   className="h-full w-full object-cover"
                                   onError={(e) => {

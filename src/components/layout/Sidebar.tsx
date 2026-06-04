@@ -199,14 +199,6 @@ export function Sidebar() {
                     alt="Andean Vibes Logo" 
                     className="h-8 w-auto object-contain shrink-0"
                   />
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      ANDEAN VIBES
-                    </span>
-                    <span className="truncate text-[8px] font-bold text-muted-foreground tracking-widest uppercase mt-0.5 leading-none">
-                      Cultura y Tradición
-                    </span>
-                  </div>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

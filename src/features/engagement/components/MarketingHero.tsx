@@ -4,31 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const ProductViewer3D = dynamic(
-  () => import('@/features/catalog').then((mod) => mod.ProductViewer3D),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="relative w-full h-full bg-muted/10 flex flex-col items-center justify-center overflow-hidden">
-        <Skeleton className="absolute inset-0 bg-gradient-to-r from-muted/5 via-muted/10 to-muted/5 animate-pulse rounded-none" />
-        <div className="absolute inset-8 lg:inset-16 border border-border/20 rounded-[2rem] pointer-events-none flex flex-col items-center justify-center">
-          <div className="space-y-4 text-center">
-            <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-foreground/30 font-mono animate-pulse">
-              [ INICIALIZANDO ENTORNO 3D ]
-            </span>
-            <div className="w-24 h-[1px] bg-border/20 mx-auto" />
-            <span className="text-[9px] uppercase tracking-[0.1em] font-medium text-foreground/20 font-mono block animate-pulse">
-              Tolerancia Geométrica Superior
-            </span>
-          </div>
-        </div>
-      </div>
-    ),
-  }
-);
 
 export function MarketingHero() {
   return (
@@ -57,13 +33,13 @@ export function MarketingHero() {
 
           {/* Massive Display Headline */}
           <h1 className="text-6xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-[1.05]">
-            <span className="block text-muted-foreground">Andean</span>
-            <span className="block text-foreground">Vibes.</span>
+            <span className="block text-muted-foreground">Siente el alma</span>
+            <span className="block text-foreground">de los Andes.</span>
           </h1>
 
           {/* Subtext */}
           <p className="text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-sm">
-            Explora el arte popular del Perú y descubre sus significados profundos a través de traducción cultural e interactividad 3D.
+            Explora el arte popular peruano y la cosmovisión detrás de cada pieza a través de traducción cultural e interactividad inmersiva.
           </p>
 
           {/* Double-Bezel CTA with Hover Physics */}
@@ -89,29 +65,27 @@ export function MarketingHero() {
 
       {/* 
         ========================================================
-        RIGHT COLUMN: THE 3D CANVAS (Absolute Hero)
+        RIGHT COLUMN: THE VISUAL STATEMENT (Premium Photography)
         ========================================================
       */}
       <div className="w-full lg:w-[55%] relative min-h-[60vh] lg:min-h-[100dvh] bg-card lg:border-l border-border flex items-center justify-center overflow-hidden">
         {/* Subtle geometric framing */}
-        <div className="absolute inset-8 lg:inset-16 border border-border/50 rounded-[2rem] pointer-events-none" />
+        <div className="absolute inset-8 lg:inset-16 border border-border/30 rounded-[2rem] pointer-events-none z-20" />
 
-        <div className="absolute inset-0 lg:inset-12 z-10">
+        <div className="absolute inset-0 lg:inset-12 z-10 overflow-hidden rounded-[2rem]">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full h-full"
+            transition={{ duration: 1.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full h-full relative"
           >
-            <ProductViewer3D className="w-full h-full cursor-grab active:cursor-grabbing" scale={2.5} />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/30 to-transparent z-10" />
+            <img 
+              src="https://images.unsplash.com/photo-1526392060635-9d6019884377?q=80&w=1200&h=1200&fit=crop" 
+              alt="Arte y Tradición Peruana" 
+              className="w-full h-full object-cover transition-transform duration-[4000ms] hover:scale-105"
+            />
           </motion.div>
-        </div>
-
-        {/* Floating helper text */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20 pointer-events-none mix-blend-difference">
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground font-mono text-center">
-            [ ARRASTRA PARA EXPLORAR ]
-          </span>
         </div>
       </div>
     </section>

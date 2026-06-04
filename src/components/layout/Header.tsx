@@ -83,14 +83,6 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
             alt="Andean Vibes Logo" 
             className="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="flex flex-col">
-            <span className="text-base sm:text-lg font-black tracking-tight leading-none bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:opacity-95 transition-opacity">
-              ANDEAN VIBES
-            </span>
-            <span className="text-[9px] font-bold text-muted-foreground tracking-widest leading-none mt-0.5">
-              CULTURA Y TRADICIÓN
-            </span>
-          </div>
         </Link>
  
         {/* NAVEGACIÓN DESKTOP */}
@@ -223,14 +215,6 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
                       alt="Andean Vibes Logo" 
                       className="h-8 w-auto object-contain"
                     />
-                    <div className="flex flex-col">
-                      <span className="text-sm font-black tracking-tight leading-none bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                        ANDEAN VIBES
-                      </span>
-                      <span className="text-[8px] font-bold text-muted-foreground tracking-widest leading-none mt-0.5">
-                        CULTURA Y TRADICIÓN
-                      </span>
-                    </div>
                   </SheetTitle>
                 </SheetHeader>
 

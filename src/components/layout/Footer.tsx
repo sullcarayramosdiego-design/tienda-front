@@ -54,14 +54,6 @@ export function Footer() {
                 alt="Andean Vibes Logo" 
                 className="h-10 w-auto object-contain"
               />
-              <div className="flex flex-col">
-                <span className="text-base sm:text-lg font-black tracking-tight leading-none bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  ANDEAN VIBES
-                </span>
-                <span className="text-[9px] font-bold text-muted-foreground tracking-widest leading-none mt-0.5">
-                  CULTURA Y TRADICIÓN
-                </span>
-              </div>
             </Link>
             
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm">

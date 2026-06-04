@@ -20,7 +20,6 @@ export function StorefrontHeader() {
               alt="Andean Vibes Logo" 
               className="h-8 w-auto object-contain"
             />
-            <span className="text-lg font-bold">Andean Vibes</span>
           </Link>
 
           {/* Hamburger Menu Button */}

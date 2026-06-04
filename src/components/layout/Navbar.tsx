@@ -31,7 +31,6 @@ export function Navbar() {
             alt="Andean Vibes Logo" 
             className="h-8 w-auto object-contain"
           />
-          <span className="text-xl font-bold">Andean Vibes</span>
         </Link>
 
         {/* Navegación Central */}

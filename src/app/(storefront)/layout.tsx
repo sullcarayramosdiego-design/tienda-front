@@ -62,8 +62,16 @@ export default function StorefrontLayout({
     return base;
   };
 
-  // Mostrar el spinner de carga
-  if (loading) {
+  // Mostrar el spinner de carga solo en rutas privadas durante la verificación de sesión
+  const isPrivatePath = pathname.startsWith('/account') || 
+                        pathname.startsWith('/checkout') || 
+                        pathname.startsWith('/orders') || 
+                        pathname.startsWith('/subscription') || 
+                        pathname.startsWith('/referrals') || 
+                        pathname.startsWith('/loyalty') || 
+                        pathname.startsWith('/admin');
+
+  if (loading && isPrivatePath) {
     return <FullScreenLoader message="Cargando permisos y verificando sesión..." />;
   }
 

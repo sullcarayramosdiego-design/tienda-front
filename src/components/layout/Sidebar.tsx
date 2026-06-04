@@ -156,7 +156,7 @@ export function Sidebar() {
       label: 'Explorar',
       links: [
         { href: '/', label: 'Inicio', icon: Home, matchExact: true },
-        { href: '/catalog', label: 'Catálogo 3D', icon: Box, matchExact: false },
+        { href: '/catalog', label: 'Catálogo Cultural', icon: Box, matchExact: false },
       ]
     },
     ...(isAuthenticated ? [
@@ -171,9 +171,9 @@ export function Sidebar() {
       {
         label: 'Fidelización',
         links: [
-          { href: '/loyalty', label: 'Club Puntos 3D', icon: Award, matchExact: false },
+          { href: '/loyalty', label: 'Club Andean Vibes', icon: Award, matchExact: false },
           { href: '/referrals', label: 'Programa de Referidos', icon: Gift, matchExact: false },
-          { href: '/subscription', label: 'Suscripción Premium', icon: Sparkles, matchExact: false },
+          { href: '/subscription', label: 'Membresía Cultural', icon: Sparkles, matchExact: false },
         ]
       }
     ] : [])
@@ -190,19 +190,21 @@ export function Sidebar() {
               <SidebarMenuButton
                 size="lg"
                 asChild
-                tooltip="Tienda 3D"
+                tooltip="Andean Vibes"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Link href="/">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary via-secondary to-primary text-white shadow-md shadow-primary/25">
-                    <Sparkles className="size-4" />
-                  </div>
+                  <img 
+                    src="/images/logo1.png" 
+                    alt="Andean Vibes Logo" 
+                    className="h-8 w-auto object-contain shrink-0"
+                  />
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      TIENDA 3D
+                      ANDEAN VIBES
                     </span>
                     <span className="truncate text-[8px] font-bold text-muted-foreground tracking-widest uppercase mt-0.5 leading-none">
-                      Experience
+                      Cultura y Tradición
                     </span>
                   </div>
                 </Link>

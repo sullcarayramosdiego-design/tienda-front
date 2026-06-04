@@ -41,14 +41,14 @@ export default function StorefrontLayout({
       currentPath += `/${segment}`;
 
       let label = segment;
-      if (segment === 'catalog') label = 'Catálogo 3D';
+      if (segment === 'catalog') label = 'Catálogo Cultural';
       else if (segment === 'cart') label = 'Mi Carrito';
       else if (segment === 'wishlist') label = 'Favoritos';
       else if (segment === 'account') label = 'Mi Perfil';
       else if (segment === 'orders') label = 'Mis Pedidos';
-      else if (segment === 'loyalty') label = 'Puntos Club 3D';
+      else if (segment === 'loyalty') label = 'Club Andean Vibes';
       else if (segment === 'checkout') label = 'Pasarela de Pago';
-      else if (segment === 'subscription') label = 'Suscripción Premium';
+      else if (segment === 'subscription') label = 'Membresía Cultural';
       else if (segment === 'referrals') label = 'Programa de Referidos';
 
       // Fallback for dynamic UUID/slug routes
@@ -115,7 +115,7 @@ export default function StorefrontLayout({
           {/* Minimalist Client Footer */}
           <footer className="py-6 border-t border-primary/5 bg-card/25 text-center">
             <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">
-              &copy; {new Date().getFullYear()} TIENDA 3D EXPERIENCE. Todos los derechos reservados.
+              &copy; {new Date().getFullYear()} ANDEAN VIBES. Todos los derechos reservados.
             </p>
           </footer>
           <AIChatbotWidget />

@@ -203,7 +203,7 @@ export function ShippingSection({ form, errors, onChange }: ShippingSectionProps
             <div className="flex items-start gap-3 p-4 rounded-xl border border-primary/15 bg-primary/5">
               <Store className="h-4 w-4 text-primary mt-0.5 shrink-0" />
               <div className="space-y-1">
-                <p className="text-xs font-extrabold text-foreground">Tienda 3D — Lima Centro</p>
+                <p className="text-xs font-extrabold text-foreground">Casa Cultural Andean Vibes — San Isidro</p>
                 <p className="text-[10px] text-muted-foreground leading-relaxed">
                   Av. Javier Prado Este 1234, San Isidro, Lima<br />
                   Lun–Sáb 9am–8pm · Dom 10am–6pm

@@ -21,7 +21,7 @@ export function Footer() {
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('¡Gracias por suscribirte a nuestro boletín 3D!');
+    alert('¡Gracias por suscribirte al boletín de Andean Vibes!');
   };
 
   const footerLinks = {
@@ -48,22 +48,24 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12">
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-5">
-            <Link href="/" className="flex items-center gap-2 group max-w-max">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-secondary to-primary bg-300% flex items-center justify-center shadow-md shadow-primary/25">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
+            <Link href="/" className="flex items-center gap-2.5 group max-w-max">
+              <img 
+                src="/images/logo1.png" 
+                alt="Andean Vibes Logo" 
+                className="h-10 w-auto object-contain"
+              />
               <div className="flex flex-col">
                 <span className="text-base sm:text-lg font-black tracking-tight leading-none bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  TIENDA 3D
+                  ANDEAN VIBES
                 </span>
                 <span className="text-[9px] font-bold text-muted-foreground tracking-widest leading-none mt-0.5">
-                  EXPERIENCE
+                  CULTURA Y TRADICIÓN
                 </span>
               </div>
             </Link>
             
             <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-sm">
-              Somos pioneros en la revolución del e-commerce interactivo. Visualiza, personaliza e interactúa con productos en 3D de alta fidelidad y realidad aumentada directamente en tu navegador.
+              Plataforma de difusión y comercio del arte popular peruano. Conoce las historias, cosmovisión y traducción de nuestras tradiciones interactivamente en 3D y realidad aumentada.
             </p>
 
             {/* Redes Sociales */}
@@ -159,7 +161,7 @@ export function Footer() {
               Newsletter
             </h3>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Entérate antes que nadie de lanzamientos de productos 3D y ofertas exclusivas.
+              Únete a nuestro boletín para conocer nuevas historias, piezas tradicionales y traducciones exclusivas.
             </p>
             <form onSubmit={handleSubscribe} className="flex gap-2">
               <div className="relative flex-1">
@@ -183,7 +185,7 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-3.5 w-3.5 text-primary shrink-0" />
-                <span>soporte@tienda3d.com</span>
+                <span>contacto@andeanvibes.com</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -195,7 +197,7 @@ export function Footer() {
 
         <div className="pt-8 border-t border-primary/5 flex items-center justify-center">
           <p className="text-xs text-muted-foreground text-center font-semibold">
-            &copy; {currentYear} TIENDA 3D EXPERIENCE. Todos los derechos reservados.
+            &copy; {currentYear} ANDEAN VIBES. Todos los derechos reservados.
           </p>
         </div>
       </div>

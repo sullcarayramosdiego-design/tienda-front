@@ -10,16 +10,18 @@ export function FullScreenLoader({ message = 'Cargando permisos...' }: FullScree
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background/95 backdrop-blur-sm transition-all duration-300">
       <div className="flex flex-col items-center justify-center space-y-8 animate-in fade-in zoom-in duration-500">
         {/* LOGO */}
-        <div className="flex items-center gap-3">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-primary via-secondary to-primary bg-300% flex items-center justify-center shadow-lg shadow-primary/25 animate-pulse">
-            <Sparkles className="h-8 w-8 text-white" />
-          </div>
+        <div className="flex items-center gap-3.5">
+          <img 
+            src="/images/logo1.png" 
+            alt="Andean Vibes Logo" 
+            className="h-16 w-auto object-contain animate-pulse"
+          />
           <div className="flex flex-col justify-center">
             <span className="text-3xl sm:text-4xl font-black tracking-tight leading-none bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-              TIENDA 3D
+              ANDEAN VIBES
             </span>
             <span className="text-[10px] sm:text-xs font-bold text-muted-foreground tracking-widest leading-none mt-1.5">
-              EXPERIENCE
+              CULTURA Y TRADICIÓN
             </span>
           </div>
         </div>

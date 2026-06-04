@@ -53,11 +53,11 @@ export default function HomePage() {
           {/* Section Header */}
           <div className="mb-20 max-w-2xl">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-6 text-foreground">
-              Infraestructura <br />
-              <span className="text-muted-foreground">Sensorial.</span>
+              El Corazón <br />
+              <span className="text-muted-foreground">De Nuestra Tierra.</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-md leading-relaxed">
-              No es solo un catálogo. Es un motor de renderizado inmersivo diseñado para eliminar la incertidumbre en el comercio digital.
+              Conectamos el arte popular del Perú con el mundo, traduciendo significados ancestrales y permitiendo la apreciación detallada en 3D y realidad aumentada.
             </p>
           </div>
 
@@ -78,9 +78,9 @@ export default function HomePage() {
                 </div>
                 
                 <div className="relative z-10 max-w-md">
-                  <h3 className="text-3xl font-bold tracking-tight mb-4 text-foreground">Inspección Topológica</h3>
+                  <h3 className="text-3xl font-bold tracking-tight mb-4 text-foreground">Traducción Cultural</h3>
                   <p className="text-muted-foreground leading-relaxed">
-                    Nuestros modelos 3D mantienen una densidad poligonal optimizada. Podrás acercarte hasta observar la trama del material sin perder fidelidad visual.
+                    Cada pieza tradicional cuenta una historia. Traducimos la cosmovisión y el significado profundo de los símbolos y técnicas de nuestros artesanos.
                   </p>
                 </div>
               </div>
@@ -97,9 +97,9 @@ export default function HomePage() {
               <div className="absolute inset-2 bg-card rounded-[calc(2rem-0.5rem)] shadow-sm p-8 flex flex-col justify-between">
                 <Layers className="w-8 h-8 text-primary/50" strokeWidth={1} />
                 <div>
-                  <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">Realidad Aumentada</h3>
+                  <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">Modelado 3D & AR</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
-                    Proyecta el objeto en tu propio espacio físico con precisión milimétrica usando tu dispositivo móvil.
+                    Interactúa y proyecta retablos, máscaras y ceramios en tu espacio real para apreciar el relieve de la arcilla y madera.
                   </p>
                 </div>
               </div>
@@ -116,9 +116,9 @@ export default function HomePage() {
               <div className="absolute inset-2 bg-card rounded-[calc(2rem-0.5rem)] shadow-sm p-8 flex flex-col justify-between">
                 <Zap className="w-8 h-8 text-secondary/50" strokeWidth={1} />
                 <div>
-                  <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">Carga Dinámica</h3>
+                  <h3 className="text-xl font-bold tracking-tight mb-2 text-foreground">Comercio Justo</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed">
-                    Texturas fragmentadas que cargan progresivamente. Sin tiempos de espera paralizantes.
+                    Cada pieza adquirida beneficia directamente a los maestros artesanos peruanos y a la preservación de sus talleres tradicionales.
                   </p>
                 </div>
               </div>
@@ -136,12 +136,12 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-3 mb-8">
               <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
               <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground font-mono">
-                Membresías Elite
+                Membresías Culturales
               </span>
             </div>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] mb-6 text-foreground">
-              Acceso sin <br />
-              <span className="text-muted-foreground">Restricciones.</span>
+              Apoya y Descubre <br />
+              <span className="text-muted-foreground">Nuestra Cultura.</span>
             </h2>
           </div>
 
@@ -205,7 +205,7 @@ export default function HomePage() {
                       <ul className="space-y-4 mb-12 flex-1">
                         <li className="flex items-start gap-4">
                           <Check className="w-5 h-5 text-primary shrink-0" strokeWidth={1.5} />
-                          <span className="text-sm text-foreground/80">Ancho de banda 3D sin límites</span>
+                          <span className="text-sm text-foreground/80">Traducción cultural e historias de piezas</span>
                         </li>
                         <li className="flex items-start gap-4">
                           {plan.features.arEnabled ? (
@@ -214,7 +214,7 @@ export default function HomePage() {
                             <span className="w-5 h-5 flex items-center justify-center text-muted-foreground/30">-</span>
                           )}
                           <span className={`text-sm ${plan.features.arEnabled ? 'text-foreground/80' : 'text-muted-foreground/50'}`}>
-                            Proyección de Realidad Aumentada
+                            Visualización en Realidad Aumentada
                           </span>
                         </li>
                         <li className="flex items-start gap-4">
@@ -224,7 +224,7 @@ export default function HomePage() {
                             <span className="w-5 h-5 flex items-center justify-center text-muted-foreground/30">-</span>
                           )}
                           <span className={`text-sm ${plan.features.premiumDiscounts ? 'text-foreground/80' : 'text-muted-foreground/50'}`}>
-                            Descuentos algorítmicos (10%)
+                            10% de descuento de apoyo al artesano
                           </span>
                         </li>
                       </ul>

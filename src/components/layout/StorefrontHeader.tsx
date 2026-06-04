@@ -14,11 +14,13 @@ export function StorefrontHeader() {
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 lg:hidden">
         <div className="flex h-16 items-center justify-between px-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
-              <span className="text-primary-foreground font-bold text-xl">3D</span>
-            </div>
-            <span className="text-lg font-bold">E-Commerce 3D</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <img 
+              src="/images/logo1.png" 
+              alt="Andean Vibes Logo" 
+              className="h-8 w-auto object-contain"
+            />
+            <span className="text-lg font-bold">Andean Vibes</span>
           </Link>
 
           {/* Hamburger Menu Button */}

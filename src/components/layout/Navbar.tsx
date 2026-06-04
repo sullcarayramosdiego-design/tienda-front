@@ -25,11 +25,13 @@ export function Navbar() {
     <nav className="hidden lg:flex sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 max-w-7xl">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
-            <span className="text-primary-foreground font-bold text-xl">3D</span>
-          </div>
-          <span className="text-xl font-bold">E-Commerce 3D</span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <img 
+            src="/images/logo1.png" 
+            alt="Andean Vibes Logo" 
+            className="h-8 w-auto object-contain"
+          />
+          <span className="text-xl font-bold">Andean Vibes</span>
         </Link>
 
         {/* Navegación Central */}

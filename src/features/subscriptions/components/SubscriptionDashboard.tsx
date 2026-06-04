@@ -135,13 +135,13 @@ export function SubscriptionDashboard() {
             <span>Beneficios VIP</span>
           </Badge>
           <h1 className="text-3xl font-heading font-extrabold tracking-tight leading-tight">
-            Suscripción{' '}
+            Membresía{' '}
             <span className="bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
-              Premium 3D
+              Cultural Andean Vibes
             </span>
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
-            Desbloquea Realidad Aumentada móvil avanzada, subidas de modelos GLB ilimitadas, envíos gratis asegurados y acumulación de puntos Club 3D acelerada.
+            Apoya directamente a talleres de artesanos peruanos y accede a traducciones culturales profundas, visualización interactiva 3D/AR ilimitada, y beneficios en envíos y puntos del Club.
           </p>
         </div>
       </section>
@@ -236,7 +236,7 @@ export function SubscriptionDashboard() {
                       <DialogHeader className="space-y-2">
                         <DialogTitle className="text-lg font-heading font-black text-foreground">¿Desactivar renovación automática?</DialogTitle>
                         <DialogDescription className="text-xs text-muted-foreground leading-relaxed">
-                          Perderás el acceso preferencial a Realidad Aumentada, el soporte VIP 3D, y los envíos gratis automáticos una vez que termine el ciclo facturado actual ({currentSub.endDate ? new Date(currentSub.endDate).toLocaleDateString() : ''}).
+                          Perderás el acceso preferencial a traducciones culturales, soporte VIP, visualización AR avanzada y envíos gratis automáticos una vez que termine el ciclo facturado actual ({currentSub.endDate ? new Date(currentSub.endDate).toLocaleDateString() : ''}).
                         </DialogDescription>
                       </DialogHeader>
                       <DialogFooter className="flex gap-3 sm:gap-0 pt-2">
@@ -274,8 +274,8 @@ export function SubscriptionDashboard() {
                     <Check className="h-3.5 w-3.5 text-primary" />
                   </div>
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-foreground">Visualización 3D Prioritaria</span>
-                    <p className="text-[10px] text-muted-foreground">Carga instantánea de los visualizadores GLB en catálogo sin retardos.</p>
+                    <span className="text-xs font-bold text-foreground">Visualización 3D y AR de Alta Fidelidad</span>
+                    <p className="text-[10px] text-muted-foreground">Interactúa con modelos 3D y realidad aumentada de piezas populares para apreciar cada detalle y técnica.</p>
                   </div>
                 </li>
 
@@ -297,8 +297,8 @@ export function SubscriptionDashboard() {
                       <Check className="h-3.5 w-3.5 text-primary" />
                     </div>
                     <div className="space-y-0.5">
-                      <span className="text-xs font-bold text-foreground">Descuento Directo Premium</span>
-                      <p className="text-[10px] text-muted-foreground">10% de descuento directo en tus compras, acumulable con Club Puntos 3D.</p>
+                      <span className="text-xs font-bold text-foreground">Descuento de Apoyo Directo</span>
+                      <p className="text-[10px] text-muted-foreground">10% de descuento directo en tus adquisiciones de arte, acumulable con Club Puntos Andean Vibes.</p>
                     </div>
                   </li>
                 )}
@@ -323,9 +323,9 @@ export function SubscriptionDashboard() {
         // ==========================================
         <div className="space-y-6">
           <div className="text-center max-w-xl mx-auto space-y-2 mb-2">
-            <h2 className="text-2xl font-heading font-extrabold text-foreground">Elige tu membresía Club Premium 3D</h2>
+            <h2 className="text-2xl font-heading font-extrabold text-foreground">Elige tu membresía Andean Vibes</h2>
             <p className="text-xs text-muted-foreground">
-              Comienza hoy mismo a disfrutar de una experiencia de compra completamente inmersiva y de la máxima velocidad en tu portal.
+              Únete hoy mismo para apoyar la preservación del arte popular peruano, acceder a traducciones culturales profundas e interactuar con visores 3D/AR.
             </p>
           </div>
 
@@ -375,7 +375,7 @@ export function SubscriptionDashboard() {
                       <ul className="space-y-3 pt-2">
                         <li className="flex items-center gap-2.5 text-xs">
                           <Check className="h-4.5 w-4.5 text-primary shrink-0" />
-                          <span className="text-foreground">Acceso 3D interactivo prioritario</span>
+                          <span className="text-foreground">Traducciones culturales exclusivas y visor 3D</span>
                         </li>
                         <li className="flex items-center gap-2.5 text-xs">
                           {plan.features.arEnabled ? (
@@ -394,7 +394,7 @@ export function SubscriptionDashboard() {
                             <span className="h-4.5 w-4.5 text-muted-foreground/30 shrink-0 text-center select-none font-bold block">-</span>
                           )}
                           <span className={plan.features.premiumDiscounts ? 'text-foreground font-semibold' : 'text-muted-foreground/50'}>
-                            10% Descuento directo en catálogo
+                            10% Descuento y puntos Club Andean Vibes
                           </span>
                         </li>
                         <li className="flex items-center gap-2.5 text-xs">

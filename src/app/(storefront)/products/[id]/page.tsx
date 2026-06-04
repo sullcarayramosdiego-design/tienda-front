@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (productId === 'default') {
     return {
-      title: 'Pieza de Diseño Exclusivo 3D | Tienda 3D',
-      description: 'Explora muebles y elementos de diseño industrial de alta precisión con simulación y visualización 3D interactiva en tiempo real.',
+      title: 'Arte Popular Peruano & Tradición | Andean Vibes',
+      description: 'Explora ceramios, retablos y máscaras tradicionales de la cultura popular peruana con traducción cultural e interactividad 3D y AR.',
     };
   }
 
@@ -32,11 +32,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       : 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1200&h=630&fit=crop'; // Un fallback editorial estético
 
     return {
-      title: `${product.name} — Experiencia Modular 3D`,
-      description: product.description || 'Ingeniería geométrica superior y lujo suizo. Examina y personaliza el objeto en tiempo real utilizando el visor interactivo 3D.',
+      title: `${product.name} — Tradición & Cultura Andina`,
+      description: product.description || 'Explora el simbolismo y la historia de esta pieza de arte popular peruano. Interactúa con el objeto en 3D para apreciar el relieve de su fabricación.',
       openGraph: {
-        title: `${product.name} | Colección Ultra-Lujo`,
-        description: product.description || 'Descubre la excelencia geométrica y material de este exclusivo diseño en nuestro visor 3D.',
+        title: `${product.name} | Colección Tradicional Peruana`,
+        description: product.description || 'Descubre la cosmovisión y el significado material de esta pieza de arte popular en nuestro visor 3D.',
         type: 'website',
         locale: 'es_PE',
         images: [
@@ -50,8 +50,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
       twitter: {
         card: 'summary_large_image',
-        title: `${product.name} — Diseño de Alta Ingeniería 3D`,
-        description: product.description || 'Detalles estéticos perfectos, renderizado en tiempo real.',
+        title: `${product.name} — Arte Popular & Cosmovisión Peruana`,
+        description: product.description || 'Conoce la historia y el significado de esta pieza artesanal en 3D.',
         images: [previewImageUrl],
       },
     };
@@ -60,8 +60,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     
     // Fallback robusto y elegante en caso de error de red o compilación estática
     return {
-      title: 'Pieza de Diseño Exclusivo 3D | Tienda 3D',
-      description: 'Explora muebles y elementos de diseño industrial de alta precisión con simulación y visualización 3D interactiva en tiempo real.',
+      title: 'Arte Popular Peruano & Tradición | Andean Vibes',
+      description: 'Explora ceramios, retablos y máscaras tradicionales de la cultura popular peruana con traducción cultural e interactividad 3D y AR.',
     };
   }
 }

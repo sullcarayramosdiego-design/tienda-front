@@ -51,19 +51,19 @@ export function MarketingHero() {
           <div className="inline-flex items-center gap-3">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
             <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-muted-foreground font-mono">
-              Arquitectura Digital
+              Cultura, Arte & Traducción
             </span>
           </div>
 
           {/* Massive Display Headline */}
           <h1 className="text-6xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-[1.05]">
-            <span className="block text-muted-foreground">Realidad</span>
-            <span className="block text-foreground">Tangible.</span>
+            <span className="block text-muted-foreground">Andean</span>
+            <span className="block text-foreground">Vibes.</span>
           </h1>
 
           {/* Subtext */}
           <p className="text-lg md:text-xl text-muted-foreground font-medium leading-relaxed max-w-sm">
-            Examinación espacial sin fricción. Interactúa con objetos en alta fidelidad antes de que existan físicamente en tus manos.
+            Explora el arte popular del Perú y descubre sus significados profundos a través de traducción cultural e interactividad 3D.
           </p>
 
           {/* Double-Bezel CTA with Hover Physics */}
@@ -76,7 +76,7 @@ export function MarketingHero() {
                 href="/catalog"
                 className="relative inline-flex items-center gap-6 rounded-full bg-primary text-primary-foreground pl-8 pr-2 py-2 font-bold uppercase tracking-[0.1em] text-xs transition-colors hover:bg-primary/90"
               >
-                <span>Descubrir Catálogo</span>
+                <span>Explorar Catálogo</span>
                 {/* Button-in-Button architecture */}
                 <div className="w-10 h-10 rounded-full bg-background/20 flex items-center justify-center transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-1 group-hover:-translate-y-[1px] group-hover:scale-105">
                   <ArrowRight className="h-4 w-4" />

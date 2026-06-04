@@ -99,14 +99,16 @@ export function LoginForm() {
       <Card className="relative border-primary/10 shadow-2xl bg-card/75 backdrop-blur-xl dark:bg-card/45 rounded-2xl md:rounded-3xl overflow-hidden border transition-all duration-300">
         <CardHeader className="space-y-1 pb-4">
           <div className="flex flex-col items-center space-y-2 mb-2">
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md shadow-primary/20 animate-pulse">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
+            <img 
+              src="/images/logo1.png" 
+              alt="Andean Vibes Logo" 
+              className="h-12 w-auto object-contain animate-pulse mb-1"
+            />
             <CardTitle className="text-2xl font-extrabold text-center tracking-tight bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">
               Bienvenido de Nuevo
             </CardTitle>
             <CardDescription className="text-center text-xs sm:text-sm">
-              Ingresa tus credenciales para acceder a la tienda 3D
+              Ingresa tus credenciales para acceder a Andean Vibes
             </CardDescription>
           </div>
         </CardHeader>

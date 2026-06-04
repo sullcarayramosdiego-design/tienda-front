@@ -21,7 +21,7 @@ export function AIChatbotWidget() {
     {
       id: '1',
       sender: 'ai',
-      text: '¡Hola! Soy tu asistente de Tienda 3D 🤖✨. ¿En qué puedo ayudarte hoy?',
+      text: '¡Hola! Soy el asistente cultural de Andean Vibes 🤖✨. ¿En qué puedo ayudarte hoy a conocer más sobre nuestra cultura andina y arte popular?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     },
   ]);
@@ -38,16 +38,16 @@ export function AIChatbotWidget() {
 
   const commonQuestions = [
     {
-      q: '¿Cómo uso el visor 3D?',
-      a: '¡Es súper intuitivo! Puedes mantener presionado y arrastrar (con el ratón o el dedo en móvil) para rotar el modelo. Usa la rueda del mouse o pellizca la pantalla para hacer zoom y examinar los detalles geométricos más de cerca. 🔍✨',
+      q: '¿Qué es Andean Vibes?',
+      a: 'Somos una plataforma de difusión cultural que comparte traducción de lenguas originarias y tradiciones peruanas, ofreciendo piezas de artesanía popular e interactividad 3D y AR para revalorar nuestro legado. 🇵🇪⛰️',
     },
     {
-      q: '¿Qué métodos de pago tienen?',
-      a: 'Soportamos pagos rápidos como Yape y Plin para compras rápidas locales en el Perú, además de transferencias directas y contra-entrega. 💳🇵🇪',
+      q: '¿Cómo funciona el visor 3D cultural?',
+      a: '¡Es muy intuitivo! Puedes arrastrar con el mouse o tu dedo en móviles para rotar la pieza (retablos, máscaras, ceramios). Esto te permite observar cada detalle de la pintura, textura y relieve del artesano desde cualquier ángulo. 🔍✨',
     },
     {
-      q: '¿Hacen envíos a provincia?',
-      a: '¡Sí, enviamos a todo el Perú! Para Lima contamos con envío exprés en 24 horas y para provincias despachamos vía Olva Courier o Shalom, llegando en un plazo de 2 a 3 días hábiles. 🚚📦',
+      q: '¿Hacen envíos a todo el Perú?',
+      a: 'Sí, enviamos a todo el Perú. Las piezas se empaquetan con alta protección. En Lima entregamos en 24 horas, y en provincias a través de Olva Courier o Shalom en 2-3 días hábiles. 🚚📦',
     },
   ];
 
@@ -73,7 +73,7 @@ export function AIChatbotWidget() {
       
       const aiReplyText = matchedQ 
         ? matchedQ.a
-        : `¡Excelente consulta! Como soy un asistente AI en fase beta, te recomiendo contactar directamente a soporte técnico escribiendo al WhatsApp (+51 999 888 777) o visitando nuestro catálogo para interactuar con más modelos 3D. 🛠️✨`;
+        : `¡Excelente consulta! Como soy tu asistente cultural de Andean Vibes, te recomiendo contactar directamente a nuestro canal de atención escribiendo al WhatsApp (+51 999 888 777) o explorar nuestra colección cultural para interactuar con nuestras piezas. 🇵🇪✨`;
 
       const aiMsg: Message = {
         id: (Date.now() + 1).toString(),
@@ -104,11 +104,11 @@ export function AIChatbotWidget() {
               </Avatar>
               <div className="flex flex-col">
                 <CardTitle className="text-sm font-heading font-black tracking-wide flex items-center gap-1">
-                  Asistente Virtual 3D <Sparkles className="h-3.5 w-3.5 fill-current text-amber-300" />
+                  Guía Cultural <Sparkles className="h-3.5 w-3.5 fill-current text-amber-300" />
                 </CardTitle>
                 <span className="text-[10px] font-bold text-white/80 uppercase tracking-widest flex items-center gap-1 mt-0.5">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-                  Soporte en línea
+                  Andean Vibes
                 </span>
               </div>
             </div>
@@ -203,7 +203,7 @@ export function AIChatbotWidget() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSendMessage(inputText)}
-              placeholder="Pregúntame algo sobre la tienda..."
+              placeholder="Pregúntame sobre el arte popular peruano..."
               disabled={isTyping}
               className="flex-1 h-9 rounded-xl border-primary/10 focus-visible:ring-1 focus-visible:ring-primary/20 text-xs"
             />

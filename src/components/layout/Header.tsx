@@ -77,16 +77,18 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
     )}>
       <div className="container mx-auto h-full flex items-center justify-between px-4 sm:px-6 lg:px-8 max-w-7xl">
         {/* LOGO */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary via-secondary to-primary bg-300% flex items-center justify-center shadow-md shadow-primary/25 group-hover:scale-105 transition-transform duration-300">
-            <Sparkles className="h-5 w-5 text-white" />
-          </div>
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <img 
+            src="/images/logo1.png" 
+            alt="Andean Vibes Logo" 
+            className="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+          />
           <div className="flex flex-col">
             <span className="text-base sm:text-lg font-black tracking-tight leading-none bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent group-hover:opacity-95 transition-opacity">
-              TIENDA 3D
+              ANDEAN VIBES
             </span>
             <span className="text-[9px] font-bold text-muted-foreground tracking-widest leading-none mt-0.5">
-              EXPERIENCE
+              CULTURA Y TRADICIÓN
             </span>
           </div>
         </Link>
@@ -125,7 +127,7 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               type="search"
-              placeholder="Buscar productos 3D..."
+              placeholder="Buscar arte y cultura..."
               className="pl-10 h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-primary/40 focus-visible:bg-background transition-all"
             />
           </div>
@@ -215,16 +217,18 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
               </SheetTrigger>
               <SheetContent side="right" className="w-[85vw] sm:w-80 flex flex-col p-6 border-l border-primary/5 bg-card/95 backdrop-blur-xl">
                 <SheetHeader className="px-0 pb-4 border-b border-primary/5">
-                  <SheetTitle className="flex items-center gap-2 text-left">
-                    <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                      <Sparkles className="h-5 w-5 text-white" />
-                    </div>
+                  <SheetTitle className="flex items-center gap-2.5 text-left">
+                    <img 
+                      src="/images/logo1.png" 
+                      alt="Andean Vibes Logo" 
+                      className="h-8 w-auto object-contain"
+                    />
                     <div className="flex flex-col">
                       <span className="text-sm font-black tracking-tight leading-none bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                        TIENDA 3D
+                        ANDEAN VIBES
                       </span>
                       <span className="text-[8px] font-bold text-muted-foreground tracking-widest leading-none mt-0.5">
-                        EXPERIENCE
+                        CULTURA Y TRADICIÓN
                       </span>
                     </div>
                   </SheetTitle>
@@ -235,7 +239,7 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                   <Input
                     type="search"
-                    placeholder="Buscar productos..."
+                    placeholder="Buscar arte y cultura..."
                     className="pl-10 h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-offset-0 focus-visible:ring-primary/40 focus-visible:bg-background"
                   />
                 </div>

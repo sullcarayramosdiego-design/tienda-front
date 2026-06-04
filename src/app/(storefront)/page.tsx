@@ -41,9 +41,9 @@ export default function HomePage() {
     return <UserDashboardDynamic />;
   }
 
-  // Guest view - Branding Aware (Forcing Dark Mode)
+  // Guest view - Branding Aware
   return (
-    <div className="dark min-h-screen bg-background text-foreground selection:bg-primary/20">
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">
       {/* 1. MARKETING HERO */}
       <MarketingHero />
 

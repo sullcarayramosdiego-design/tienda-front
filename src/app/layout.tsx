@@ -19,27 +19,27 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: '3D Experience Store — Tecnología y Lujo en Tu Hogar',
-    template: '%s | 3D Experience Store',
+    default: 'Andean Vibes — Arte Popular Peruano y Cosmovisión 3D',
+    template: '%s | Andean Vibes',
   },
-  description: 'Descubre muebles y decoración tecnológica de ultra-lujo con nuestro visualizador interactivo 3D. Diseños minimalistas, durabilidad excepcional y personalización a medida.',
+  description: 'Explora y adquiere piezas exclusivas de arte popular peruano con visualización interactiva 3D y realidad aumentada. Comercio justo apoyando directamente a los artesanos locales.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    title: '3D Experience Store — Tecnología y Lujo en Tu Hogar',
-    description: 'Descubre muebles y decoración tecnológica de ultra-lujo con nuestro visualizador interactivo 3D. Diseños minimalistas, durabilidad excepcional y personalización a medida.',
+    title: 'Andean Vibes — Arte Popular Peruano y Cosmovisión 3D',
+    description: 'Explora y adquiere piezas exclusivas de arte popular peruano con visualización interactiva 3D y realidad aumentada. Comercio justo apoyando directamente a los artesanos locales.',
     url: '/',
-    siteName: '3D Experience Store',
+    siteName: 'Andean Vibes',
     locale: 'es_PE',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: '3D Experience Store — Tecnología y Lujo en Tu Hogar',
-    description: 'Descubre muebles y decoración tecnológica de ultra-lujo con nuestro visualizador interactivo 3D. Diseños minimalistas, durabilidad excepcional y personalización a medida.',
-    creator: '@3dexperience',
+    title: 'Andean Vibes — Arte Popular Peruano y Cosmovisión 3D',
+    description: 'Explora y adquiere piezas exclusivas de arte popular peruano con visualización interactiva 3D y realidad aumentada. Comercio justo apoyando directamente a los artesanos locales.',
+    creator: '@andeanvibes',
   },
 };
 

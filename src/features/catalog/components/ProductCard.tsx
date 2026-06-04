@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Sparkles, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/features/checkout';
+import { useState } from 'react';
 
 interface ProductCardProps {
   id: string;
@@ -16,10 +17,11 @@ interface ProductCardProps {
   slug?: string;
 }
 
-export function ProductCard({ id, name, price, has3D = true, sku, slug }: ProductCardProps) {
+export function ProductCard({ id, name, price, has3D = true, sku, slug, image }: ProductCardProps) {
   const { items } = useCart();
   const cartItem = items.find(item => item.product.id === id);
   const cartQuantity = cartItem ? cartItem.quantity : 0;
+  const [imageError, setImageError] = useState(false);
 
   // Format price in local Peruvian Soles (S/)
   const formattedPrice = new Intl.NumberFormat('es-PE', {
@@ -34,7 +36,7 @@ export function ProductCard({ id, name, price, has3D = true, sku, slug }: Produc
         {/* Badge: xQ in cart */}
         {cartQuantity > 0 && (
           <div className="absolute top-3 right-3 z-10 animate-fade-in scale-95">
-            <span className="flex items-center gap-1 px-2.5 py-1 text-[9px] font-black text-white bg-gradient-to-r from-primary to-secondary border border-white/10 rounded-md shadow-md uppercase tracking-wider">
+            <span className="flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-black text-white bg-gradient-to-r from-primary to-secondary border border-white/10 rounded-md shadow-md uppercase tracking-wider">
               {cartQuantity} en Carrito
             </span>
           </div>
@@ -42,7 +44,7 @@ export function ProductCard({ id, name, price, has3D = true, sku, slug }: Produc
 
         {/* Badge: 3D/AR Available */}
         {has3D && (
-          <div className="absolute top-3 left-3 z-10">
+          <div className="absolute top-3 left-3 z-20">
             <span className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold tracking-wider text-primary-foreground bg-primary/80 backdrop-blur-md border border-white/20 rounded-full shadow-lg shadow-primary/20 uppercase animate-pulse">
               <Sparkles className="h-3 w-3 text-secondary" />
               <span>3D / AR</span>
@@ -55,6 +57,15 @@ export function ProductCard({ id, name, price, has3D = true, sku, slug }: Produc
           {/* Subtle Glowing Background Grid */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent opacity-40 group-hover:scale-110 transition-transform duration-500" />
           
+          {image && !imageError ? (
+            <img 
+              src={image} 
+              alt={name} 
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 z-10"
+              onError={() => setImageError(true)}
+            />
+          ) : null}
+
           {/* Decorative Modern Art Circles */}
           <div className="absolute w-28 h-28 rounded-full border border-primary/10 group-hover:border-primary/20 scale-90 group-hover:scale-105 transition-all duration-500" />
           <div className="absolute w-20 h-20 rounded-full border border-secondary/15 group-hover:border-secondary/25 scale-90 group-hover:scale-110 transition-all duration-500" />
@@ -67,10 +78,10 @@ export function ProductCard({ id, name, price, has3D = true, sku, slug }: Produc
           </div>
 
           {/* Quick Peek Action Overlay */}
-          <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+          <div className="absolute inset-0 bg-background/40 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center z-20">
             <span className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-xl shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
               <Eye className="h-4 w-4" />
-              Explorar en 3D
+              {has3D ? 'Explorar en 3D' : 'Ver Detalles'}
             </span>
           </div>
         </div>

@@ -107,6 +107,16 @@ export function InventoryTable() {
   const [newProductCategoryId, setNewProductCategoryId] = useState('');
   const [submittingCreate, setSubmittingCreate] = useState(false);
 
+  // Estados de Editar Producto
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editProductName, setEditProductName] = useState('');
+  const [editProductDescription, setEditProductDescription] = useState('');
+  const [editProductSku, setEditProductSku] = useState('');
+  const [editProductPrice, setEditProductPrice] = useState('');
+  const [editProductCategoryId, setEditProductCategoryId] = useState('');
+  const [editProductImages, setEditProductImages] = useState('');
+  const [submittingEdit, setSubmittingEdit] = useState(false);
+
   // Estados de Crear Categoría
   const [isCategoryCreateOpen, setIsCategoryCreateOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -326,6 +336,61 @@ export function InventoryTable() {
       });
     } finally {
       setSubmittingCategory(false);
+    }
+  };
+
+  const openEditModal = (product: Product) => {
+    setSelectedProduct(product);
+    setEditProductName(product.name);
+    setEditProductDescription(product.description || '');
+    setEditProductSku(product.sku);
+    setEditProductPrice(product.price.toString());
+    setEditProductCategoryId(product.category?.id || (product as any).categoryId || '');
+    setEditProductImages(product.images ? product.images.join('\n') : '');
+    setIsEditOpen(true);
+  };
+
+  const handleEditProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProduct) return;
+
+    try {
+      setSubmittingEdit(true);
+      const priceVal = parseFloat(editProductPrice);
+      if (isNaN(priceVal)) {
+        throw new Error('Precio inválido');
+      }
+
+      const imagesArray = editProductImages
+        .split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0);
+
+      await productsService.update(selectedProduct.id, {
+        name: editProductName,
+        description: editProductDescription,
+        price: priceVal,
+        sku: editProductSku.toUpperCase(),
+        categoryId: editProductCategoryId || undefined,
+        images: imagesArray,
+      });
+
+      toast({
+        type: 'success',
+        title: '¡Producto Actualizado! ✨',
+        description: 'Los detalles del producto se guardaron con éxito.'
+      });
+
+      setIsEditOpen(false);
+      fetchData();
+    } catch (err: any) {
+      toast({
+        type: 'error',
+        title: 'Error al actualizar',
+        description: err.response?.data?.message || err.message || 'Ocurrió un error.'
+      });
+    } finally {
+      setSubmittingEdit(false);
     }
   };
 
@@ -761,6 +826,9 @@ export function InventoryTable() {
                           <DropdownMenuItem onClick={() => openHistoryModal(p)} className="text-xs cursor-pointer">
                             <History className="mr-2 h-3.5 w-3.5"/> Historial
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => openEditModal(p)} className="text-xs cursor-pointer">
+                            <Settings className="mr-2 h-3.5 w-3.5"/> Editar Detalles
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => handleToggleActive(p)} className="text-xs cursor-pointer">
                             <EyeOff className="mr-2 h-3.5 w-3.5"/> {p.isActive !== false ? 'Desactivar' : 'Activar'}
@@ -1003,6 +1071,125 @@ export function InventoryTable() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+      {/* MODAL DE EDICIÓN DE DETALLES */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-lg rounded-xl p-6 shadow-xl bg-card border-primary/5 max-h-[90vh] overflow-y-auto">
+          <form onSubmit={handleEditProduct}>
+            <DialogHeader>
+              <DialogTitle className="text-sm font-bold text-foreground">Editar Detalles del Producto</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground">
+                Actualice los detalles y enlaces de imágenes para este producto.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-1">
+                <Label htmlFor="editName" className="text-xs font-bold text-muted-foreground">Nombre del Producto</Label>
+                <Input
+                  id="editName"
+                  type="text"
+                  value={editProductName}
+                  onChange={(e) => setEditProductName(e.target.value)}
+                  className="h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                  required
+                />
+              </div>
+
+              <div className="grid gap-1">
+                <Label htmlFor="editSku" className="text-xs font-bold text-muted-foreground">SKU</Label>
+                <Input
+                  id="editSku"
+                  type="text"
+                  value={editProductSku}
+                  onChange={(e) => setEditProductSku(e.target.value)}
+                  className="h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs font-mono uppercase"
+                  required
+                />
+              </div>
+
+              <div className="grid gap-1">
+                <Label htmlFor="editPrice" className="text-xs font-bold text-muted-foreground">Precio (S/.)</Label>
+                <Input
+                  id="editPrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editProductPrice}
+                  onChange={(e) => setEditProductPrice(e.target.value)}
+                  className="h-10 rounded-xl bg-muted/40 border-primary/5 focus-visible:ring-2 focus-visible:ring-primary/40 text-xs"
+                  required
+                />
+              </div>
+
+              <div className="grid gap-1">
+                <Label htmlFor="editCategory" className="text-xs font-bold text-muted-foreground">Categoría</Label>
+                <Select
+                  value={editProductCategoryId}
+                  onValueChange={setEditProductCategoryId}
+                >
+                  <SelectTrigger id="editCategory" className="h-10 rounded-xl bg-muted/40 border-primary/5 text-xs">
+                    <SelectValue placeholder="Seleccione una categoría" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card">
+                    {categoriesList.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id} className="text-xs cursor-pointer">
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-1">
+                <Label htmlFor="editDesc" className="text-xs font-bold text-muted-foreground">Descripción</Label>
+                <textarea
+                  id="editDesc"
+                  placeholder="Detalles sobre el producto..."
+                  value={editProductDescription}
+                  onChange={(e) => setEditProductDescription(e.target.value)}
+                  className="w-full min-w-0 rounded-xl border border-primary/10 bg-muted/40 px-3.5 py-2 text-xs transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 h-24"
+                  required
+                />
+              </div>
+
+              <div className="grid gap-1">
+                <Label htmlFor="editImages" className="text-xs font-bold text-muted-foreground">
+                  Enlaces de Imágenes (URLs)
+                </Label>
+                <DialogDescription className="text-[10px] text-muted-foreground">
+                  Coloque un enlace de imagen por línea. Se permiten múltiples enlaces.
+                </DialogDescription>
+                <textarea
+                  id="editImages"
+                  placeholder="https://drive.google.com/...\nhttps://images.unsplash.com/..."
+                  value={editProductImages}
+                  onChange={(e) => setEditProductImages(e.target.value)}
+                  className="w-full min-w-0 rounded-xl border border-primary/10 bg-muted/40 px-3.5 py-2 text-xs font-mono transition-colors outline-none placeholder:text-muted-foreground focus-visible:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary/40 h-28"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-0">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsEditOpen(false)}
+                className="rounded-xl text-xs cursor-pointer"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={submittingEdit}
+                className="rounded-xl bg-primary text-primary-foreground font-bold text-xs cursor-pointer shadow-md shadow-primary/10"
+              >
+                {submittingEdit ? 'Guardando...' : 'Guardar Cambios'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* MODAL 3: CREAR NUEVO PRODUCTO */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>

@@ -66,6 +66,7 @@ export default function ProductPage({
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [addedNotify, setAddedNotify] = useState(false);
   const [favNotify, setFavNotify] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const { addItem } = useCart();
   const { toggleItem, hasItem } = useWishlist();
@@ -161,6 +162,12 @@ export default function ProductPage({
     ? product.assets[0].fileUrl
     : undefined;
 
+  const productImages: string[] = selectedVariant?.images && selectedVariant.images.length > 0
+    ? selectedVariant.images
+    : product.images && product.images.length > 0
+    ? product.images
+    : [`/images/products/${product.sku}.jpg`];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/5 pb-20">
       
@@ -173,15 +180,50 @@ export default function ProductPage({
           {/* ================================================= */}
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="relative w-full aspect-square bg-card border border-primary/10 rounded-3xl overflow-hidden shadow-xl">
-              <ProductViewer3D 
-                modelUrl={glbAssetUrl}
-              />
+              {!glbAssetUrl ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-primary/5 via-muted/30 to-secondary/5">
+                  <img
+                    key={activeImageIndex}
+                    src={productImages[activeImageIndex]}
+                    alt={product.name}
+                    className="max-w-full max-h-[85%] object-contain rounded-2xl shadow-2xl border border-primary/5 transition-all duration-300"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                  {/* Gallery Navigation Dot Indicators */}
+                  {productImages.length > 1 && (
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                      {productImages.map((img, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActiveImageIndex(idx)}
+                          className={cn(
+                            "w-2.5 h-2.5 rounded-full border transition-all duration-300 cursor-pointer",
+                            activeImageIndex === idx 
+                              ? "bg-foreground border-foreground w-6" 
+                              : "bg-foreground/20 border-transparent hover:bg-foreground/45"
+                          )}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <ProductViewer3D 
+                  modelUrl={glbAssetUrl}
+                />
+              )}
             </div>
 
             {/* Gesture Tip panel */}
             <div className="flex items-center gap-2.5 p-4 border border-primary/10 bg-card/60 backdrop-blur-md rounded-2xl justify-center">
               <Sparkles className="h-4.5 w-4.5 text-primary animate-pulse shrink-0" />
-              <span className="text-xs text-muted-foreground font-semibold text-center">Interactúa con el modelo arrastrando y haciendo zoom.</span>
+              <span className="text-xs text-muted-foreground font-semibold text-center">
+                {glbAssetUrl 
+                  ? 'Interactúa con el modelo arrastrando y haciendo zoom.' 
+                  : 'Fotografía detallada de la pieza artesanal.'}
+              </span>
             </div>
           </div>
 
@@ -245,6 +287,7 @@ export default function ProductPage({
                           key={v.id}
                           onClick={() => {
                             setSelectedVariant(isSelected ? null : v);
+                            setActiveImageIndex(0);
                             if (v.stock < quantity) {
                               setQuantity(Math.max(1, v.stock));
                             }

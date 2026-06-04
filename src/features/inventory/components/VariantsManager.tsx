@@ -32,6 +32,7 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState('');
   const [editStock, setEditStock] = useState('');
+  const [editImages, setEditImages] = useState('');
   const [savingId, setSavingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -41,6 +42,7 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
   const [newSku, setNewSku] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newStock, setNewStock] = useState('');
+  const [newImages, setNewImages] = useState('');
   const [savingNew, setSavingNew] = useState(false);
 
   const fetchVariants = useCallback(async () => {
@@ -65,12 +67,14 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
     setEditingId(variant.id);
     setEditPrice(variant.price.toString());
     setEditStock(variant.stock.toString());
+    setEditImages(variant.images ? variant.images.join(', ') : '');
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditPrice('');
     setEditStock('');
+    setEditImages('');
   };
 
   const saveEdit = async (variantId: string) => {
@@ -83,9 +87,15 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
         throw new Error("Valores numéricos inválidos");
       }
 
+      const imagesArr = editImages
+        .split(/[,\n]/)
+        .map((img) => img.trim())
+        .filter((img) => img !== '');
+
       const updated = await variantsService.update(productId, variantId, {
         price: priceVal,
         stock: stockVal,
+        images: imagesArr,
       });
 
       setVariants((prev) => prev.map((v) => (v.id === variantId ? updated : v)));
@@ -121,12 +131,18 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
         throw new Error('El nombre y SKU son obligatorios');
       }
 
+      const imagesArr = newImages
+        .split(/[,\n]/)
+        .map((img) => img.trim())
+        .filter((img) => img !== '');
+
       const created = await variantsService.create(productId, {
         name: newName.trim(),
         sku: newSku.trim().toUpperCase(),
         price: parseFloat(newPrice) || 0,
         stock: parseInt(newStock, 10) || 0,
         attributes: [], // Atributos personalizados inline no soportados en el formulario simple aún
+        images: imagesArr,
       });
 
       setVariants((prev) => [...prev, created]);
@@ -137,6 +153,7 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
       setNewSku('');
       setNewPrice('');
       setNewStock('');
+      setNewImages('');
     } catch (err: any) {
       setError(err.message || 'Error al crear nueva variante');
     } finally {
@@ -225,6 +242,15 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
               />
             </div>
           </div>
+          <div className="space-y-1">
+            <Label className="text-[10px] font-black text-muted-foreground uppercase">Enlaces de Imágenes (separados por coma)</Label>
+            <Input
+              placeholder="https://ejemplo.com/imagen1.jpg, https://ejemplo.com/imagen2.jpg"
+              value={newImages}
+              onChange={(e) => setNewImages(e.target.value)}
+              className="h-8 text-xs rounded-lg border-primary/15 bg-background focus-visible:ring-1 focus-visible:ring-primary/40"
+            />
+          </div>
           <div className="flex justify-end pt-1">
             <Button
               type="button"
@@ -245,6 +271,7 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-border/50">
               <TableHead className="text-[10px] font-black text-muted-foreground uppercase py-2">Detalles</TableHead>
+              <TableHead className="text-[10px] font-black text-muted-foreground uppercase py-2">Imágenes</TableHead>
               <TableHead className="text-[10px] font-black text-muted-foreground uppercase py-2 w-28 text-center">Precio (S/.)</TableHead>
               <TableHead className="text-[10px] font-black text-muted-foreground uppercase py-2 w-24 text-center">Stock</TableHead>
               <TableHead className="text-[10px] font-black text-muted-foreground uppercase py-2 w-24 text-right pr-4">Acciones</TableHead>
@@ -257,12 +284,13 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
                   <TableCell className="py-2"><Skeleton className="h-8 w-full max-w-[200px]" /></TableCell>
                   <TableCell className="py-2"><Skeleton className="h-8 w-full" /></TableCell>
                   <TableCell className="py-2"><Skeleton className="h-8 w-full" /></TableCell>
+                  <TableCell className="py-2"><Skeleton className="h-8 w-full" /></TableCell>
                   <TableCell className="py-2"><Skeleton className="h-8 w-full ml-auto" /></TableCell>
                 </TableRow>
               ))
             ) : variants.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={5} className="h-24 text-center">
                   <div className="flex flex-col items-center justify-center gap-1.5 text-muted-foreground">
                     <Info className="h-5 w-5 opacity-50" />
                     <span className="text-xs font-medium">Este producto aún no tiene variantes</span>
@@ -282,6 +310,39 @@ export function VariantsManager({ productId }: VariantsManagerProps) {
                         <span className="font-bold text-xs truncate" title={v.name}>{v.name}</span>
                         <span className="text-[10px] text-muted-foreground font-mono uppercase truncate" title={v.sku}>{v.sku}</span>
                       </div>
+                    </TableCell>
+
+                    <TableCell className="py-2">
+                      {isEditing ? (
+                        <Input
+                          placeholder="URLs (separados por coma)"
+                          value={editImages}
+                          onChange={(e) => setEditImages(e.target.value)}
+                          className="h-7 text-xs rounded-md bg-background focus-visible:ring-1 border-primary/20 w-full min-w-[120px]"
+                        />
+                      ) : (
+                        <div className="flex items-center gap-1.5">
+                          {v.images && v.images.length > 0 ? (
+                            <>
+                              <div className="relative h-7 w-7 rounded border bg-muted overflow-hidden shrink-0">
+                                <img
+                                  src={v.images[0]}
+                                  alt=""
+                                  className="h-full w-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                              <span className="text-[10px] text-muted-foreground font-medium">
+                                {v.images.length} {v.images.length === 1 ? 'img' : 'imgs'}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground italic">Sin imágenes</span>
+                          )}
+                        </div>
+                      )}
                     </TableCell>
                     
                     <TableCell className="py-2 px-1 text-center">

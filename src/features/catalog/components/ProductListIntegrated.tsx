@@ -320,7 +320,7 @@ export function ProductListIntegrated() {
                   id={product.id}
                   name={product.name}
                   price={product.price}
-                  image={`/images/products/${product.sku}.jpg`}
+                  image={product.images && product.images.length > 0 ? product.images[0] : `/images/products/${product.sku}.jpg`}
                   sku={product.sku}
                   has3D={product.assets && product.assets.length > 0}
                   slug={product.slug}

@@ -16,6 +16,7 @@ export interface Product {
   variants?: ProductVariant[];
   category?: any;
   isActive?: boolean;
+  images?: string[];
 }
 
 // ============================================================================
@@ -38,6 +39,7 @@ export interface ProductVariant {
   isActive?: boolean;
   createdAt: string;
   updatedAt: string;
+  images?: string[];
 }
 
 export interface CreateVariantData {
@@ -46,6 +48,7 @@ export interface CreateVariantData {
   price: number;
   stock: number;
   attributes?: VariantAttribute[];
+  images?: string[];
 }
 
 export interface UpdateVariantData {
@@ -55,6 +58,7 @@ export interface UpdateVariantData {
   stock?: number;
   attributes?: VariantAttribute[];
   isActive?: boolean;
+  images?: string[];
 }
 
 export interface CreateProductData {
@@ -65,6 +69,7 @@ export interface CreateProductData {
   stock: number;
   categoryId?: string;
   isActive?: boolean;
+  images?: string[];
 }
 
 export interface UpdateProductData {
@@ -75,6 +80,7 @@ export interface UpdateProductData {
   stock?: number;
   categoryId?: string;
   isActive?: boolean;
+  images?: string[];
 }
 
 export interface ProductListResponse {

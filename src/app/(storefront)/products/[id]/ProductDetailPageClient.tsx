@@ -61,6 +61,7 @@ export default function ProductDetailPageClient({
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [addedNotify, setAddedNotify] = useState(false);
   const [favNotify, setFavNotify] = useState(false);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const { addItem } = useCart();
   const { toggleItem, hasItem } = useWishlist();
@@ -140,6 +141,12 @@ export default function ProductDetailPageClient({
     ? product.assets[0].fileUrl
     : undefined;
 
+  const productImages: string[] = selectedVariant?.images && selectedVariant.images.length > 0
+    ? selectedVariant.images
+    : product.images && product.images.length > 0
+    ? product.images
+    : [`/images/products/${product.sku}.jpg`];
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-foreground selection:text-background flex flex-col lg:flex-row overflow-x-hidden">
       
@@ -160,25 +167,58 @@ export default function ProductDetailPageClient({
           </Link>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute inset-0 z-10"
-        >
-          <ProductViewer3D 
-            modelUrl={glbAssetUrl}
-            className="w-full h-full cursor-grab active:cursor-grabbing"
-            scale={2.5}
-          />
-        </motion.div>
+        {!glbAssetUrl ? (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-primary/5 via-muted/30 to-secondary/5">
+            <motion.img
+              key={activeImageIndex}
+              initial={{ opacity: 0, scale: 1.02 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              src={productImages[activeImageIndex]}
+              alt={product.name}
+              className="max-w-full max-h-[80%] object-contain rounded-2xl shadow-2xl border border-primary/5"
+            />
+            {/* Gallery Navigation Dot Indicators */}
+            {productImages.length > 1 && (
+              <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                {productImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setActiveImageIndex(idx)}
+                    className={cn(
+                      "w-2.5 h-2.5 rounded-full border transition-all duration-300 cursor-pointer",
+                      activeImageIndex === idx 
+                        ? "bg-foreground border-foreground w-6" 
+                        : "bg-foreground/20 border-transparent hover:bg-foreground/45"
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute inset-0 z-10"
+          >
+            <ProductViewer3D 
+              modelUrl={glbAssetUrl}
+              className="w-full h-full cursor-grab active:cursor-grabbing"
+              scale={2.5}
+            />
+          </motion.div>
+        )}
 
         {/* Minimal interaction hint */}
-        <div className="absolute bottom-10 left-10 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-          <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-foreground/50 font-mono">
-            [ EJE X/Y/Z DESBLOQUEADO ]
-          </span>
-        </div>
+        {glbAssetUrl && (
+          <div className="absolute bottom-10 left-10 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-medium text-foreground/50 font-mono">
+              [ EJE X/Y/Z DESBLOQUEADO ]
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 
@@ -238,6 +278,7 @@ export default function ProductDetailPageClient({
                         key={v.id}
                         onClick={() => {
                           setSelectedVariant(isSelected ? null : v);
+                          setActiveImageIndex(0);
                           if (v.stock < quantity) setQuantity(Math.max(1, v.stock));
                         }}
                         className={cn(

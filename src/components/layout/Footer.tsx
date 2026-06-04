@@ -28,15 +28,15 @@ export function Footer() {
     explorar: [
       { label: 'Inicio', href: '/' },
       { label: 'Catálogo de Modelos', href: '/catalog' },
-      { label: 'Colecciones Especiales', href: '/catalog' },
-      { label: 'Preguntas Frecuentes', href: '/' },
+      { label: 'Colecciones Especiales', href: '/collections' },
+      { label: 'Preguntas Frecuentes', href: '/faq' },
     ],
     soporte: [
-      { label: 'Políticas de Envío', href: '/' },
-      { label: 'Garantía 3D', href: '/' },
-      { label: 'Cambios y Devoluciones', href: '/' },
-      { label: 'Términos de Servicio', href: '/' },
-      { label: 'Política de Privacidad', href: '/' },
+      { label: 'Políticas de Envío', href: '/shipping-policy' },
+      { label: 'Garantía 3D', href: '/warranty-3d' },
+      { label: 'Cambios y Devoluciones', href: '/returns' },
+      { label: 'Términos de Servicio', href: '/terms' },
+      { label: 'Política de Privacidad', href: '/privacy' },
     ],
   };
 

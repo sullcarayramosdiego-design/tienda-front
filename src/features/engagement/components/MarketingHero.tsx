@@ -34,7 +34,7 @@ export function MarketingHero() {
           {/* Massive Display Headline */}
           <h1 className="text-6xl md:text-7xl lg:text-[5.5rem] font-black tracking-tighter leading-[1.05]">
             <span className="block text-muted-foreground">Siente el alma</span>
-            <span className="block text-foreground">de los Andes.</span>
+            <span className="block text-foreground">de los Andes</span>
           </h1>
 
           {/* Subtext */}

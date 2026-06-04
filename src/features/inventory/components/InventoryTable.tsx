@@ -239,6 +239,24 @@ export function InventoryTable() {
         categoryId: newProductCategoryId || undefined,
       });
 
+      // Registrar movimiento de stock inicial en el historial
+      const initialStockQty = hasVariants && variantDrafts.length > 0
+        ? variantDrafts.reduce((sum, d) => sum + (parseInt(d.stock, 10) || 0), 0)
+        : stockNum;
+
+      if (initialStockQty > 0) {
+        try {
+          await inventoryService.recordMovement({
+            productId: createdProduct.id,
+            movementType: 'PURCHASE',
+            quantity: initialStockQty,
+            reason: 'Registro de stock inicial de producto.',
+          });
+        } catch (mvErr) {
+          console.error('Error al registrar movimiento inicial de stock:', mvErr);
+        }
+      }
+
       if (hasVariants && variantDrafts.length > 0) {
         await variantsService.bulkCreate(
           createdProduct.id,
@@ -988,7 +1006,7 @@ export function InventoryTable() {
 
       {/* MODAL 3: CREAR NUEVO PRODUCTO */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="sm:max-w-lg rounded-xl p-6 shadow-xl bg-card border-primary/5">
+        <DialogContent className="sm:max-w-lg rounded-xl p-6 shadow-xl bg-card border-primary/5 max-h-[90vh] overflow-y-auto">
           <form onSubmit={handleCreateProduct}>
             <DialogHeader>
               <DialogTitle className="text-sm font-bold text-foreground">Registrar Nuevo Producto en Catálogo</DialogTitle>

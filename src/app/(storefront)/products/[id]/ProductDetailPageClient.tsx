@@ -168,7 +168,7 @@ export default function ProductDetailPageClient({
         </div>
 
         {!glbAssetUrl ? (
-          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-primary/5 via-muted/30 to-secondary/5">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 via-muted/30 to-secondary/5">
             <motion.img
               key={activeImageIndex}
               initial={{ opacity: 0, scale: 1.02 }}
@@ -176,7 +176,7 @@ export default function ProductDetailPageClient({
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               src={transformGoogleDriveUrl(productImages[activeImageIndex])}
               alt={product.name}
-              className="max-w-full max-h-[80%] object-contain rounded-2xl shadow-2xl border border-primary/5"
+              className="w-full h-full object-cover"
             />
             {/* Gallery Navigation Dot Indicators */}
             {productImages.length > 1 && (

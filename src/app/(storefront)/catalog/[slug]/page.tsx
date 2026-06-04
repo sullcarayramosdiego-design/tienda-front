@@ -168,12 +168,12 @@ export default function ProductPage({
           <div className="lg:col-span-8 flex flex-col gap-6">
             <div className="relative w-full aspect-square bg-card border border-primary/10 rounded-3xl overflow-hidden shadow-xl">
               {!glbAssetUrl ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-primary/5 via-muted/30 to-secondary/5">
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 via-muted/30 to-secondary/5">
                   <img
                     key={activeImageIndex}
                     src={transformGoogleDriveUrl(productImages[activeImageIndex])}
                     alt={product.name}
-                    className="max-w-full max-h-[85%] object-contain rounded-2xl shadow-2xl border border-primary/5 transition-all duration-300"
+                    className="w-full h-full object-cover transition-all duration-300"
                     onError={(e) => {
                       (e.target as HTMLElement).style.display = 'none';
                     }}

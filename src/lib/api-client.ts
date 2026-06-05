@@ -56,7 +56,7 @@ apiClient.interceptors.response.use(
         
         if (!refreshToken) {
           // No hay refresh token, redirigir al login
-          if (typeof window !== 'undefined') {
+          if (typeof window !== 'undefined' && !originalRequest.headers?.['x-skip-auth-redirect']) {
             window.location.href = '/login';
           }
           return Promise.reject(error);
@@ -85,7 +85,9 @@ apiClient.interceptors.response.use(
         if (typeof window !== 'undefined') {
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
+          if (!originalRequest.headers?.['x-skip-auth-redirect']) {
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(refreshError);
       }

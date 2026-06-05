@@ -19,7 +19,8 @@ import {
   Sun,
   Moon,
   Award,
-  Gift
+  Gift,
+  Compass
 } from 'lucide-react';
 import { useTheme } from '@/providers';
 import {
@@ -157,6 +158,7 @@ export function Sidebar() {
       links: [
         { href: '/', label: 'Inicio', icon: Home, matchExact: true },
         { href: '/catalog', label: 'Catálogo Cultural', icon: Box, matchExact: false },
+        { href: '/mi-peru', label: 'Mi Perú', icon: Compass, matchExact: false },
       ]
     },
     ...(isAuthenticated ? [

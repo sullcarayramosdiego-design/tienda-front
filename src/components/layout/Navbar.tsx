@@ -18,6 +18,7 @@ export function Navbar() {
   const navLinks = [
     { href: '/', label: 'Inicio' },
     { href: '/catalog', label: 'Catálogo' },
+    { href: '/mi-peru', label: 'Mi Perú' },
     { href: '/wishlist', label: 'Favoritos', icon: Heart },
   ];
 

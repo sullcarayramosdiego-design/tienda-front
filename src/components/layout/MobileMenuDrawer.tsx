@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Box, Search } from "lucide-react";
+import { Home, Box, Search, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -20,6 +20,7 @@ const navigationGroups = [
     links: [
       { href: "/", label: "Inicio", icon: Home },
       { href: "/catalog", label: "Catálogo 3D", icon: Box },
+      { href: "/mi-peru", label: "Mi Perú", icon: Compass },
     ],
   },
 ];

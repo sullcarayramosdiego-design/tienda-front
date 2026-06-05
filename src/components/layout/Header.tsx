@@ -65,6 +65,7 @@ export function Header({ cartItemsCount = 0 }: HeaderProps) {
   const navLinks = [
     { href: '/', label: 'Inicio' },
     { href: '/catalog', label: 'Catálogo' },
+    { href: '/mi-peru', label: 'Mi Perú' },
     ...(isAuthenticated ? [{ href: '/wishlist', label: 'Favoritos', icon: Heart }] : []),
   ];
 

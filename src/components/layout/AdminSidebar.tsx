@@ -21,7 +21,8 @@ import {
   BarChart2,
   Package,
   Heart,
-  Shield
+  Shield,
+  MapPin
 } from 'lucide-react';
 import { useTheme } from '@/providers';
 
@@ -87,6 +88,7 @@ const adminNavigationGroups = [
     links: [
       { href: '/admin/users', label: 'Cuentas de Usuario', icon: Users },
       { href: '/admin/finance', label: 'Finanzas', icon: Wallet },
+      { href: '/admin/mi-peru', label: 'Mi Perú', icon: MapPin },
     ],
   },
 ];

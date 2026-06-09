@@ -1835,6 +1835,44 @@ function MapClusterLayer<
   return null;
 }
 
+type MapMaskProps = {
+  url: string;
+  fillColor?: string;
+  fillOpacity?: number;
+};
+
+function MapMask({ url, fillColor = "#0f172a", fillOpacity = 1 }: MapMaskProps) {
+  const { map, isLoaded } = useMap();
+
+  useEffect(() => {
+    if (!map || !isLoaded) return;
+
+    const sourceId = "map-mask-source";
+    const layerId = "map-mask-layer";
+
+    if (!map.getSource(sourceId)) {
+      map.addSource(sourceId, {
+        type: "geojson",
+        data: url,
+      });
+      map.addLayer({
+        id: layerId,
+        type: "fill",
+        source: sourceId,
+        paint: {
+          "fill-color": fillColor,
+          "fill-opacity": fillOpacity,
+        },
+      });
+    } else {
+      map.setPaintProperty(layerId, "fill-color", fillColor);
+      map.setPaintProperty(layerId, "fill-opacity", fillOpacity);
+    }
+  }, [map, isLoaded, url, fillColor, fillOpacity]);
+
+  return null;
+}
+
 export {
   Map,
   useMap,
@@ -1848,6 +1886,7 @@ export {
   MapRoute,
   MapArc,
   MapClusterLayer,
+  MapMask,
 };
 
 export type { MapRef, MapViewport, MapArcDatum, MapArcEvent };

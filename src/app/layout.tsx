@@ -50,8 +50,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es-PE" className={`${inter.variable} ${playfair.variable}`} suppressHydrationWarning>
-      <head>
+      <head suppressHydrationWarning>
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `
               (function() {

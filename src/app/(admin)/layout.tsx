@@ -29,6 +29,10 @@ function AdminBreadcrumb() {
     subscriptions: 'Suscripciones VIP',
     loyalty: 'Club de Puntos',
     referrals: 'Programa de Referidos',
+    'mi-peru': 'Mi Perú',
+    districts: 'Distritos',
+    festivities: 'Festividades',
+    cultures: 'Culturas',
   };
 
   return (

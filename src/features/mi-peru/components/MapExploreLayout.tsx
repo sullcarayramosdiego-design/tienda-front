@@ -27,6 +27,8 @@ interface MapExploreLayoutProps {
   subtitle?: React.ReactNode;
   /** Clase adicional para el contenedor del mapa */
   mapClassName?: string;
+  /** Imagen de fondo hero (si aplica) */
+  heroImage?: string;
 }
 
 /**
@@ -42,19 +44,17 @@ export function MapExploreLayout({
   subtitle,
   topPanel,
   mapClassName,
+  heroImage,
 }: MapExploreLayoutProps) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* ── Header ───────────────────────────────────────────────────── */}
-      <div className="sticky top-0 z-50 border-b border-border/60 bg-background/90 backdrop-blur-md">
+    <div className="flex flex-col min-h-[calc(100vh-64px)] bg-background w-full">
+      {/* --- Main Header (Breadcrumbs) --- */}
+      <div className="w-full border-b border-border/40 bg-card/40 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4">
-          {/* Breadcrumb */}
           <nav className="flex items-center gap-1.5 text-xs flex-wrap">
             {breadcrumbs.map((crumb, i) => (
               <React.Fragment key={i}>
-                {i > 0 && (
-                  <span className="text-muted-foreground/50">/</span>
-                )}
+                {i > 0 && <span className="text-muted-foreground/50">/</span>}
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
@@ -82,53 +82,57 @@ export function MapExploreLayout({
             )}
           </div>
         </div>
-
-        {/* Sub-header con título */}
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pb-3">
-          <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground leading-none">
-            {title}
-          </h1>
-          {subtitle && (
-            <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
-          )}
-        </div>
       </div>
 
-      {/* ── Contenido Principal ──────────────────────────────────────── */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Panel Superior (Full width) */}
-        {topPanel && (
-          <div className="mb-6 w-full">
-            {topPanel}
+      {/* --- Content Area (With Absolute Background) --- */}
+      <div className="relative w-full flex-1 flex flex-col">
+        {/* --- Layout Background Image --- */}
+        {heroImage && (
+          <div className="absolute top-0 left-0 w-full h-[70vh] min-h-[500px] z-0 pointer-events-none overflow-hidden">
+            <div className="absolute inset-0 bg-black/40 z-10" />
+            <img src={heroImage} alt="Layout Background" referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent z-10" />
           </div>
         )}
 
-        {/* DESKTOP: 3 columnas (Paneles a los costados, Mapa al centro) */}
-        <div className="hidden lg:grid grid-cols-[300px_1fr_300px] gap-6 items-start">
-          {/* Columna izquierda */}
-          <aside className="flex flex-col gap-3 sticky top-[110px] max-h-[calc(100vh-130px)] overflow-y-auto pr-1 scrollbar-thin">
-            {leftPanel}
-          </aside>
+        {/* --- Main Content --- */}
+        <div className={cn("max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8 flex-1 py-6 relative z-20")}>
+          <div className="mb-6 w-full">
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-none drop-shadow-md">
+              {title}
+            </h1>
+            {subtitle && (
+              <p className="text-sm sm:text-base text-gray-200 mt-2 font-medium drop-shadow-sm">{subtitle}</p>
+            )}
+          </div>
+          {topPanel && (
+            <div className="mb-6 w-full">
+              {topPanel}
+            </div>
+          )}
 
-          {/* Centro — mapa */}
-          <div className={cn('h-[600px] rounded-2xl overflow-hidden border border-border/60 shadow-xl', mapClassName)}>
-            {mapCanvas}
+          <div className="hidden lg:grid grid-cols-[300px_1fr_300px] gap-6 items-start">
+            <aside className="flex flex-col gap-3 sticky top-[110px] max-h-[calc(100vh-130px)] overflow-y-auto pr-1 scrollbar-thin">
+              {leftPanel}
+            </aside>
+
+            <div className={cn('h-[calc(100vh-130px)] min-h-[600px] rounded-2xl overflow-hidden border border-border/60 shadow-xl', mapClassName)}>
+              {mapCanvas}
+            </div>
+
+            <aside className="flex flex-col gap-3 sticky top-[110px] max-h-[calc(100vh-130px)] overflow-y-auto pl-1 scrollbar-thin">
+              {rightPanel}
+            </aside>
           </div>
 
-          {/* Columna derecha */}
-          <aside className="flex flex-col gap-3 sticky top-[110px] max-h-[calc(100vh-130px)] overflow-y-auto pl-1 scrollbar-thin">
-            {rightPanel}
-          </aside>
-        </div>
-
-        {/* MOBILE: Paneles arriba, mapa abajo */}
-        <div className="flex flex-col gap-5 lg:hidden">
-          <div className={cn('h-[400px] w-full rounded-2xl overflow-hidden border border-border/60 shadow-xl', mapClassName)}>
-            {mapCanvas}
-          </div>
-          <div className="flex flex-col gap-3">
-            {leftPanel}
-            {rightPanel}
+          <div className="flex flex-col gap-5 lg:hidden">
+            <div className={cn('h-[500px] w-full rounded-2xl overflow-hidden border border-border/60 shadow-xl', mapClassName)}>
+              {mapCanvas}
+            </div>
+            <div className="flex flex-col gap-3">
+              {leftPanel}
+              {rightPanel}
+            </div>
           </div>
         </div>
       </div>

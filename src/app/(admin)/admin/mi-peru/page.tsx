@@ -19,9 +19,9 @@ import {
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-interface Region  { id: string; name: string; slug: string; latitude: number | null; longitude: number | null; description?: string; history?: string; photos?: string[]; videos?: string[]; mainCultureId?: string | null; provinces: { id: string; name: string; slug: string }[]; }
-interface Province{ id: string; name: string; slug: string; latitude: number | null; longitude: number | null; description?: string; history?: string; photos?: string[]; videos?: string[]; mainCultureId?: string | null; districts: { id: string; name: string; slug: string }[]; region?: { id: string; name: string; slug: string } | null; }
-interface District{ id: string; name: string; slug: string; history?: string; description?: string; howToGetThere: string; latitude: number | null; longitude: number | null; photos: string[]; videos?: string[]; mainCultureId?: string | null; }
+interface Region  { id: string; name: string; slug: string; latitude: number | null; longitude: number | null; description?: string; history?: string; photos?: string[]; photoLayout?: string; videos?: string[]; mainCultureId?: string | null; provinces: { id: string; name: string; slug: string }[]; }
+interface Province{ id: string; name: string; slug: string; latitude: number | null; longitude: number | null; description?: string; history?: string; photos?: string[]; photoLayout?: string; videos?: string[]; mainCultureId?: string | null; districts: { id: string; name: string; slug: string }[]; region?: { id: string; name: string; slug: string } | null; }
+interface District{ id: string; name: string; slug: string; history?: string; description?: string; howToGetThere: string; latitude: number | null; longitude: number | null; photos: string[]; photoLayout?: string; videos?: string[]; mainCultureId?: string | null; }
 interface Festivity{ id: string; name: string; description: string; youtubeVideos: string[]; images: string[]; }
 interface Culture  { id: string; name: string; slug: string; description: string; images: string[]; }
 
@@ -137,17 +137,53 @@ function YoutubeEditor({ videos, onChange }: { videos: string[]; onChange: (v: s
   );
 }
 
+function PhotoLayoutSelector({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+      <button 
+        onClick={() => onChange('BACKGROUND')}
+        className={`flex flex-col items-center p-3 rounded-xl border transition-all ${value === 'BACKGROUND' ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-muted/30 text-muted-foreground hover:bg-muted/50'}`}
+      >
+        <Image size={24} className="mb-2" />
+        <span className="text-xs font-bold uppercase tracking-wider">Fondo Hero</span>
+        <span className="text-[10px] opacity-70 mt-1 text-center leading-tight">Banner inmersivo gigante</span>
+      </button>
+      <button 
+        onClick={() => onChange('CAROUSEL')}
+        className={`flex flex-col items-center p-3 rounded-xl border transition-all ${value === 'CAROUSEL' ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-muted/30 text-muted-foreground hover:bg-muted/50'}`}
+      >
+        <Sparkles size={24} className="mb-2" />
+        <span className="text-xs font-bold uppercase tracking-wider">Carrusel</span>
+        <span className="text-[10px] opacity-70 mt-1 text-center leading-tight">Slider dinámico</span>
+      </button>
+      <button 
+        onClick={() => onChange('GRID')}
+        className={`flex flex-col items-center p-3 rounded-xl border transition-all ${value === 'GRID' ? 'border-primary bg-primary/10 text-primary' : 'border-border bg-muted/30 text-muted-foreground hover:bg-muted/50'}`}
+      >
+        <div className="grid grid-cols-2 gap-1 mb-2">
+          <div className="w-2.5 h-2.5 bg-current rounded-sm"></div>
+          <div className="w-2.5 h-2.5 bg-current rounded-sm"></div>
+          <div className="w-2.5 h-2.5 bg-current rounded-sm"></div>
+          <div className="w-2.5 h-2.5 bg-current rounded-sm"></div>
+        </div>
+        <span className="text-xs font-bold uppercase tracking-wider">Blog (Cuadrícula)</span>
+        <span className="text-[10px] opacity-70 mt-1 text-center leading-tight">Vista de tarjetas clásica</span>
+      </button>
+    </div>
+  );
+}
+
 // ─── District Editor ─────────────────────────────────────────────────────────
 
 function DistrictEditor({ id, cultures, onBack, onToast }: { id: string; cultures: any[]; onBack: () => void; onToast: (m: string, t: 'ok'|'err') => void }) {
   const [d, setD] = useState<District | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ description: '', history: '', howToGetThere: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], videos: [] as string[] });
+  const [form, setForm] = useState({ description: '', history: '', howToGetThere: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], photoLayout: 'GRID', videos: [] as string[] });
 
   useEffect(() => {
     apiClient.get(`/admin/mi-peru/districts/${id}`)
-      .then(r => { setD(r.data); setForm({ description: r.data.description || '', history: r.data.history || '', howToGetThere: r.data.howToGetThere || '', latitude: r.data.latitude?.toString() || '', longitude: r.data.longitude?.toString() || '', mainCultureId: r.data.mainCultureId || '', photos: r.data.photos || [], videos: r.data.videos || [] }); })
+      .then(r => { setD(r.data); setForm({ description: r.data.description || '', history: r.data.history || '', howToGetThere: r.data.howToGetThere || '', latitude: r.data.latitude?.toString() || '', longitude: r.data.longitude?.toString() || '', mainCultureId: r.data.mainCultureId || '', photos: r.data.photos || [], photoLayout: r.data.photoLayout || 'GRID', videos: r.data.videos || [] }); })
       .catch(() => onToast('Error al cargar distrito', 'err'))
       .finally(() => setLoading(false));
   }, [id]);
@@ -369,14 +405,14 @@ function RegionEditor({ id, cultures, onBack, onToast }: { id: string; cultures:
   const [r, setR] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ description: '', history: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], videos: [] as string[] });
+  const [form, setForm] = useState({ description: '', history: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], photoLayout: 'GRID', videos: [] as string[] });
 
   useEffect(() => {
     apiClient.get(`/admin/mi-peru/regions/${id}`)
       .then(res => { 
         const data = res.data?.data || res.data;
         setR(data); 
-        setForm({ description: data.description || '', history: data.history || '', latitude: data.latitude?.toString() || '', longitude: data.longitude?.toString() || '', mainCultureId: data.mainCultureId || '', photos: data.photos || [], videos: data.videos || [] }); 
+        setForm({ description: data.description || '', history: data.history || '', latitude: data.latitude?.toString() || '', longitude: data.longitude?.toString() || '', mainCultureId: data.mainCultureId || '', photos: data.photos || [], photoLayout: data.photoLayout || 'GRID', videos: data.videos || [] }); 
       })
       .catch(() => onToast('Error al cargar región', 'err'))
       .finally(() => setLoading(false));
@@ -450,6 +486,10 @@ function RegionEditor({ id, cultures, onBack, onToast }: { id: string; cultures:
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><Image size={14} className="text-pink-500" /> Fotos (Google Drive)</CardTitle></CardHeader>
         <CardContent>
+          <div className="mb-5">
+            <label className="text-xs font-semibold mb-2 block">Estilo de Visualización</label>
+            <PhotoLayoutSelector value={form.photoLayout} onChange={v => setForm(f => ({ ...f, photoLayout: v }))} />
+          </div>
           <PhotosEditor photos={form.photos} onChange={photos => setForm(f => ({ ...f, photos }))} />
         </CardContent>
       </Card>
@@ -520,14 +560,14 @@ function ProvinceEditor({ id, cultures, onBack, onToast }: { id: string; culture
   const [p, setP] = useState<Province | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ description: '', history: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], videos: [] as string[] });
+  const [form, setForm] = useState({ description: '', history: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], photoLayout: 'GRID', videos: [] as string[] });
 
   useEffect(() => {
     apiClient.get(`/admin/mi-peru/provinces/${id}`)
       .then(res => { 
         const data = res.data?.data || res.data;
         setP(data); 
-        setForm({ description: data.description || '', history: data.history || '', latitude: data.latitude?.toString() || '', longitude: data.longitude?.toString() || '', mainCultureId: data.mainCultureId || '', photos: data.photos || [], videos: data.videos || [] }); 
+        setForm({ description: data.description || '', history: data.history || '', latitude: data.latitude?.toString() || '', longitude: data.longitude?.toString() || '', mainCultureId: data.mainCultureId || '', photos: data.photos || [], photoLayout: data.photoLayout || 'GRID', videos: data.videos || [] }); 
       })
       .catch(() => onToast('Error al cargar provincia', 'err'))
       .finally(() => setLoading(false));
@@ -601,6 +641,10 @@ function ProvinceEditor({ id, cultures, onBack, onToast }: { id: string; culture
       <Card>
         <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><Image size={14} className="text-pink-500" /> Fotos (Google Drive)</CardTitle></CardHeader>
         <CardContent>
+          <div className="mb-5">
+            <label className="text-xs font-semibold mb-2 block">Estilo de Visualización</label>
+            <PhotoLayoutSelector value={form.photoLayout} onChange={v => setForm(f => ({ ...f, photoLayout: v }))} />
+          </div>
           <PhotosEditor photos={form.photos} onChange={photos => setForm(f => ({ ...f, photos }))} />
         </CardContent>
       </Card>

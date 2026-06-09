@@ -21,6 +21,7 @@ export default function HomePage() {
 
   const [plans, setPlans] = React.useState<SubscriptionPlan[]>([]);
   const [loadingPlans, setLoadingPlans] = React.useState(true);
+  const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
     async function loadPlans() {
@@ -30,12 +31,17 @@ export default function HomePage() {
         setPlans(data);
       } catch (err) {
         console.error('Error al cargar planes en landing:', err);
+        setError(err instanceof Error ? err : new Error('Network Error'));
       } finally {
         setLoadingPlans(false);
       }
     }
     loadPlans();
   }, []);
+
+  if (error) {
+    throw error;
+  }
 
   if (isAuthenticated && user) {
     return <UserDashboardDynamic />;

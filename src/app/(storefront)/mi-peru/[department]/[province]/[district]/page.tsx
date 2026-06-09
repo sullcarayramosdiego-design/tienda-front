@@ -449,15 +449,40 @@ export default function DistrictPage() {
           </div>
         )}
 
-        {detail?.photos && detail.photos.length > 0 && (
+        {detail?.photos && detail.photos.length > 0 && (detail.photoLayout === 'GRID' || !detail.photoLayout) && (
           <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
             <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-primary"></span> Galería Fotográfica
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {(detail.photos as string[]).map((photo: string, i: number) => (
-                <img key={i} src={photo} alt={`Foto ${i}`} className="w-full h-28 object-cover rounded-xl border border-border/50 shadow-sm transition-transform hover:scale-105" />
-              ))}
+              {(detail.photos as string[]).map((photo: string, i: number) => {
+                const isDrive = photo.includes('drive.google.com/file/d/');
+                const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
+                const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
+
+                return <img key={i} src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="w-full h-28 object-cover rounded-xl border border-border/50 shadow-sm transition-transform hover:scale-105" />;
+              })}
+            </div>
+          </div>
+        )}
+
+        {detail?.photos && detail.photos.length > 0 && detail.photoLayout === 'CAROUSEL' && (
+          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm overflow-hidden">
+            <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary"></span> Galería de Fotos
+            </p>
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 custom-scrollbar">
+              {(detail.photos as string[]).map((photo: string, i: number) => {
+                const isDrive = photo.includes('drive.google.com/file/d/');
+                const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
+                const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
+
+                return (
+                  <div key={i} className="snap-center shrink-0 w-full md:w-[80%] aspect-video relative rounded-xl overflow-hidden shadow-sm border border-border/50">
+                    <img src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-cover" />
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -475,6 +500,13 @@ export default function DistrictPage() {
       ]}
       title={detail?.name ?? district?.name ?? districtSlug}
       subtitle={`${festivities.length} festividades principales${detail?.mainCulture ? ` · ${detail.mainCulture.name}` : ''}`}
+      heroImage={(() => {
+        if (detail?.photoLayout !== 'BACKGROUND' || !detail.photos?.[0]) return undefined;
+        const p = detail.photos[0];
+        const isDrive = p.includes('drive.google.com/file/d/');
+        const driveId = isDrive ? p.match(/\/d\/(.*?)\//)?.[1] : null;
+        return driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : p;
+      })()}
       topPanel={(detail?.description || detail?.history || detail?.howToGetThere || (detail?.videos && detail.videos.length > 0) || (detail?.photos && detail.photos.length > 0)) ? topPanel : undefined}
       leftPanel={leftPanel}
       mapCanvas={

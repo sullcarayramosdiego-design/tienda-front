@@ -128,6 +128,7 @@ export default function ProvincePage() {
             description: data.description,
             history: data.history,
             photos: data.photos || [],
+            photoLayout: data.photoLayout || 'GRID',
             videos: data.videos || [],
           });
 
@@ -377,15 +378,40 @@ export default function ProvincePage() {
           </div>
         )}
 
-        {province.photos && province.photos.length > 0 && (
+        {province.photos && province.photos.length > 0 && province.photoLayout === 'GRID' && (
           <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
-            <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent"></span> Galería Fotográfica
+            <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-secondary"></span> Galería Fotográfica
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {province.photos.map((photo: string, i: number) => (
-                <img key={i} src={photo} alt={`Foto ${i}`} className="w-full h-28 object-cover rounded-xl border border-border/50 shadow-sm transition-transform hover:scale-105" />
-              ))}
+              {province.photos.map((photo: string, i: number) => {
+                const isDrive = photo.includes('drive.google.com/file/d/');
+                const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
+                const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
+
+                return <img key={i} src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="w-full h-28 object-cover rounded-xl border border-border/50 shadow-sm transition-transform hover:scale-105" />;
+              })}
+            </div>
+          </div>
+        )}
+
+        {province.photos && province.photos.length > 0 && province.photoLayout === 'CAROUSEL' && (
+          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm overflow-hidden">
+            <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-secondary"></span> Galería de Fotos
+            </p>
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 custom-scrollbar">
+              {province.photos.map((photo: string, i: number) => {
+                const isDrive = photo.includes('drive.google.com/file/d/');
+                const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
+                const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
+
+                return (
+                  <div key={i} className="snap-center shrink-0 w-full md:w-[80%] aspect-video relative rounded-xl overflow-hidden shadow-sm border border-border/50">
+                    <img src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-cover" />
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -400,8 +426,15 @@ export default function ProvincePage() {
         { label: department?.name ?? departmentSlug, href: `/mi-peru/${departmentSlug}` },
         { label: province.name },
       ]}
-      title={`${province.name} — Distritos`}
+      title={province.name}
       subtitle={`${districts.length} distritos · ${formatCoord(province.latitude, true)}, ${formatCoord(province.longitude, false)}`}
+      heroImage={(() => {
+        if (province.photoLayout !== 'BACKGROUND' || !province.photos?.[0]) return undefined;
+        const p = province.photos[0];
+        const isDrive = p.includes('drive.google.com/file/d/');
+        const driveId = isDrive ? p.match(/\/d\/(.*?)\//)?.[1] : null;
+        return driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : p;
+      })()}
       topPanel={(province.description || province.history || (province.videos && province.videos.length > 0) || (province.photos && province.photos.length > 0)) ? topPanel : undefined}
       leftPanel={leftPanel}
       mapCanvas={

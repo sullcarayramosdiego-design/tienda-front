@@ -7,6 +7,7 @@ export interface MapLocation {
   description?: string;
   history?: string;
   photos?: string[];
+  photoLayout?: string;
   videos?: string[];
   capital?: string;
   area?: number;

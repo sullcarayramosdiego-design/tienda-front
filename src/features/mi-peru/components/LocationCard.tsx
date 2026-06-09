@@ -11,10 +11,14 @@ interface LocationCardProps {
   /** Color accent para el borde/ícono (CSS var o clase) */
   accentColor?: 'primary' | 'secondary' | 'accent';
   /** Si está seleccionada/activa */
+  /** Si está seleccionada/activa */
   isActive?: boolean;
   /** Etiqueta del tipo (Provincia, Distrito, etc.) */
   typeLabel?: string;
   className?: string;
+  id?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 const accentClasses = {
@@ -40,6 +44,9 @@ export function LocationCard({
   isActive = false,
   typeLabel,
   className,
+  id,
+  onMouseEnter,
+  onMouseLeave,
 }: LocationCardProps) {
   const formatCoord = (val: number, isLat: boolean) => {
     const abs = Math.abs(val).toFixed(4);
@@ -49,7 +56,10 @@ export function LocationCard({
 
   return (
     <button
+      id={id}
       onClick={() => onClick(location)}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       className={cn(
         'w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 cursor-pointer group',
         'flex items-start gap-3',

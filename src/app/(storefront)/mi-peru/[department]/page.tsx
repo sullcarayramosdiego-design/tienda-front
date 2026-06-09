@@ -3,9 +3,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { RefreshCw, Compass } from 'lucide-react';
+import { RefreshCw, Compass, MapPin } from 'lucide-react';
 import { MapLocation } from '@/features/mi-peru/data/peru-locations';
 import { MapExploreLayout } from '@/features/mi-peru/components/MapExploreLayout';
+import { MapConnectors } from '@/features/mi-peru/components/MapConnectors';
 import { LocationCard } from '@/features/mi-peru/components/LocationCard';
 import { apiClient } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
@@ -56,29 +57,29 @@ function ProvinceMarker({ province, isSelected, onClick }: ProvinceMarkerProps) 
       onClick={() => onClick(province)}
     >
       <MarkerContentDyn>
-        <div className="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group pointer-events-auto">
+        <div 
+          id={`marker-${province.id}`}
+          className="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group pointer-events-auto"
+        >
           {isSelected && (
             <span className="absolute inline-flex h-9 w-9 rounded-full bg-secondary/30 animate-ping" />
           )}
           <div
             className={cn(
-              'relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-lg backdrop-blur-sm transition-all duration-200',
+              'relative flex items-center justify-center p-1 rounded-full border shadow-lg backdrop-blur-sm transition-all duration-200',
               isSelected
-                ? 'bg-secondary text-secondary-foreground border-secondary-foreground/20 scale-110'
-                : 'bg-card/90 text-foreground border-secondary/30 hover:border-secondary/70 hover:scale-105'
+                ? 'bg-secondary border-secondary-foreground/20 scale-110'
+                : 'bg-card/90 border-secondary/30 hover:border-secondary/70 hover:scale-105'
             )}
           >
             <div
               className={cn(
-                'h-2.5 w-2.5 rounded-full border shrink-0',
+                'h-3.5 w-3.5 rounded-full border shrink-0',
                 isSelected
                   ? 'bg-secondary-foreground border-secondary-foreground/50 animate-pulse'
                   : 'bg-secondary border-secondary/50'
               )}
             />
-            <span className="text-[11px] font-bold whitespace-nowrap">
-              {province.name}
-            </span>
           </div>
         </div>
       </MarkerContentDyn>
@@ -101,6 +102,7 @@ export default function DepartmentPage() {
   const departmentSlug = params.department as string;
 
   const [selectedProv, setSelectedProv] = useState<MapLocation | null>(null);
+  const [hoveredProvId, setHoveredProvId] = useState<string | null>(null);
   const [provinces, setProvinces] = useState<MapLocation[]>([]);
   const [department, setDepartment] = useState<MapLocation | null>(null);
   const [loading, setLoading] = useState(true);
@@ -128,6 +130,7 @@ export default function DepartmentPage() {
             description: data.description,
             history: data.history,
             photos: data.photos || [],
+            photoLayout: data.photoLayout || 'GRID',
             videos: data.videos || [],
           });
 
@@ -210,8 +213,11 @@ export default function DepartmentPage() {
       {leftProvinces.map((prov) => (
         <LocationCard
           key={prov.id}
+          id={`card-${prov.id}`}
           location={prov}
           onClick={handleNavigateToProvince}
+          onMouseEnter={() => setHoveredProvId(prov.id)}
+          onMouseLeave={() => setHoveredProvId(null)}
           accentColor="secondary"
           isActive={selectedProv?.slug === prov.slug}
           typeLabel="Provincia"
@@ -227,33 +233,16 @@ export default function DepartmentPage() {
       {rightProvinces.map((prov) => (
         <LocationCard
           key={prov.id}
+          id={`card-${prov.id}`}
           location={prov}
           onClick={handleNavigateToProvince}
+          onMouseEnter={() => setHoveredProvId(prov.id)}
+          onMouseLeave={() => setHoveredProvId(null)}
           accentColor="secondary"
           isActive={selectedProv?.slug === prov.slug}
           typeLabel="Provincia"
         />
       ))}
-
-      {/* Info del departamento */}
-      <div className="mt-2 p-4 rounded-xl border border-border/50 bg-card/60">
-        <p className="text-[9px] font-black text-secondary uppercase tracking-widest mb-2">
-          Coordenadas del Departamento
-        </p>
-        <div className="space-y-1 text-xs font-mono">
-          <p className="text-muted-foreground">
-            Lat: <span className="text-foreground font-semibold">{formatCoord(department.latitude, true)}</span>
-          </p>
-          <p className="text-muted-foreground">
-            Lon: <span className="text-foreground font-semibold">{formatCoord(department.longitude, false)}</span>
-          </p>
-          {department.capital && (
-            <p className="text-muted-foreground font-sans mt-2">
-              Capital: <span className="text-foreground font-semibold">{department.capital}</span>
-            </p>
-          )}
-        </div>
-      </div>
     </>
   );
 
@@ -315,15 +304,40 @@ export default function DepartmentPage() {
           </div>
         )}
 
-        {department.photos && department.photos.length > 0 && (
+        {department.photos && department.photos.length > 0 && department.photoLayout === 'GRID' && (
           <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
             <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-secondary"></span> Galería Fotográfica
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {department.photos.map((photo: string, i: number) => (
-                <img key={i} src={photo} alt={`Foto ${i}`} className="w-full h-28 object-cover rounded-xl border border-border/50 shadow-sm transition-transform hover:scale-105" />
-              ))}
+              {department.photos.map((photo: string, i: number) => {
+                const isDrive = photo.includes('drive.google.com/file/d/');
+                const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
+                const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
+                
+                return <img key={i} src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="w-full h-28 object-cover rounded-xl border border-border/50 shadow-sm transition-transform hover:scale-105" />;
+              })}
+            </div>
+          </div>
+        )}
+
+        {department.photos && department.photos.length > 0 && department.photoLayout === 'CAROUSEL' && (
+          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm overflow-hidden">
+            <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-secondary"></span> Galería de Fotos
+            </p>
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 custom-scrollbar">
+              {department.photos.map((photo: string, i: number) => {
+                const isDrive = photo.includes('drive.google.com/file/d/');
+                const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
+                const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
+
+                return (
+                  <div key={i} className="snap-center shrink-0 w-full md:w-[80%] aspect-video relative rounded-xl overflow-hidden shadow-sm border border-border/50">
+                    <img src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-cover" />
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -383,13 +397,21 @@ export default function DepartmentPage() {
   }
 
   return (
+    <>
     <MapExploreLayout
       breadcrumbs={[
         { label: 'Mi Perú', href: '/mi-peru' },
         { label: department.name },
       ]}
-      title={`${department.name} — Provincias`}
+      title={department.name}
       subtitle={`${provinces.length} provincias · Capital: ${department.capital ?? '—'}`}
+      heroImage={(() => {
+        if (department.photoLayout !== 'BACKGROUND' || !department.photos?.[0]) return undefined;
+        const p = department.photos[0];
+        const isDrive = p.includes('drive.google.com/file/d/');
+        const driveId = isDrive ? p.match(/\/d\/(.*?)\//)?.[1] : null;
+        return driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : p;
+      })()}
       topPanel={(department.description || department.history || (department.videos && department.videos.length > 0) || (department.photos && department.photos.length > 0)) ? topPanel : undefined}
       leftPanel={leftPanel}
       mapCanvas={
@@ -427,5 +449,7 @@ export default function DepartmentPage() {
       }
       rightPanel={rightPanel}
     />
+    <MapConnectors items={provinces} hoveredId={hoveredProvId} />
+    </>
   );
 }

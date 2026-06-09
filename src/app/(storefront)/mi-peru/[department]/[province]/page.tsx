@@ -3,10 +3,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { RefreshCw, Compass } from 'lucide-react';
+import { RefreshCw, Compass, MapPin } from 'lucide-react';
 import { MapLocation } from '@/features/mi-peru/data/peru-locations';
 import { MapExploreLayout } from '@/features/mi-peru/components/MapExploreLayout';
+import { MapConnectors } from '@/features/mi-peru/components/MapConnectors';
 import { LocationCard } from '@/features/mi-peru/components/LocationCard';
+import { FestivityCard, Festivity } from '@/features/mi-peru/components/FestivityCard';
 import { apiClient } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 
@@ -56,29 +58,29 @@ function DistrictMarker({ district, isSelected, onClick }: DistrictMarkerProps) 
       onClick={() => onClick(district)}
     >
       <MarkerContentDyn>
-        <div className="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group pointer-events-auto">
+        <div 
+          id={`marker-${district.id}`}
+          className="relative flex items-center justify-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group pointer-events-auto"
+        >
           {isSelected && (
             <span className="absolute inline-flex h-8 w-8 rounded-full bg-accent/30 animate-ping" />
           )}
           <div
             className={cn(
-              'relative flex items-center gap-1.5 px-2.5 py-1 rounded-xl border shadow-md backdrop-blur-sm transition-all duration-200',
+              'relative flex items-center justify-center p-1 rounded-full border shadow-md backdrop-blur-sm transition-all duration-200',
               isSelected
-                ? 'bg-accent text-accent-foreground border-accent-foreground/20 scale-110'
-                : 'bg-card/90 text-foreground border-accent/30 hover:border-accent/60 hover:scale-105'
+                ? 'bg-accent border-accent-foreground/20 scale-110'
+                : 'bg-card/90 border-accent/30 hover:border-accent/60 hover:scale-105'
             )}
           >
             <div
               className={cn(
-                'h-2 w-2 rounded-full border shrink-0',
+                'h-3 w-3 rounded-full border shrink-0',
                 isSelected
                   ? 'bg-accent-foreground border-accent-foreground/50 animate-pulse'
                   : 'bg-accent border-accent/50'
               )}
             />
-            <span className="text-[10px] font-bold whitespace-nowrap leading-none">
-              {district.name}
-            </span>
           </div>
         </div>
       </MarkerContentDyn>
@@ -102,8 +104,9 @@ export default function ProvincePage() {
   const provinceSlug = params.province as string;
 
   const [selectedDist, setSelectedDist] = useState<MapLocation | null>(null);
+  const [hoveredDistId, setHoveredDistId] = useState<string | null>(null);
   const [districts, setDistricts] = useState<MapLocation[]>([]);
-  const [province, setProvince] = useState<MapLocation | null>(null);
+  const [province, setProvince] = useState<any | null>(null);
   const [department, setDepartment] = useState<MapLocation | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -127,6 +130,8 @@ export default function ProvincePage() {
             longitude: pLng || 0,
             description: data.description,
             history: data.history,
+            howToGetThere: data.howToGetThere,
+            festivities: data.festivities || [],
             photos: data.photos || [],
             photoLayout: data.photoLayout || 'GRID',
             videos: data.videos || [],
@@ -272,13 +277,26 @@ export default function ProvincePage() {
       {leftDistricts.map((dist) => (
         <LocationCard
           key={dist.id}
+          id={`card-${dist.id}`}
           location={dist}
           onClick={handleNavigateToDistrict}
+          onMouseEnter={() => setHoveredDistId(dist.id)}
+          onMouseLeave={() => setHoveredDistId(null)}
           accentColor="accent"
           isActive={selectedDist?.slug === dist.slug}
           typeLabel="Distrito"
         />
       ))}
+      {province?.festivities && province.festivities.length > 0 && (
+        <>
+          <div className="text-[9px] font-black text-accent uppercase tracking-widest px-1 mt-6 mb-1">
+            Festividades Principales
+          </div>
+          {province.festivities.slice(0, Math.ceil(province.festivities.length / 2)).map((fest: Festivity, i: number) => (
+            <FestivityCard key={fest.id} festivity={fest} accentColor={i % 2 === 0 ? 'accent' : 'primary'} />
+          ))}
+        </>
+      )}
     </>
   );
 
@@ -289,8 +307,11 @@ export default function ProvincePage() {
       {rightDistricts.map((dist) => (
         <LocationCard
           key={dist.id}
+          id={`card-${dist.id}`}
           location={dist}
           onClick={handleNavigateToDistrict}
+          onMouseEnter={() => setHoveredDistId(dist.id)}
+          onMouseLeave={() => setHoveredDistId(null)}
           accentColor="accent"
           isActive={selectedDist?.slug === dist.slug}
           typeLabel="Distrito"
@@ -317,6 +338,17 @@ export default function ProvincePage() {
           </p>
         </div>
       </div>
+      
+      {province?.festivities && province.festivities.length > 1 && (
+        <>
+          <div className="text-[9px] font-black text-accent uppercase tracking-widest px-1 mt-6 mb-1">
+            &nbsp;
+          </div>
+          {province.festivities.slice(Math.ceil(province.festivities.length / 2)).map((fest: Festivity, i: number) => (
+            <FestivityCard key={fest.id} festivity={fest} accentColor={i % 2 === 0 ? 'secondary' : 'accent'} />
+          ))}
+        </>
+      )}
     </>
   );
 
@@ -340,6 +372,17 @@ export default function ProvincePage() {
             </p>
             <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-80 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
               {province.history}
+            </div>
+          </div>
+        )}
+
+        {province.howToGetThere && (
+          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
+            <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-accent"></span> Cómo llegar
+            </p>
+            <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-80 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
+              {province.howToGetThere}
             </div>
           </div>
         )}
@@ -420,6 +463,7 @@ export default function ProvincePage() {
   );
 
   return (
+    <>
     <MapExploreLayout
       breadcrumbs={[
         { label: 'Mi Perú', href: '/mi-peru' },
@@ -435,7 +479,7 @@ export default function ProvincePage() {
         const driveId = isDrive ? p.match(/\/d\/(.*?)\//)?.[1] : null;
         return driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : p;
       })()}
-      topPanel={(province.description || province.history || (province.videos && province.videos.length > 0) || (province.photos && province.photos.length > 0)) ? topPanel : undefined}
+      topPanel={(province.description || province.history || province.howToGetThere || (province.videos && province.videos.length > 0) || (province.photos && province.photos.length > 0)) ? topPanel : undefined}
       leftPanel={leftPanel}
       mapCanvas={
         <div className="w-full h-full">
@@ -472,5 +516,7 @@ export default function ProvincePage() {
       }
       rightPanel={rightPanel}
     />
+    <MapConnectors items={districts} hoveredId={hoveredDistId} />
+    </>
   );
 }

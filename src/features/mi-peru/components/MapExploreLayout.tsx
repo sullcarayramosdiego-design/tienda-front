@@ -111,16 +111,18 @@ export function MapExploreLayout({
             </div>
           )}
 
-          <div className="hidden lg:grid grid-cols-[300px_1fr_300px] gap-6 items-start">
-            <aside className="flex flex-col gap-3 sticky top-[110px] max-h-[calc(100vh-130px)] overflow-y-auto pr-1 scrollbar-thin">
+          <div className="hidden lg:grid grid-cols-[300px_1fr_300px] gap-6 items-start relative">
+            <aside className="flex flex-col gap-3 pr-1">
               {leftPanel}
             </aside>
 
-            <div className={cn('h-[calc(100vh-130px)] min-h-[600px] rounded-2xl overflow-hidden border border-border/60 shadow-xl', mapClassName)}>
-              {mapCanvas}
+            <div className="relative w-full h-full">
+              <div className={cn('sticky top-[110px] h-[calc(100vh-130px)] min-h-[600px] rounded-2xl overflow-hidden border border-border/60 shadow-xl', mapClassName)}>
+                {mapCanvas}
+              </div>
             </div>
 
-            <aside className="flex flex-col gap-3 sticky top-[110px] max-h-[calc(100vh-130px)] overflow-y-auto pl-1 scrollbar-thin">
+            <aside className="flex flex-col gap-3 pl-1">
               {rightPanel}
             </aside>
           </div>

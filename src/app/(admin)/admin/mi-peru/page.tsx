@@ -273,7 +273,7 @@ function DistrictEditor({ id, cultures, onBack, onToast }: { id: string; culture
 
 // ─── Festivity Editor ─────────────────────────────────────────────────────────
 
-function FestivityEditor({ id, districtId, onBack, onToast }: { id: string | null; districtId?: string; onBack: () => void; onToast: (m: string, t: 'ok'|'err') => void }) {
+function FestivityEditor({ id, context, onBack, onToast }: { id: string | null; context?: { type: 'region'|'province'|'district', id: string }; onBack: () => void; onToast: (m: string, t: 'ok'|'err') => void }) {
   const isNew = !id;
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
@@ -291,8 +291,14 @@ function FestivityEditor({ id, districtId, onBack, onToast }: { id: string | nul
   const save = async () => {
     setSaving(true);
     try {
-      if (isNew && districtId) {
-        await apiClient.post(`/admin/mi-peru/districts/${districtId}/festivities`, form);
+      if (isNew && context) {
+        if (context.type === 'district') {
+          await apiClient.post(`/admin/mi-peru/districts/${context.id}/festivities`, form);
+        } else if (context.type === 'region') {
+          await apiClient.post(`/admin/mi-peru/regions/${context.id}/festivities`, form);
+        } else if (context.type === 'province') {
+          await apiClient.post(`/admin/mi-peru/provinces/${context.id}/festivities`, form);
+        }
         onToast('Festividad creada ✓', 'ok');
       } else {
         await apiClient.patch(`/admin/mi-peru/festivities/${id}`, form);
@@ -405,14 +411,14 @@ function RegionEditor({ id, cultures, onBack, onToast }: { id: string; cultures:
   const [r, setR] = useState<Region | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ description: '', history: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], photoLayout: 'GRID', videos: [] as string[] });
+  const [form, setForm] = useState({ description: '', history: '', howToGetThere: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], photoLayout: 'GRID', videos: [] as string[] });
 
   useEffect(() => {
     apiClient.get(`/admin/mi-peru/regions/${id}`)
       .then(res => { 
         const data = res.data?.data || res.data;
         setR(data); 
-        setForm({ description: data.description || '', history: data.history || '', latitude: data.latitude?.toString() || '', longitude: data.longitude?.toString() || '', mainCultureId: data.mainCultureId || '', photos: data.photos || [], photoLayout: data.photoLayout || 'GRID', videos: data.videos || [] }); 
+        setForm({ description: data.description || '', history: data.history || '', howToGetThere: data.howToGetThere || '', latitude: data.latitude?.toString() || '', longitude: data.longitude?.toString() || '', mainCultureId: data.mainCultureId || '', photos: data.photos || [], photoLayout: data.photoLayout || 'GRID', videos: data.videos || [] }); 
       })
       .catch(() => onToast('Error al cargar región', 'err'))
       .finally(() => setLoading(false));
@@ -471,6 +477,10 @@ function RegionEditor({ id, cultures, onBack, onToast }: { id: string; cultures:
                 <label className="text-xs font-semibold mb-1 block">Longitud</label>
                 <input type="number" step="any" value={form.longitude} onChange={e => setForm(f => ({ ...f, longitude: e.target.value }))} placeholder="-71.9785" className="w-full text-sm px-3 py-2 rounded-lg border border-border bg-muted/30 focus:outline-none focus:ring-2 focus:ring-primary/50" />
               </div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold mb-1 block">Cómo Llegar</label>
+              <textarea value={form.howToGetThere} onChange={e => setForm(f => ({ ...f, howToGetThere: e.target.value }))} rows={4} className="w-full text-sm px-3 py-2 rounded-lg border border-border bg-muted/30 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
             </div>
           </CardContent>
         </Card>
@@ -560,14 +570,14 @@ function ProvinceEditor({ id, cultures, onBack, onToast }: { id: string; culture
   const [p, setP] = useState<Province | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ description: '', history: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], photoLayout: 'GRID', videos: [] as string[] });
+  const [form, setForm] = useState({ description: '', history: '', howToGetThere: '', latitude: '', longitude: '', mainCultureId: '', photos: [] as string[], photoLayout: 'GRID', videos: [] as string[] });
 
   useEffect(() => {
     apiClient.get(`/admin/mi-peru/provinces/${id}`)
       .then(res => { 
         const data = res.data?.data || res.data;
         setP(data); 
-        setForm({ description: data.description || '', history: data.history || '', latitude: data.latitude?.toString() || '', longitude: data.longitude?.toString() || '', mainCultureId: data.mainCultureId || '', photos: data.photos || [], photoLayout: data.photoLayout || 'GRID', videos: data.videos || [] }); 
+        setForm({ description: data.description || '', history: data.history || '', howToGetThere: data.howToGetThere || '', latitude: data.latitude?.toString() || '', longitude: data.longitude?.toString() || '', mainCultureId: data.mainCultureId || '', photos: data.photos || [], photoLayout: data.photoLayout || 'GRID', videos: data.videos || [] }); 
       })
       .catch(() => onToast('Error al cargar provincia', 'err'))
       .finally(() => setLoading(false));
@@ -627,6 +637,10 @@ function ProvinceEditor({ id, cultures, onBack, onToast }: { id: string; culture
                 <input type="number" step="any" value={form.longitude} onChange={e => setForm(f => ({ ...f, longitude: e.target.value }))} placeholder="-71.9785" className="w-full text-sm px-3 py-2 rounded-lg border border-border bg-muted/30 focus:outline-none focus:ring-2 focus:ring-primary/50" />
               </div>
             </div>
+            <div>
+              <label className="text-xs font-semibold mb-1 block">Cómo Llegar</label>
+              <textarea value={form.howToGetThere} onChange={e => setForm(f => ({ ...f, howToGetThere: e.target.value }))} rows={4} className="w-full text-sm px-3 py-2 rounded-lg border border-border bg-muted/30 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none" />
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -666,7 +680,7 @@ export default function MiPeruAdminPage() {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedFestivity, setSelectedFestivity] = useState<string | null>(null);
   const [selectedCulture, setSelectedCulture]   = useState<string | null>(null);
-  const [newFestDistrictId, setNewFestDistrictId] = useState<string | undefined>();
+  const [newFestContext, setNewFestContext] = useState<{type: 'region'|'province'|'district', id: string} | undefined>();
   const [syncing, setSyncing]       = useState(false);
   const [loading, setLoading]       = useState(false);
   const [toast, setToast]           = useState<{ msg: string; type: 'ok' | 'err' } | null>(null);
@@ -674,7 +688,7 @@ export default function MiPeruAdminPage() {
   // Drill-down filters
   const [filterRegion, setFilterRegion] = useState<{id: string; name: string} | null>(null);
   const [filterProvince, setFilterProvince] = useState<{id: string; name: string} | null>(null);
-  const [filterDistrict, setFilterDistrict] = useState<{id: string; name: string} | null>(null);
+  const [festivityContext, setFestivityContext] = useState<{type: 'region'|'province'|'district', id: string; name: string} | null>(null);
 
   const showToast = useCallback((msg: string, type: 'ok' | 'err') => {
     setToast({ msg, type });
@@ -800,6 +814,12 @@ export default function MiPeruAdminPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <button
+                          onClick={() => { setFestivityContext({ type: 'region', id: r.id, name: r.name }); setView('festivities'); }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 text-xs font-bold hover:bg-amber-500/20 cursor-pointer"
+                        >
+                          <Sparkles size={13} /> Festividades
+                        </button>
+                        <button
                           onClick={() => { setFilterRegion({ id: r.id, name: r.name }); setView('provinces'); }}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 text-xs font-bold hover:bg-cyan-500/20 cursor-pointer"
                         >
@@ -866,6 +886,12 @@ export default function MiPeruAdminPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <button
+                          onClick={() => { setFestivityContext({ type: 'province', id: p.id, name: p.name }); setView('festivities'); }}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 text-xs font-bold hover:bg-amber-500/20 cursor-pointer"
+                        >
+                          <Sparkles size={13} /> Festividades
+                        </button>
+                        <button
                           onClick={() => { setFilterProvince({ id: p.id, name: p.name }); setView('districts'); }}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-500/10 text-cyan-600 text-xs font-bold hover:bg-cyan-500/20 cursor-pointer"
                         >
@@ -929,7 +955,7 @@ export default function MiPeruAdminPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <button
-                          onClick={() => { setFilterDistrict({ id: d.id, name: d.name }); setView('festivities'); }}
+                          onClick={() => { setFestivityContext({ type: 'district', id: d.id, name: d.name }); setView('festivities'); }}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 text-xs font-bold hover:bg-amber-500/20 cursor-pointer"
                         >
                           <Sparkles size={13} /> Ver Festividades
@@ -968,14 +994,24 @@ export default function MiPeruAdminPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <button onClick={() => { setFilterDistrict(null); setView('districts'); }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-bold hover:bg-muted/80 cursor-pointer">
-                ← Volver a Distritos
-              </button>
-              {filterDistrict && <span className="text-sm font-semibold text-muted-foreground">/ Festividades de {filterDistrict.name}</span>}
+              {festivityContext?.type === 'district' ? (
+                <button onClick={() => { setFestivityContext(null); setView('districts'); }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-bold hover:bg-muted/80 cursor-pointer">
+                  ← Volver a Distritos
+                </button>
+              ) : festivityContext?.type === 'province' ? (
+                <button onClick={() => { setFestivityContext(null); setView('provinces'); }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-bold hover:bg-muted/80 cursor-pointer">
+                  ← Volver a Provincias
+                </button>
+              ) : festivityContext?.type === 'region' ? (
+                <button onClick={() => { setFestivityContext(null); setView('regions'); }} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-bold hover:bg-muted/80 cursor-pointer">
+                  ← Volver a Regiones
+                </button>
+              ) : null}
+              {festivityContext && <span className="text-sm font-semibold text-muted-foreground">/ Festividades de {festivityContext.name}</span>}
             </div>
             <button
               id="btn-new-festivity"
-              onClick={() => { setSelectedFestivity(null); setNewFestDistrictId(filterDistrict?.id || districts[0]?.id); setView('festivity-edit'); }}
+              onClick={() => { setSelectedFestivity(null); setNewFestContext(festivityContext ? { type: festivityContext.type, id: festivityContext.id } : undefined); setView('festivity-edit'); }}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold cursor-pointer hover:bg-primary/90 shadow-md"
             >
               <Plus size={14} /> Nueva Festividad
@@ -993,11 +1029,11 @@ export default function MiPeruAdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(filterDistrict ? festivities.filter(f => f.district?.id === filterDistrict.id) : festivities).map(f => (
+                {(festivityContext ? festivities.filter(f => f[festivityContext.type]?.id === festivityContext.id) : festivities).map(f => (
                   <TableRow key={f.id}>
                     <TableCell><Sparkles size={15} className="text-amber-500" /></TableCell>
                     <TableCell className="font-semibold text-sm">{f.name}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{f.district?.name}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">{f.district?.name || f.province?.name || f.region?.name}</TableCell>
                     <TableCell className="text-muted-foreground text-xs">{f.youtubeVideos?.length ?? 0} videos · {f.images?.length ?? 0} fotos</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -1019,7 +1055,7 @@ export default function MiPeruAdminPage() {
                     </TableCell>
                   </TableRow>
                 ))}
-                {(filterDistrict ? festivities.filter(f => f.district?.id === filterDistrict.id) : festivities).length === 0 && (
+                {(festivityContext ? festivities.filter(f => f[festivityContext.type]?.id === festivityContext.id) : festivities).length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-8">
                       Sin festividades registradas.
@@ -1036,7 +1072,7 @@ export default function MiPeruAdminPage() {
       {view === 'festivity-edit' && (
         <FestivityEditor
           id={selectedFestivity}
-          districtId={newFestDistrictId}
+          context={newFestContext}
           onBack={() => setView('festivities')}
           onToast={showToast}
         />

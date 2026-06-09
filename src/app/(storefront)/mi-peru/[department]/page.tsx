@@ -8,6 +8,7 @@ import { MapLocation } from '@/features/mi-peru/data/peru-locations';
 import { MapExploreLayout } from '@/features/mi-peru/components/MapExploreLayout';
 import { MapConnectors } from '@/features/mi-peru/components/MapConnectors';
 import { LocationCard } from '@/features/mi-peru/components/LocationCard';
+import { FestivityCard, Festivity } from '@/features/mi-peru/components/FestivityCard';
 import { apiClient } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
 
@@ -104,7 +105,7 @@ export default function DepartmentPage() {
   const [selectedProv, setSelectedProv] = useState<MapLocation | null>(null);
   const [hoveredProvId, setHoveredProvId] = useState<string | null>(null);
   const [provinces, setProvinces] = useState<MapLocation[]>([]);
-  const [department, setDepartment] = useState<MapLocation | null>(null);
+  const [department, setDepartment] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Fetch department y provincias desde API
@@ -129,6 +130,8 @@ export default function DepartmentPage() {
             capital: data.capital || '',
             description: data.description,
             history: data.history,
+            howToGetThere: data.howToGetThere,
+            festivities: data.festivities || [],
             photos: data.photos || [],
             photoLayout: data.photoLayout || 'GRID',
             videos: data.videos || [],
@@ -223,6 +226,16 @@ export default function DepartmentPage() {
           typeLabel="Provincia"
         />
       ))}
+      {department?.festivities && department.festivities.length > 0 && (
+        <>
+          <div className="text-[9px] font-black text-secondary uppercase tracking-widest px-1 mt-6 mb-1">
+            Festividades Principales
+          </div>
+          {department.festivities.slice(0, Math.ceil(department.festivities.length / 2)).map((fest: Festivity, i: number) => (
+            <FestivityCard key={fest.id} festivity={fest} accentColor={i % 2 === 0 ? 'secondary' : 'primary'} />
+          ))}
+        </>
+      )}
     </>
   );
 
@@ -243,6 +256,17 @@ export default function DepartmentPage() {
           typeLabel="Provincia"
         />
       ))}
+      
+      {department?.festivities && department.festivities.length > 1 && (
+        <>
+          <div className="text-[9px] font-black text-secondary uppercase tracking-widest px-1 mt-6 mb-1">
+            &nbsp;
+          </div>
+          {department.festivities.slice(Math.ceil(department.festivities.length / 2)).map((fest: Festivity, i: number) => (
+            <FestivityCard key={fest.id} festivity={fest} accentColor={i % 2 === 0 ? 'accent' : 'secondary'} />
+          ))}
+        </>
+      )}
     </>
   );
 
@@ -266,6 +290,17 @@ export default function DepartmentPage() {
             </p>
             <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-80 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
               {department.history}
+            </div>
+          </div>
+        )}
+
+        {department.howToGetThere && (
+          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
+            <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-secondary"></span> Cómo llegar
+            </p>
+            <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-80 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
+              {department.howToGetThere}
             </div>
           </div>
         )}
@@ -412,7 +447,7 @@ export default function DepartmentPage() {
         const driveId = isDrive ? p.match(/\/d\/(.*?)\//)?.[1] : null;
         return driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : p;
       })()}
-      topPanel={(department.description || department.history || (department.videos && department.videos.length > 0) || (department.photos && department.photos.length > 0)) ? topPanel : undefined}
+      topPanel={(department.description || department.history || department.howToGetThere || (department.videos && department.videos.length > 0) || (department.photos && department.photos.length > 0)) ? topPanel : undefined}
       leftPanel={leftPanel}
       mapCanvas={
         <div className="w-full h-full">

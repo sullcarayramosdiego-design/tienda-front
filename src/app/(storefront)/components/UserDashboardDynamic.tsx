@@ -84,7 +84,7 @@ export function UserDashboardDynamic() {
               </span>!
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl">
-              Esta es tu zona de control interactiva. Consulta tu historial, haz seguimiento a tus envíos o explora el catálogo completo en tres dimensiones.
+              Te damos la bienvenida a tu portal cultural. Desde aquí puedes seguir el recorrido de tus piezas de arte, explorar las colecciones en 3D/AR y participar en la preservación de nuestras tradiciones.
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export function UserDashboardDynamic() {
             <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Lealtad</span>
             <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2 mt-1">
               <Award className="h-4.5 w-4.5 text-primary" />
-              Mis Puntos Club 3D
+              Mis Puntos Club Andean Vibes
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-1">
@@ -115,7 +115,7 @@ export function UserDashboardDynamic() {
               {loyaltyPoints.toLocaleString('es-PE')} <span className="text-sm font-bold text-muted-foreground font-sans">Pts</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Canjeables por descuentos en tus compras 3D.
+              Canjeables por beneficios y apoyo directo a talleres artesanos.
             </p>
           </CardContent>
         </Card>
@@ -123,7 +123,7 @@ export function UserDashboardDynamic() {
         {/* Card: Pedidos Activos */}
         <Card className="relative overflow-hidden border border-primary/10 bg-card/60 backdrop-blur-md shadow-md">
           <CardHeader className="pb-2">
-            <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Envío exprés</span>
+            <span className="text-[10px] font-black uppercase text-primary tracking-widest block">Envío de Arte</span>
             <CardTitle className="text-sm font-bold text-muted-foreground flex items-center gap-2 mt-1">
               <ShoppingBag className="h-4.5 w-4.5 text-primary" />
               Mis Pedidos Activos
@@ -134,7 +134,7 @@ export function UserDashboardDynamic() {
               {activeOrdersCount} <span className="text-sm font-bold text-muted-foreground font-sans">En Camino</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Haciendo seguimiento en tiempo real.
+              Sigue el recorrido de tus piezas desde las comunidades.
             </p>
           </CardContent>
         </Card>
@@ -150,10 +150,10 @@ export function UserDashboardDynamic() {
           </CardHeader>
           <CardContent className="space-y-1">
             <div className="text-2xl sm:text-3xl font-heading font-extrabold text-foreground">
-              {wishlistCount} <span className="text-sm font-bold text-muted-foreground font-sans">{wishlistCount === 1 ? 'Favorito' : 'Favoritos'}</span>
+              {wishlistCount} <span className="text-sm font-bold text-muted-foreground font-sans">{wishlistCount === 1 ? 'Pieza' : 'Piezas'}</span>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Sincronizados en tu lista de deseos.
+              Tus piezas guardadas para explorar.
             </p>
           </CardContent>
         </Card>
@@ -171,7 +171,7 @@ export function UserDashboardDynamic() {
           {recentOrders.length === 0 ? (
             <Card className="border-primary/10 bg-card/40 backdrop-blur-md shadow-md">
               <CardContent className="p-6 text-center text-xs text-muted-foreground leading-relaxed">
-                Aún no has realizado pedidos. ¡Explora el catálogo y adquiere tu primer modelo 3D interactivo!
+                Aún no tienes pedidos registrados. ¡Explora la colección y adquiere tu primera pieza tradicional!
               </CardContent>
             </Card>
           ) : (
@@ -227,10 +227,10 @@ export function UserDashboardDynamic() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Zap className="h-4.5 w-4.5 text-primary" />
-              <h3 className="font-heading font-bold text-lg text-foreground">Recomendaciones para Ti</h3>
+              <h3 className="font-heading font-bold text-lg text-foreground">Selección Recomendada</h3>
             </div>
             <Link href="/catalog" className="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-              Ver Catálogo completo
+              Explorar Catálogo Cultural
               <ExternalLink className="h-3 w-3" />
             </Link>
           </div>
@@ -248,7 +248,7 @@ export function UserDashboardDynamic() {
           ) : featuredProducts.length === 0 ? (
             <Card className="border-primary/5 bg-card/20 py-10 text-center">
               <CardContent className="text-xs text-muted-foreground">
-                Visita el catálogo para explorar tus primeras piezas 3D.
+                Explora el catálogo para descubrir y guardar tus primeras piezas tradicionales.
               </CardContent>
             </Card>
           ) : (

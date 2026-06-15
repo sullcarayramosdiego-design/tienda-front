@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { RefreshCw, Compass, MapPin } from 'lucide-react';
+import { RefreshCw, Compass, MapPin, Calendar, Search, X } from 'lucide-react';
 import { MapLocation } from '@/features/mi-peru/data/peru-locations';
 import { MapExploreLayout } from '@/features/mi-peru/components/MapExploreLayout';
 import { MapConnectors } from '@/features/mi-peru/components/MapConnectors';
@@ -109,6 +109,52 @@ export default function ProvincePage() {
   const [province, setProvince] = useState<any | null>(null);
   const [department, setDepartment] = useState<MapLocation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [selectedFestivity, setSelectedFestivity] = useState<any | null>(null);
+
+  const parseFestivityMetadata = useCallback((fest: any) => {
+    let cardDate = '—';
+    let calendarDate = 'Fecha no disponible';
+    let locationLabel = '';
+
+    const description = fest.description || '';
+    const name = fest.name || '';
+    const combinedText = `${name} | ${description}`;
+
+    // Regex to find things like "01 de Enero", "01 y 02 de Enero", "05 - 09 de Enero", "01 y 02 Enero"
+    const dateRegex = /(?:el\s+)?(\d+(?:[\s,y\-al/]+(?:de\s+)?\d+)?)\s+de\s+(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Setiembre|Septiembre|Octubre|Noviembre|Diciembre)/i;
+    const match = combinedText.match(dateRegex);
+
+    if (match) {
+      const days = match[1].trim();
+      const month = match[2].trim();
+      calendarDate = `${days} de ${month}`;
+      cardDate = `${days} ${month.toUpperCase()}`;
+    } else {
+      const dateRegexSimple = /(?:el\s+)?(\d+(?:[\s,y\-al/]+\d+)?)\s+(Enero|Febrero|Marzo|Abril|Mayo|Junio|Julio|Agosto|Setiembre|Septiembre|Octubre|Noviembre|Diciembre)/i;
+      const matchSimple = combinedText.match(dateRegexSimple);
+      if (matchSimple) {
+        const days = matchSimple[1].trim();
+        const month = matchSimple[2].trim();
+        calendarDate = `${days} de ${month}`;
+        cardDate = `${days} ${month.toUpperCase()}`;
+      }
+    }
+
+    if (fest.district?.name) {
+      locationLabel = `${fest.province?.name || ''} » ${fest.district.name}`;
+    } else if (fest.province?.name) {
+      locationLabel = fest.province.name;
+    } else if (fest.region?.name) {
+      locationLabel = fest.region.name;
+    }
+
+    const pobladoMatch = description.match(/(?:poblado|comunidad|distrito)\s+de\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)/);
+    if (pobladoMatch && fest.province?.name) {
+      locationLabel = `${fest.province.name} » ${pobladoMatch[1]}`;
+    }
+
+    return { cardDate, calendarDate, locationLabel };
+  }, []);
 
   // Fetch provincia y distritos desde API
   useEffect(() => {
@@ -287,16 +333,7 @@ export default function ProvincePage() {
           typeLabel="Distrito"
         />
       ))}
-      {province?.festivities && province.festivities.length > 0 && (
-        <>
-          <div className="text-[9px] font-black text-accent uppercase tracking-widest px-1 mt-6 mb-1">
-            Festividades Principales
-          </div>
-          {province.festivities.slice(0, Math.ceil(province.festivities.length / 2)).map((fest: Festivity, i: number) => (
-            <FestivityCard key={fest.id} festivity={fest} accentColor={i % 2 === 0 ? 'accent' : 'primary'} />
-          ))}
-        </>
-      )}
+      {/* Festividades quitadas del lateral para mostrarse abajo a ancho completo */}
     </>
   );
 
@@ -339,126 +376,222 @@ export default function ProvincePage() {
         </div>
       </div>
       
-      {province?.festivities && province.festivities.length > 1 && (
-        <>
-          <div className="text-[9px] font-black text-accent uppercase tracking-widest px-1 mt-6 mb-1">
-            &nbsp;
-          </div>
-          {province.festivities.slice(Math.ceil(province.festivities.length / 2)).map((fest: Festivity, i: number) => (
-            <FestivityCard key={fest.id} festivity={fest} accentColor={i % 2 === 0 ? 'secondary' : 'accent'} />
-          ))}
-        </>
-      )}
+      {/* Festividades quitadas del lateral para mostrarse abajo a ancho completo */}
     </>
   );
 
   const topPanel = (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-      {/* Columna Izquierda Top: Descripción e Historia */}
-      <div className="flex flex-col gap-4">
-        {province.description && (
-          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
-            <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent"></span> Descripción
-            </p>
-            <p className="text-sm text-muted-foreground leading-relaxed">{province.description}</p>
-          </div>
-        )}
-
-        {province.history && (
-          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
-            <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent"></span> Historia
-            </p>
-            <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-80 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
-              {province.history}
+    <div className="flex flex-col gap-8 w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+        {/* Columna Izquierda Top: Descripción e Historia */}
+        <div className="flex flex-col gap-4">
+          {province.description && (
+            <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
+              <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-accent"></span> Descripción
+              </p>
+              <p className="text-sm text-muted-foreground leading-relaxed">{province.description}</p>
             </div>
-          </div>
-        )}
+          )}
 
-        {province.howToGetThere && (
-          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
-            <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent"></span> Cómo llegar
-            </p>
-            <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-80 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
-              {province.howToGetThere}
+          {province.history && (
+            <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
+              <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-accent"></span> Historia
+              </p>
+              <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-80 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
+                {province.history}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {province.howToGetThere && (
+            <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
+              <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-accent"></span> Cómo llegar
+              </p>
+              <div className="text-sm text-muted-foreground whitespace-pre-wrap max-h-80 overflow-y-auto custom-scrollbar pr-2 leading-relaxed">
+                {province.howToGetThere}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Columna Derecha Top: Multimedia */}
+        <div className="flex flex-col gap-4">
+          {province.videos && province.videos.length > 0 && (
+            <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
+              <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-accent"></span> Videos Documentales
+              </p>
+              <div className="flex flex-col gap-3">
+                {province.videos.map((vid: string, i: number) => {
+                  const videoIdMatch = vid.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\n]+)/);
+                  const videoId = videoIdMatch ? videoIdMatch[1] : null;
+                  if (videoId) {
+                    return (
+                      <div key={i} className="aspect-video w-full rounded-xl overflow-hidden border border-border/50 shadow-sm">
+                        <iframe 
+                          src={`https://www.youtube.com/embed/${videoId}`} 
+                          className="w-full h-full" 
+                          allowFullScreen 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        />
+                      </div>
+                    );
+                  }
+                  return (
+                    <a key={i} href={vid} target="_blank" rel="noreferrer" className="text-sm text-accent hover:underline truncate bg-accent/10 px-3 py-2 rounded-lg border border-accent/20 transition-colors hover:bg-accent/20">
+                      {vid}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {province.photos && province.photos.length > 0 && province.photoLayout === 'GRID' && (
+            <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
+              <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-secondary"></span> Galería Fotográfica
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {province.photos.map((photo: string, i: number) => {
+                  const isDrive = photo.includes('drive.google.com/file/d/');
+                  const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
+                  const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
+
+                  return <img key={i} src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="w-full h-28 object-cover rounded-xl border border-border/50 shadow-sm transition-transform hover:scale-105" />;
+                })}
+              </div>
+            </div>
+          )}
+
+          {province.photos && province.photos.length > 0 && province.photoLayout === 'CAROUSEL' && (
+            <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm overflow-hidden">
+              <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-secondary"></span> Galería de Fotos
+              </p>
+              <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 custom-scrollbar">
+                {province.photos.map((photo: string, i: number) => {
+                  const isDrive = photo.includes('drive.google.com/file/d/');
+                  const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
+                  const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
+
+                  return (
+                    <div key={i} className="snap-center shrink-0 w-full md:w-[80%] aspect-video relative rounded-xl overflow-hidden shadow-sm border border-border/50">
+                      <img src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-cover" />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Columna Derecha Top: Multimedia */}
-      <div className="flex flex-col gap-4">
-        {province.videos && province.videos.length > 0 && (
-          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
-            <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent"></span> Videos Documentales
-            </p>
-            <div className="flex flex-col gap-3">
-              {province.videos.map((vid: string, i: number) => {
+      {/* Sección Festividades (Estilo Mockup en Ancho Completo) */}
+      {province?.festivities && province.festivities.length > 0 && (
+        <div className="w-full mt-2">
+          <div className="border-b border-border/30 pb-3 mb-6">
+            <h2 className="text-3xl font-bold text-white tracking-tight">
+              Festividades
+            </h2>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2">
+              <span className="hover:text-foreground transition-colors cursor-pointer" onClick={() => router.push('/mi-peru')}>Inicio</span>
+              <span>/</span>
+              <span className="text-accent font-medium">Festividades</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {province.festivities.map((fest: any) => {
+              const { cardDate, calendarDate, locationLabel } = parseFestivityMetadata(fest);
+              
+              // Obtener miniatura (imagen o video de youtube)
+              let imgSrc = '';
+              if (fest.images && fest.images.length > 0) {
+                const img = fest.images[0];
+                const isDrive = img.includes('drive.google.com/file/d/');
+                const driveId = isDrive ? img.match(/\/d\/(.*?)\//)?.[1] : null;
+                imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w800` : img;
+              } else if (fest.youtubeVideos && fest.youtubeVideos.length > 0) {
+                const vid = fest.youtubeVideos[0];
                 const videoIdMatch = vid.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\n]+)/);
                 const videoId = videoIdMatch ? videoIdMatch[1] : null;
                 if (videoId) {
-                  return (
-                    <div key={i} className="aspect-video w-full rounded-xl overflow-hidden border border-border/50 shadow-sm">
-                      <iframe 
-                        src={`https://www.youtube.com/embed/${videoId}`} 
-                        className="w-full h-full" 
-                        allowFullScreen 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      />
-                    </div>
-                  );
+                  imgSrc = `https://img.youtube.com/vi/${videoId}/0.jpg`;
                 }
-                return (
-                  <a key={i} href={vid} target="_blank" rel="noreferrer" className="text-sm text-accent hover:underline truncate bg-accent/10 px-3 py-2 rounded-lg border border-accent/20 transition-colors hover:bg-accent/20">
-                    {vid}
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        )}
+              }
 
-        {province.photos && province.photos.length > 0 && province.photoLayout === 'GRID' && (
-          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm">
-            <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-secondary"></span> Galería Fotográfica
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {province.photos.map((photo: string, i: number) => {
-                const isDrive = photo.includes('drive.google.com/file/d/');
-                const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
-                const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
-
-                return <img key={i} src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="w-full h-28 object-cover rounded-xl border border-border/50 shadow-sm transition-transform hover:scale-105" />;
-              })}
-            </div>
-          </div>
-        )}
-
-        {province.photos && province.photos.length > 0 && province.photoLayout === 'CAROUSEL' && (
-          <div className="p-5 rounded-2xl border border-border/50 bg-card/60 shadow-sm overflow-hidden">
-            <p className="text-[10px] font-black text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-secondary"></span> Galería de Fotos
-            </p>
-            <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 pb-4 custom-scrollbar">
-              {province.photos.map((photo: string, i: number) => {
-                const isDrive = photo.includes('drive.google.com/file/d/');
-                const driveId = isDrive ? photo.match(/\/d\/(.*?)\//)?.[1] : null;
-                const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w1920` : photo;
-
-                return (
-                  <div key={i} className="snap-center shrink-0 w-full md:w-[80%] aspect-video relative rounded-xl overflow-hidden shadow-sm border border-border/50">
-                    <img src={imgSrc} alt={`Foto ${i}`} referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-cover" />
+              return (
+                <div 
+                  key={fest.id} 
+                  onClick={() => setSelectedFestivity(fest)}
+                  className="group cursor-pointer flex flex-col rounded-xl overflow-hidden border border-border/40 bg-card/40 hover:bg-card/70 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-sm"
+                >
+                  {/* Top Bar (Date) */}
+                  <div className="bg-muted/30 group-hover:bg-muted/50 px-4 py-2.5 border-b border-border/30 transition-colors">
+                    <p className="text-sm font-black text-accent tracking-wider">
+                      {cardDate}
+                    </p>
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* Image/Thumbnail */}
+                  <div className="aspect-video w-full relative overflow-hidden bg-slate-950/40">
+                    {imgSrc ? (
+                      <img 
+                        src={imgSrc} 
+                        alt={fest.name} 
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+                        <Compass className="animate-spin" size={20} style={{ animationDuration: '4s' }} />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Body Info */}
+                  <div className="p-4 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-sm font-bold text-foreground leading-snug uppercase tracking-tight group-hover:text-accent transition-colors line-clamp-2">
+                        {fest.name}
+                      </h3>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed mt-2 line-clamp-3">
+                        {fest.description}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-border/30 space-y-2">
+                      {/* Date */}
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                        <Calendar size={11} className="text-accent shrink-0" />
+                        <span className="truncate">{calendarDate}</span>
+                      </div>
+                      
+                      {/* Location */}
+                      <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                        <MapPin size={11} className="text-accent shrink-0" />
+                        <span className="truncate">{locationLabel || 'Provincia'}</span>
+                      </div>
+
+                      {/* Ver más button */}
+                      <div className="flex justify-end pt-1">
+                        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-700 group-hover:bg-accent transition-colors text-[9px] font-bold text-white">
+                          <Search size={10} />
+                          Ver más
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 
@@ -517,6 +650,116 @@ export default function ProvincePage() {
       rightPanel={rightPanel}
     />
     <MapConnectors items={districts} hoveredId={hoveredDistId} />
+
+    {/* Modal / Lightbox (Ver más detalle) */}
+    {selectedFestivity && (() => {
+      const { calendarDate, locationLabel } = parseFestivityMetadata(selectedFestivity);
+      
+      return (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+          onClick={() => setSelectedFestivity(null)}
+        >
+          <div 
+            className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-3xl border border-border/50 bg-card p-6 md:p-8 shadow-2xl animate-in zoom-in-95 duration-200 text-foreground custom-scrollbar"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button 
+              onClick={() => setSelectedFestivity(null)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors z-10"
+            >
+              <X size={16} />
+            </button>
+
+            <div className="space-y-6">
+              <div>
+                <span className="text-[10px] font-black text-accent uppercase tracking-widest">
+                  Festividad
+                </span>
+                <h2 className="text-xl md:text-2xl font-black text-white leading-tight mt-1">
+                  {selectedFestivity.name}
+                </h2>
+                
+                {/* Metadata */}
+                <div className="flex flex-wrap gap-4 mt-3 text-xs text-muted-foreground border-b border-border/30 pb-4">
+                  <div className="flex items-center gap-1.5 font-medium">
+                    <Calendar size={13} className="text-accent" />
+                    <span>{calendarDate}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 font-medium">
+                    <MapPin size={13} className="text-accent" />
+                    <span>{locationLabel || 'Provincia'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Video / Image Gallery */}
+              {selectedFestivity.youtubeVideos && selectedFestivity.youtubeVideos.length > 0 && (
+                <div className="aspect-video w-full rounded-2xl overflow-hidden border border-border/50 shadow-md">
+                  {(() => {
+                    const vid = selectedFestivity.youtubeVideos[0];
+                    const videoIdMatch = vid.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&?\n]+)/);
+                    const videoId = videoIdMatch ? videoIdMatch[1] : null;
+                    if (videoId) {
+                      return (
+                        <iframe 
+                          src={`https://www.youtube.com/embed/${videoId}`} 
+                          className="w-full h-full" 
+                          allowFullScreen 
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        />
+                      );
+                    }
+                    return (
+                      <a href={vid} target="_blank" rel="noreferrer" className="text-sm text-accent hover:underline block p-3 bg-muted/50 rounded-lg">
+                        Ver video: {vid}
+                      </a>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Description */}
+              <div className="space-y-2">
+                <h3 className="text-xs font-black text-white uppercase tracking-widest">
+                  Descripción Completa
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {selectedFestivity.description}
+                </p>
+              </div>
+
+              {/* Additional Images */}
+              {selectedFestivity.images && selectedFestivity.images.length > 0 && (
+                <div className="space-y-3">
+                  <h3 className="text-xs font-black text-white uppercase tracking-widest">
+                    Galería de fotos
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {selectedFestivity.images.map((img: string, i: number) => {
+                      const isDrive = img.includes('drive.google.com/file/d/');
+                      const driveId = isDrive ? img.match(/\/d\/(.*?)\//)?.[1] : null;
+                      const imgSrc = driveId ? `https://drive.google.com/thumbnail?id=${driveId}&sz=w800` : img;
+
+                      return (
+                        <img 
+                          key={i} 
+                          src={imgSrc} 
+                          alt={`Galería ${i}`} 
+                          referrerPolicy="no-referrer"
+                          className="w-full h-24 object-cover rounded-xl border border-border/50" 
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    })()}
     </>
   );
 }

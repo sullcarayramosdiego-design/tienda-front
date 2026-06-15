@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-15T13:59:54Z",
+  "title": "Design System: Andean Vibes",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Teal Andino",
+        "canonical": "oklch(65% 0.16 174)",
+        "tonalRamp": ["#07201e", "#0e413c", "#18655d", "#26a699", "#58c1b5", "#8ddad1", "#c5f0eb", "#f0faf9"]
+      },
+      "secondary": {
+        "role": "secondary",
+        "displayName": "Verde Campo",
+        "canonical": "oklch(71% 0.17 123)",
+        "tonalRamp": ["#112912", "#225124", "#3b8040", "#68bb6c", "#89cb8c", "#abdbad", "#ceebd0", "#f0faf1"]
+      },
+      "accent": {
+        "role": "accent",
+        "displayName": "Carmesí Suave",
+        "canonical": "oklch(72% 0.14 354)",
+        "tonalRamp": ["#3b1013", "#751f25", "#ad3d46", "#e18e96", "#eba5ab", "#f3bfc4", "#fadadd", "#fef5f6"]
+      },
+      "neutral-bg": {
+        "role": "neutral",
+        "displayName": "Blanco Puro",
+        "canonical": "oklch(100% 0 0)",
+        "tonalRamp": ["#000000", "#1c1c1c", "#444444", "#777777", "#aaaaaa", "#cccccc", "#eeeeee", "#ffffff"]
+      },
+      "neutral-ink": {
+        "role": "neutral",
+        "displayName": "Negro Profundo",
+        "canonical": "oklch(20% 0.01 180)",
+        "tonalRamp": ["#0b0e0e", "#1b2222", "#3b4747", "#607171", "#8ba0a0", "#b7c5c5", "#dee4e4", "#f5f7f7"]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Gris Muted",
+        "canonical": "oklch(96% 0.01 165)",
+        "tonalRamp": ["#0f1211", "#212827", "#445250", "#768b88", "#a6bab7", "#cbd9d7", "#e7eeed", "#edf2f1"]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Borde Suave",
+        "canonical": "oklch(91% 0.01 165)",
+        "tonalRamp": ["#0f1111", "#222726", "#464f4e", "#7b8987", "#abb5b3", "#ced6d4", "#e7ebea", "#d7e0dd"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Títulos principales de héroes y secciones" },
+      "headline": { "displayName": "Headline", "purpose": "Títulos de secciones secundarias y tarjetas grandes" },
+      "title": { "displayName": "Title", "purpose": "Encabezados de tarjetas" },
+      "body": { "displayName": "Body", "purpose": "Texto de lectura principal" },
+      "label": { "displayName": "Label", "purpose": "Botones, micro-etiquetas e hipervínculos" }
+    },
+    "shadows": [
+      { "name": "ambient-float", "value": "0 10px 30px -10px rgba(27, 34, 34, 0.08)", "purpose": "Modales emergentes y dropdowns flotantes." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Animaciones y micro-escalados interactivos." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Botón interactivo principal para llamados a la acción.",
+      "html": "<button class=\"ds-btn-primary\">Explorar Provincia</button>",
+      "css": ".ds-btn-primary { background-color: #26a699; color: #ffffff; padding: 12px 24px; border-radius: 10px; font-family: var(--font-sans, system-ui, sans-serif); font-size: 0.875rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; border: none; cursor: pointer; transition: background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), transform 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-btn-primary:hover { background-color: #1c7d73; transform: scale(1.02); } .ds-btn-primary:focus-visible { outline: 2px solid #26a699; outline-offset: 2px; }"
+    },
+    {
+      "name": "Interactive Card",
+      "kind": "card",
+      "description": "Contenedor de festividad o producto con elevación en hover.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Señor de Choque Chimpu</h3><p class=\"ds-card-body\">Una festividad tradicional llena de color y danzas folclóricas en la provincia.</p></div>",
+      "css": ".ds-card { background-color: #ffffff; border: 1px solid #d7e0dd; border-radius: 10px; padding: 20px; font-family: var(--font-sans, system-ui, sans-serif); transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1), border-color 200ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-card:hover { transform: scale(1.01); border-color: #26a699; } .ds-card-title { margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; color: #1b2222; } .ds-card-body { margin: 0; font-size: 0.875rem; color: #8f8f8f; line-height: 1.5; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "description": "Campo de texto para formularios de búsqueda o contacto.",
+      "html": "<input type=\"text\" class=\"ds-input\" placeholder=\"Buscar festividad...\" />",
+      "css": ".ds-input { width: 100%; padding: 12px 16px; border: 1px solid #d7e0dd; border-radius: 8px; font-family: var(--font-sans, system-ui, sans-serif); font-size: 0.875rem; color: #1b2222; background-color: #ffffff; box-sizing: border-box; transition: border-color 150ms cubic-bezier(0.4, 0, 0.2, 1); } .ds-input:focus { outline: none; border-color: #26a699; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Portal Andino Inmersivo (The Immersive Andean Portal)",
+    "overview": "Este sistema de diseño está concebido para transportar a los usuarios a través del paisaje y la cultura peruana de manera inmersiva, limpia y sofisticada. La interacción con el portal debe evocar la riqueza de las tradiciones mediante el uso intencional de colores naturales y transiciones suaves.",
+    "keyCharacteristics": [
+      "Profundidad Visual Mística",
+      "Rendimiento Dinámico",
+      "Legibilidad sin Compromiso"
+    ],
+    "rules": [
+      { "name": "The Teal Rarity Rule", "body": "El Teal Andino (#26a699) debe cubrir como máximo el 10% de cualquier pantalla para mantener su estatus de acento.", "section": "colors" },
+      { "name": "The Rest-Flat Rule", "body": "Las tarjetas y elementos interactivos deben estar completamente planos sobre el lienzo en reposo. Las sombras solo aparecen de forma dinámica durante hover o estado activo.", "section": "elevation" }
+    ],
+    "dos": [
+      "Asegurar que el texto sobre fondos fotográficos o de color tenga una relación de contraste mínima de 4.5:1.",
+      "Utilizar transiciones fluidas de 150-200ms con curvas estándar para interactividad.",
+      "Respetar la directiva @media (prefers-reduced-motion: reduce) simplificando las animaciones de escala por desvanecimientos instantáneos.",
+      "Seguir la regla de usar acentos de color en menos del 10% del lienzo."
+    ],
+    "donts": [
+      "Usar sombras pesadas de más de 12px de blur en reposo para tarjetas o botones comunes.",
+      "Usar bordes redondeados exagerados (32px o más) en tarjetas o bloques principales.",
+      "Añadir bordes decorativos gruesos a la izquierda o derecha (border-left mayor a 1px) como acento de color.",
+      "Usar texto degradado con background-clip: text sobre imágenes o fondos de lectura.",
+      "Añadir ilustraciones a mano tipo sketch que resten valor y sensación premium."
+    ]
+  }
+}
